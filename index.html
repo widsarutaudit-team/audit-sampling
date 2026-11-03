@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ระบบสุ่มรายการตรวจสอบ</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#eef2f1;--surface:#fff;--ink:#14282b;--muted:#5b6f71;--line:#cfdad8;--accent:#0f6b63;--accent-ink:#fff;--soft:#e2f0ee;--must:#fdf0d5;--warn:#a3261b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1b1c;--surface:#172829;--ink:#e6f0ee;--muted:#93aaa8;--line:#2b4244;--accent:#3fb8aa;--accent-ink:#06201d;--soft:#1d3535;--must:#3b2f12;--warn:#ff8f84}}
+:root[data-theme="dark"]{--bg:#0f1b1c;--surface:#172829;--ink:#e6f0ee;--muted:#93aaa8;--line:#2b4244;--accent:#3fb8aa;--accent-ink:#06201d;--soft:#1d3535;--must:#3b2f12;--warn:#ff8f84}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.6 "IBM Plex Sans Thai",system-ui,sans-serif}
+main{max-width:980px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:24px;margin:0 0 4px;font-weight:600}
+h2{font-size:17px;margin:0 0 12px;font-weight:600}
+h3{font-size:15px;margin:18px 0 8px;font-weight:600}
+.sub{color:var(--muted);margin:0 0 20px}
+section{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px;margin-bottom:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.card{display:flex;gap:10px;align-items:flex-start;border:1.5px solid var(--line);border-radius:6px;padding:14px;cursor:pointer}
+.card:has(input:checked){border-color:var(--accent);background:var(--soft)}
+.card input{margin-top:6px;accent-color:var(--accent)}
+.card b{display:block}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-weight:600;background:var(--bg)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.pt td:nth-child(2){text-align:right;font-variant-numeric:tabular-nums;width:260px}
+.pt td:nth-child(3){color:var(--muted);font-size:13px;width:200px}
+.pt tr.sum td{font-weight:600;background:var(--soft)}
+input[type=text]{width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);font:inherit;text-align:right}
+textarea{width:100%;min-height:140px;padding:10px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);font:13px/1.5 ui-monospace,monospace}
+input[type=file]{width:100%}
+input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{font:inherit;font-weight:500;padding:9px 18px;border:0;border-radius:4px;background:var(--accent);color:var(--accent-ink);cursor:pointer}
+button.alt{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+select{width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);font:inherit}
+.pv th,.pv td{white-space:nowrap;font-size:12px;padding:4px 8px}
+.pv th small{display:block;font-weight:400;color:var(--accent)}
+button.link{background:none;color:var(--accent);padding:0;text-decoration:underline}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+label.fl{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+input.hf{text-align:left}
+.hdr{font-size:14px;margin:8px 0}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tabs button{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.tabs button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.hint{font-size:13px;color:var(--muted);margin:6px 0}
+.msg{font-size:14px;margin-top:8px}.err{color:var(--warn)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.wrap{overflow-x:auto}
+.res th,.res td{white-space:nowrap}
+.res tfoot td{font-weight:600;background:var(--soft)}
+.rhead{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start}
+[hidden]{display:none!important}
+@media print{
+:root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:#fff;--surface:#fff;--ink:#000;--muted:#333;--line:#999;--soft:#eee;--accent:#000}
+body{background:#fff;font-size:12px}
+main{padding:0;max-width:none}
+.noprint{display:none!important}
+section{border:0;padding:0;margin:0}
+.wrap{overflow:visible}
+th{background:#eee!important}
+tr{break-inside:avoid}
+table{font-size:11px}
+.res th,.res td{white-space:normal;padding:4px 6px}
+@page{size:A4 landscape;margin:12mm}
+.dense table{font-size:9.5px}
+.dense .res th,.dense .res td{padding:3px 4px}
+}
+</style>
+</head>
+<body>
+<main>
+<div class="noprint">
+<h1>ระบบสุ่มรายการตรวจสอบ</h1>
+<p class="sub">ข้อมูลประมวลผลในเบราว์เซอร์ของคุณเท่านั้น ไม่ถูกส่งออกไปที่ใด</p>
+
+<section>
+<h2>ข้อมูลหัวรายงาน</h2>
+<div class="grid2">
+<div><label class="fl" for="hOrg">หน่วยงานผู้ตรวจสอบ</label><input type="text" class="hf" id="hOrg" autocomplete="off"></div>
+<div><label class="fl" for="hAud">หน่วยรับตรวจ</label><input type="text" class="hf" id="hAud" autocomplete="off"></div>
+<div><label class="fl" for="hYear">สำหรับปีสิ้นสุดวันที่</label><input type="text" class="hf" id="hYear" placeholder="เช่น 30 กันยายน 2569" autocomplete="off"></div>
+<div><label class="fl" for="hAcc">ชื่อบัญชี</label><input type="text" class="hf" id="hAcc" autocomplete="off"></div>
+</div>
+</section>
+
+<section>
+<h2>ขั้นตอนที่ 1 เลือกวิธีการสุ่มรายการ</h2>
+<div class="cards">
+<label class="card"><input type="radio" name="m" value="1"><span><b>วิธีที่ 1</b>การสุ่มแบบทุกรายการมีโอกาสถูกเลือกเป็นตัวอย่างแบบเท่าเทียมกัน</span></label>
+<label class="card"><input type="radio" name="m" value="2"><span><b>วิธีที่ 2</b>การสุ่มแบบคัดกรองรายการที่มีมูลค่าที่เป็นสาระสำคัญก่อน</span></label>
+<label class="card"><input type="radio" name="m" value="3"><span><b>วิธีที่ 3</b>การเลือกตัวอย่างแบบถ่วงน้ำหนักตามมูลค่า (MUS)</span></label>
+<label class="card"><input type="radio" name="m" value="4"><span><b>วิธีที่ 4</b>การสุ่มแบบช่วง (เลือกทุก ๆ ช่วงห่างที่เท่ากันตามลำดับรายการ)</span></label>
+</div>
+</section>
+
+<section id="s2" hidden>
+<h2>ขั้นตอนที่ 2 ข้อมูลก่อนทำการสุ่มตัวอย่าง <span id="mname" style="font-weight:400;color:var(--muted)"></span></h2>
+<div class="wrap"><table class="pt">
+<thead><tr><th>ข้อมูล</th><th class="n">จำนวน</th><th>หมายเหตุ</th></tr></thead>
+<tbody>
+<tr><td>ระดับความมีสาระสำคัญ</td><td><input type="text" id="mat" inputmode="decimal" autocomplete="off"></td><td>[MAT]</td></tr>
+<tr><td>จำนวนประชากรทั้งหมด</td><td><input type="text" id="tot" inputmode="decimal" autocomplete="off"></td><td>√</td></tr>
+<tr data-m="2,3,4"><td colspan="3">
+<b>วิธีกำหนดรายการประชากรที่เป็นสาระสำคัญ</b>
+<div class="cards" style="margin-top:6px">
+<label class="card"><input type="radio" name="keyMode" value="auto" checked><span><b>ระบบคัดกรองข้อมูลให้ (ตรวจสอบทุกรายการที่มีสาระสำคัญ)</b>ดึงทุกรายการที่ยอดเกินระดับความมีสาระสำคัญ และตรวจทุกรายการ</span></label>
+<label class="card"><input type="radio" name="keyMode" value="manual"><span><b>ผู้ตรวจสอบกรอกข้อมูลด้วยตนเอง (ผู้ตรวจสอบทำการเลือกตัวอย่างรายการสาระสำคัญแล้ว)</b>ใช้เมื่อตรวจรายการสาระสำคัญไปแล้วบางส่วน ระบุเลขที่เอกสารที่ตรวจแล้ว</span></label>
+<label class="card"><input type="radio" name="keyMode" value="rand"><span><b>ผู้ตรวจสอบต้องการให้สุ่มรายการสาระสำคัญ</b>ระบุจำนวนรายการสาระสำคัญที่จะตรวจ ระบบสุ่มให้ทุกรายการมีโอกาสเท่ากัน</span></label>
+</div>
+<div id="keyManual" hidden style="margin-top:8px">
+<label>เลขที่เอกสารที่ตรวจไปแล้ว (หนึ่งเลขที่ต่อบรรทัด หรือคั่นด้วยจุลภาค)<textarea id="keyDocs" style="min-height:70px"></textarea></label>
+<label style="display:block;margin-top:6px">จำนวนเงินรวมของรายการที่ตรวจแล้ว (ไม่บังคับ ถ้าเว้นว่างระบบใช้ยอดจากข้อมูลที่นำเข้า)<input type="text" id="keyAmt" inputmode="decimal" autocomplete="off"></label>
+</div>
+<div id="keyRand" hidden style="margin-top:8px">
+<label>จำนวนรายการสาระสำคัญที่ต้องการสุ่มตรวจ<input type="text" id="keyN" inputmode="numeric" autocomplete="off"></label>
+<div class="row"><button id="keyDraw" type="button">สุ่มรายการสาระสำคัญ</button></div>
+</div>
+<div class="hint" id="keyHint"></div>
+<div id="keyWhyBox" hidden><label>เหตุผลที่ไม่ตรวจรายการสาระสำคัญครบทุกรายการ (ควรต้องกรอกเหตุผล)<textarea id="keyWhy" style="min-height:60px"></textarea></label></div>
+</td></tr>
+<tr data-m="2,3,4"><td>จำนวนประชากรที่เป็นสาระสำคัญ</td><td id="mv">รอข้อมูล</td><td id="mvn">c</td></tr>
+<tr data-m="2,3,4"><td>จำนวนประชากรคงเหลือ</td><td id="rem">รอข้อมูล</td><td>c</td></tr>
+<tr><td>ค่า Confidence Factor</td><td><input type="text" id="cf" inputmode="decimal" autocomplete="off"></td><td>cf</td></tr>
+<tr><td>จำนวนรายการประชากรตัวอย่าง</td><td id="smp">-</td><td id="smpn">c</td></tr>
+<tr data-m="2,3,4"><td>จำนวนรายการประชากรที่มีสาระสำคัญ</td><td id="mc">รอข้อมูล</td><td id="mcn">รายการ</td></tr>
+<tr><td>จำนวนรายการประชากรตัวอย่างที่ต้องการเลือกเพิ่มเติม</td><td><input type="text" id="ex" inputmode="numeric" value="0" autocomplete="off"></td><td>รายการ</td></tr>
+<tr class="sum"><td>จำนวนรายการประชากรที่เลือกตรวจสอบทั้งสิ้น</td><td id="all">-</td><td>รายการ</td></tr>
+<tr class="sum" id="effRow" hidden><td>จำนวนรายการที่เลือกตรวจสอบจริง (หลังจำกัดสูงสุด)</td><td id="eff">-</td><td>รายการ</td></tr>
+<tr><td>หมายเหตุ</td><td colspan="2" style="text-align:left;width:auto"><textarea id="remark" style="min-height:70px;font:inherit" placeholder="ใส่ข้อความหรือข้อมูลเพิ่มเติม เช่น เรื่องที่เป็นสาระสำคัญที่ผู้ตรวจสอบต้องการบันทึกไว้ (ไม่บังคับ)"></textarea></td></tr>
+</tbody></table></div>
+<div class="hint" id="totHint"></div>
+<h3>เลือกจำนวนรายการที่จะตรวจสอบ</h3>
+<p class="hint" style="margin-top:0">ถ้าจำนวนที่คำนวณได้มากเกินกำลังของผู้ตรวจสอบ สามารถกำหนดจำนวนสูงสุดเองได้</p>
+<div class="cards">
+<label class="card"><input type="radio" name="cap" value="0" checked><span><b>ตามจำนวนที่คำนวณได้จริง</b><span id="capA">ยังไม่มีจำนวนที่คำนวณได้</span></span></label>
+<label class="card"><input type="radio" name="cap" value="1"><span><b>จำกัดจำนวนสูงสุด</b>กรอกจำนวนรายการสูงสุดที่ผู้ตรวจสอบตรวจได้<input type="text" id="capN" inputmode="numeric" placeholder="จำนวนรายการสูงสุด" autocomplete="off" style="margin-top:6px"></span></label>
+</div>
+<div class="hint" id="capHint"></div>
+<div id="negBox" hidden>
+<h3>การจัดการรายการที่จำนวนเงินเป็นศูนย์หรือติดลบ</h3>
+<p class="hint" id="negHint" style="margin-top:0"></p>
+<div class="cards">
+<label class="card"><input type="radio" name="neg" value="skip" checked><span><b id="negSkipT">ข้ามรายการศูนย์และติดลบ</b><span id="negSkipD"></span></span></label>
+<label class="card"><input type="radio" name="neg" value="abs"><span><b id="negAbsT">ใช้ค่าสัมบูรณ์ของยอดเงิน</b><span id="negAbsD"></span></span></label>
+</div>
+</div>
+<div data-m="1,2" id="stratBox">
+<h3>วิธีการสุ่มรายการ</h3>
+<div class="hint err" id="stOff"></div>
+<div class="cards">
+<label class="card"><input type="radio" name="strat" value="0" checked><span><b>สุ่มแบบไม่จัดกลุ่ม</b>ทุกรายการมีโอกาสถูกสุ่มเลือกอย่างเท่าเทียมกัน</span></label>
+<label class="card"><input type="radio" name="strat" value="1"><span><b>สุ่มแบบจัดกลุ่มตามช่วงของยอดเงิน</b>แบ่งกลุ่มตามช่วงของยอดเงินและสุ่มตามสัดส่วนที่เหมาะสม</span></label>
+</div>
+<div id="stOpt" hidden>
+<div class="grid2" style="margin-top:10px"><div><label class="fl" for="stK">จำนวนกลุ่ม</label><select id="stK"><option value="2">2 กลุ่ม</option><option value="3" selected>3 กลุ่ม</option><option value="4">4 กลุ่ม</option><option value="5">5 กลุ่ม</option></select></div></div>
+<p class="hint">ระบบกำหนดช่วงของแต่ละกลุ่มจากข้อมูลให้อัตโนมัติ กลุ่มที่ 1 คือกลุ่มยอดต่อรายการสูงสุด</p>
+<div class="hint" id="stHint"></div>
+<div class="wrap"><table class="res" id="stTbl"></table></div>
+</div>
+</div>
+</section>
+
+<section id="s3" hidden>
+<h2>ขั้นตอนที่ 3 นำเข้าข้อมูลรายการ</h2>
+<p class="hint" style="margin-top:0">ข้อมูลต้องมีอย่างน้อยคอลัมน์ <b>เลขที่เอกสาร</b> และ <b>จำนวนเงิน</b> รองรับสูงสุด 10 คอลัมน์ในรายงาน ระบบจับคู่คอลัมน์จากหัวตาราง แล้วให้คุณตรวจสอบก่อนเริ่มสุ่ม</p>
+<div class="tabs"><button class="on" id="t1">อัปโหลดไฟล์ Excel</button><button id="t2">วางข้อมูลจาก Excel</button></div>
+<div id="p1">
+<div class="cards" style="margin-bottom:10px">
+<label class="card"><input type="radio" name="prep" value="ready" checked><span><b>จัดเตรียมไฟล์ข้อมูลแล้ว</b>มีแถวหัวตารางชัดเจน ระบบจับคู่คอลัมน์ตามหัวตาราง</span></label>
+<label class="card"><input type="radio" name="prep" value="raw"><span><b>ยังไม่ได้จัดเตรียมไฟล์ข้อมูล</b>ไฟล์ดิบจากระบบ ระบบจะค้นหาแถวหัวตาราง ข้ามแถวรวม และคาดเดาคอลัมน์ให้ คุณต้องตรวจสอบผลก่อนใช้</span></label>
+</div>
+<input type="file" id="file" accept=".xlsx,.xls,.csv">
+<div id="sheetBox" hidden style="margin-top:8px"><label class="fl" for="sheetSel">เลือก Sheet</label><select id="sheetSel"></select></div>
+</div>
+<div id="p2" hidden><textarea id="paste" placeholder="คัดลอกช่วงข้อมูลพร้อมแถวหัวตารางจาก Excel (สูงสุด 10 คอลัมน์) แล้ววางที่นี่ (Ctrl+V)"></textarea></div>
+<div class="msg" id="dmsg"></div>
+<div class="msg err" id="negWarn" hidden></div>
+<div id="mapBox" hidden>
+<h3>ตรวจสอบการจับคู่คอลัมน์</h3>
+<div class="grid2">
+<div><label class="fl" for="hdrRow">แถวหัวตาราง (ใส่ 0 ถ้าไม่มีหัวตาราง)</label><input type="text" class="hf" id="hdrRow" inputmode="numeric" autocomplete="off"></div>
+<div><label class="fl" for="colDoc">คอลัมน์เลขที่เอกสาร (จำเป็น)</label><select id="colDoc"></select></div>
+<div><label class="fl" for="colAmt">คอลัมน์จำนวนเงิน (จำเป็น)</label><select id="colAmt"></select></div>
+</div>
+<h3>คอลัมน์ที่แสดงในรายงาน</h3>
+<div class="cards">
+<label class="card"><input type="radio" name="disp" value="sys" checked><span><b>ให้ระบบเลือกให้</b>แสดง 6 คอลัมน์ ได้แก่ ลำดับที่ เลขที่เอกสาร ประเภทเอกสาร วันที่เอกสาร รหัสหน่วยเบิกจ่าย จำนวนเงิน (ตามหัวตารางที่พบ)</span></label>
+<label class="card"><input type="radio" name="disp" value="own"><span><b>ผู้ใช้ระบุเอง</b>ระบุตัวอักษรคอลัมน์ในไฟล์ สูงสุด 10 คอลัมน์ เช่น A C D<input type="text" class="hf" id="dispCols" placeholder="เช่น A C D" autocomplete="off" style="margin-top:6px"></span></label>
+</div>
+<label id="keepLastBox" class="hint" hidden style="display:block"><input type="checkbox" id="keepLast"> ระบบคาดว่าแถวสุดท้ายเป็นยอดรวม จึงไม่นำมาคิดเป็นรายการ หากเป็นรายการปกติ ให้ติ๊กช่องนี้ <b>(นำแถวสุดท้ายกลับมาเป็นรายการ)</b></label>
+<div class="msg" id="mapMsg"></div>
+<div class="wrap" style="margin-top:10px"><table class="res pv" id="pv"></table></div>
+</div>
+<div class="row"><button id="run">เริ่มทำการสุ่มรายการ</button><button class="alt" id="clr">ล้างข้อมูลที่นำเข้า</button></div>
+<div class="msg err" id="emsg"></div>
+</section>
+</div>
+
+<section id="report" hidden></section>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const fmt=v=>v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const num=s=>{s=String(s==null?'':s).replace(/[,\s฿]/g,'');if(s==='')return null;const x=Number(s);return isNaN(x)?null:x};
+const sum=a=>a.reduce((t,x)=>t+x.amt,0);
+const ceil=x=>Math.ceil(+x.toFixed(9));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let method=0,data=[],negTouched=false,keyPick=null,keyDraws=0,keySkip=false;
+const keyMode=()=>document.querySelector('input[name=keyMode]:checked').value;
+const parseDocs=s=>[...new Set(String(s).split(/[\n,;\t]+/).map(t=>t.trim()).filter(Boolean))];
+const keySig=()=>[data.length,sum(data).toFixed(2),num($('mat').value),$('keyN').value.trim(),method===3?'skip':negMode()].join('|');
+const negMode=()=>document.querySelector('input[name=neg]:checked').value;
+const NEGTXT={
+  1:['วิธีนี้ทุกรายการมีโอกาสถูกเลือกเท่ากัน ผู้ตรวจสอบเลือกได้ว่าจะให้รายการยอดศูนย์และติดลบอยู่ในกลุ่มที่สุ่มหรือไม่','ข้ามรายการศูนย์และติดลบ','ตัดรายการยอดศูนย์และติดลบออกจากกลุ่มที่สุ่ม รายการเหล่านี้ไม่มีโอกาสถูกเลือก และแจ้งจำนวนที่ข้ามในรายงาน','คงรายการศูนย์และติดลบไว้','รายการเหล่านี้ยังอยู่ในกลุ่มที่สุ่มและมีโอกาสถูกเลือกเท่ากับรายการอื่น รายการติดลบใช้ค่าสัมบูรณ์เฉพาะตอนเลือกตัวอย่าง'],
+  2:['รายการศูนย์และติดลบมีผลต่อทั้งการคัดรายการที่มีสาระสำคัญและกลุ่มที่สุ่มส่วนที่เหลือ ผู้ตรวจสอบเลือกวิธีจัดการได้ตามดุลยพินิจ','ข้ามรายการศูนย์และติดลบ','ตัดรายการยอดศูนย์และติดลบออกจากกลุ่มที่สุ่ม และไม่นับเป็นรายการที่มีสาระสำคัญ แจ้งจำนวนที่ข้ามในรายงาน','คงรายการศูนย์และติดลบไว้','รายการศูนย์และติดลบยังอยู่ในกลุ่มที่สุ่ม และใช้ค่าสัมบูรณ์เทียบกับระดับความมีสาระสำคัญ รายการติดลบที่ยอดสูงจึงถูกนับเป็นรายการที่มีสาระสำคัญด้วย'],
+  4:null,
+  3:['MUS เลือกตามหน่วยเงิน รายการยอดศูนย์จึงไม่ถูกเลือกโดย MUS เสมอ ส่วนรายการติดลบ ผู้ตรวจสอบเลือกวิธีจัดการได้ตามดุลยพินิจ','ข้ามรายการศูนย์และติดลบ','MUS เลือกเฉพาะรายการยอดบวก และแจ้งจำนวนที่ข้ามในรายงาน','ใช้ค่าสัมบูรณ์ของยอดเงิน','รายการติดลบมีโอกาสถูกเลือกตามขนาดยอดเงินเช่นเดียวกับรายการบวก']
+};
+NEGTXT[4]=NEGTXT[2];
+document.querySelectorAll('input[name=neg]').forEach(r=>r.addEventListener('change',()=>{negTouched=true;autoTot();calc()}));
+const hdrHtml=()=>[['หน่วยงานผู้ตรวจสอบ','hOrg'],['หน่วยรับตรวจ','hAud'],['สำหรับปีสิ้นสุดวันที่','hYear'],['ชื่อบัญชี','hAcc']].map(([l,id])=>`<div>${l}: <b>${esc($(id).value.trim())||'-'}</b></div>`).join('');
+
+document.querySelectorAll('input[name=m]').forEach(r=>r.addEventListener('change',()=>{
+  method=+r.value;$('s2').hidden=$('s3').hidden=false;
+  $('mname').textContent='(วิธีที่ '+method+')';
+  document.querySelectorAll('[data-m]').forEach(e=>e.hidden=!e.dataset.m.split(',').includes(String(method)));
+  $('negBox').hidden=method===3;
+  const T=NEGTXT[method];
+  $('negHint').textContent=T[0];$('negSkipT').textContent=T[1];$('negSkipD').textContent=T[2];$('negAbsT').textContent=T[3];$('negAbsD').textContent=T[4];
+  if(!negTouched)document.querySelector('input[name=neg][value="'+(method===3?'skip':'abs')+'"]').checked=true;
+  $('report').hidden=true;autoTot();calc();
+}));
+['mat','tot','cf','ex','keyDocs','keyAmt','keyN','keyWhy'].forEach(id=>$(id).addEventListener('input',calc));
+$('keyAmt').addEventListener('blur',()=>{const v=num($('keyAmt').value);if(v!==null)$('keyAmt').value=fmt(v)});
+document.querySelectorAll('input[name=keyMode]').forEach(r=>r.addEventListener('change',calc));
+$('keyDraw').addEventListener('click',()=>{
+  const p=calc(),n=Math.floor(num($('keyN').value)||0);
+  if(!(p.mat>0)||!data.length){$('keyHint').innerHTML='<span class="err">กรอกระดับความมีสาระสำคัญและนำเข้าข้อมูลก่อนสุ่ม</span>';return}
+  if(n<1){$('keyHint').innerHTML='<span class="err">กรอกจำนวนรายการสาระสำคัญที่ต้องการสุ่ม (มากกว่า 0)</span>';return}
+  keyDraws++;
+  keyPick={items:pick(p.keyAll,Math.min(n,p.keyAll.length)),sig:keySig(),draws:keyDraws};
+  calc();
+});
+document.querySelectorAll('input[name=cap]').forEach(r=>r.addEventListener('change',calc));
+['input','focus'].forEach(ev=>$('capN').addEventListener(ev,()=>{document.querySelector('input[name=cap][value="1"]').checked=true;calc()}));
+['mat','tot'].forEach(id=>$(id).addEventListener('blur',()=>{const v=num($(id).value);if(v!==null)$(id).value=fmt(v)}));
+
+/* ประชากรที่ใช้สุ่ม (วิธีที่ 1 และ 2): รวมเฉพาะรายการที่อยู่ในกลุ่มที่สุ่มตามวิธีจัดการศูนย์/ติดลบที่เลือก */
+function frameInfo(){
+  const ab=negMode()==='abs';let pos=0,neg=0,negN=0,zeroN=0,abs=0;
+  data.forEach(x=>{if(x.amt>0)pos+=x.amt;else if(x.amt<0){neg+=x.amt;negN++}else zeroN++;abs+=Math.abs(x.amt)});
+  return {ab,pos,neg,negN,zeroN,net:pos+neg,ft:ab?pos+neg:pos};
+}
+function autoTot(){
+  if(!data.length||touched.tot)return;
+  const f=frameInfo();
+  $('tot').value=fmt(f.ft);
+}
+
+/* สุ่มแบบจัดกลุ่มตามช่วงยอดเงินก่อน */
+const stOn=()=>method<3&&document.querySelector('input[name=strat]:checked').value==='1';
+const stV=()=>{const ab=negMode()==='abs';return x=>ab?Math.abs(x.amt):x.amt};
+function randPool(matItems,mat,km){
+  const abm=negMode()==='abs',mset=new Set(matItems.map(x=>x.idx));
+  return data.filter(x=>(abm||x.amt>0)&&((method!==2&&method!==4)||(km==='auto'?(abm?Math.abs(x.amt):x.amt)<=mat:!mset.has(x.idx))));
+}
+/* ระบบกำหนดช่วงของกลุ่มจากข้อมูล: แบ่งตามกฎ cumulative sqrt(f) บนสเกลลอการิทึมของยอดเงิน */
+function autoBounds(vals,k){
+  const pos=vals.filter(a=>a>0).sort((x,y)=>x-y);
+  if(k<2||pos.length<2)return [];
+  const lo=pos[0],hi=pos[pos.length-1];
+  if(!(hi>lo))return [];
+  const B=100,l0=Math.log(lo),w=(Math.log(hi)-l0)/B,f=new Array(B).fill(0);
+  pos.forEach(a=>{let i=Math.floor((Math.log(a)-l0)/w);if(i>=B)i=B-1;if(i<0)i=0;f[i]++});
+  const c=[];let t=0;f.forEach(n=>{t+=Math.sqrt(n);c.push(t)});
+  const out=new Set();
+  for(let j=1;j<k;j++){
+    const i=c.findIndex(x=>x>=t*j/k-1e-9);
+    const e=Number(Math.exp(l0+w*(i+1)).toPrecision(2));
+    if(e>lo&&e<=hi)out.add(e);
+  }
+  return [...out].sort((x,y)=>y-x);
+}
+function stPlan(pool,n,b,v){
+  const k=b.length+1,S=Array.from({length:k},(_,i)=>({i,items:[],val:0,a:0}));
+  pool.forEach(x=>{const a=v(x);let g=k-1;for(let i=0;i<b.length;i++)if(a>=b[i]){g=i;break}S[g].items.push(x);S[g].val+=Math.max(0,a)});
+  S.forEach(g=>{g.hi=g.i===0?null:b[g.i-1];g.lo=g.i===k-1?null:b[g.i]});
+  const E=S.filter(g=>g.items.length),tot=Math.min(n,pool.length);
+  if(E.length&&tot<E.length){E.forEach(g=>g.a=1);return {S,over:true,tot:E.length}}
+  let R=tot,F=E.slice();
+  for(;;){
+    const tv=F.reduce((t,g)=>t+g.val,0);let fx=false;
+    F.forEach(g=>{g.q=tv>0?R*g.val/tv:R/F.length;if(g.q>g.items.length){g.a=g.items.length;g.fixed=true;fx=true}});
+    if(!fx)break;
+    F.filter(g=>g.fixed).forEach(g=>{R-=g.a});F=F.filter(g=>!g.fixed);
+    if(!F.length)break;
+  }
+  F.forEach(g=>{g.a=Math.min(Math.floor(g.q+1e-9),g.items.length)});
+  let left=R-F.reduce((t,g)=>t+g.a,0);
+  while(left>0){const c=F.filter(g=>g.a<g.items.length).sort((p,q)=>(q.q-q.a)-(p.q-p.a))[0];if(!c)break;c.a++;left--}
+  E.forEach(g=>{
+    if(g.a<1){
+      const d=E.filter(t=>t!==g&&t.a>1).sort((p,q)=>(q.a-q.q)-(p.a-p.q))[0];
+      if(d)d.a--;
+      g.a=1;
+    }
+  });
+  return {S,over:false,tot:E.reduce((t,g)=>t+g.a,0)};
+}
+const stRange=g=>(g.hi===null&&g.lo===null)?'ทุกยอด':g.hi===null?`ตั้งแต่ ${fmt(g.lo)}`:g.lo===null?`ต่ำกว่า ${fmt(g.hi)}`:`${fmt(g.lo)} ถึงต่ำกว่า ${fmt(g.hi)}`;
+function stTable(st,withSel){
+  const tv=st.S.reduce((t,g)=>t+g.val,0);
+  let h=`<thead><tr><th class="n">กลุ่ม</th><th>ช่วงยอดต่อรายการ</th><th class="n">จำนวนรายการ</th><th class="n">มูลค่ารวม</th><th class="n">จัดสรร (รายการ)</th>${withSel?'<th class="n">มูลค่าของตัวอย่าง</th><th class="n">ครอบคลุมมูลค่า</th>':''}</tr></thead><tbody>`;
+  st.S.forEach(g=>{
+    const sv=withSel?g.sel.reduce((t,x)=>t+Math.max(0,stV()(x)),0):0;
+    h+=`<tr><td class="n">${g.i+1}</td><td>${stRange(g)}</td><td class="n">${g.items.length.toLocaleString()}</td><td class="n">${fmt(g.val)}</td><td class="n">${g.a.toLocaleString()}</td>${withSel?`<td class="n">${fmt(sv)}</td><td class="n">${g.val>0?(sv/g.val*100).toFixed(2)+'%':'-'}</td>`:''}</tr>`;
+  });
+  const sa=st.S.reduce((t,g)=>t+g.a,0);
+  h+=`</tbody><tfoot><tr><td colspan="2">รวม</td><td class="n">${st.S.reduce((t,g)=>t+g.items.length,0).toLocaleString()}</td><td class="n">${fmt(tv)}</td><td class="n">${sa.toLocaleString()}</td>${withSel?`<td class="n">${fmt(st.S.reduce((t,g)=>t+g.sel.reduce((u,x)=>u+Math.max(0,stV()(x)),0),0))}</td><td class="n">${tv>0?(st.S.reduce((t,g)=>t+g.sel.reduce((u,x)=>u+Math.max(0,stV()(x)),0),0)/tv*100).toFixed(2)+'%':'-'}</td>`:''}</tr></tfoot>`;
+  return h;
+}
+
+function calc(){
+  const mat=num($('mat').value),tot=num($('tot').value),cf=num($('cf').value),ex=Math.max(0,Math.floor(num($('ex').value)||0));
+  let matItems=[],matVal=null,base=tot,sample=null,raw=null,km='auto',keyAll=[],keyNot=[],keyDocN=0,keyMissing=[];
+  if(method===2||method===3||method===4){
+    const ab=(method===2||method===4)&&negMode()==='abs',v=x=>ab?Math.abs(x.amt):x.amt;
+    km=keyMode();
+    $('keyManual').hidden=km!=='manual';$('keyRand').hidden=km!=='rand';
+    if(mat!==null&&data.length)keyAll=data.filter(x=>v(x)>mat);
+    let kh='';
+    if(km==='auto'&&mat!==null&&data.length){matItems=keyAll;matVal=matItems.reduce((t,x)=>t+x.amt,0)}
+    else if(km==='manual'&&data.length){
+      const docs=parseDocs($('keyDocs').value),ds=new Set(docs);keyDocN=docs.length;
+      matItems=data.filter(x=>ds.has(String(x.doc).trim()));
+      const found=new Set(matItems.map(x=>String(x.doc).trim()));
+      keyMissing=docs.filter(d=>!found.has(d));
+      const ma=num($('keyAmt').value);
+      matVal=ma!==null?ma:matItems.reduce((t,x)=>t+x.amt,0);
+      kh=`ระบบนับได้ ${docs.length.toLocaleString()} รายการ (พบในข้อมูลที่นำเข้า ${matItems.length.toLocaleString()} รายการ)`+(keyMissing.length?` <span class="err">ไม่พบ ${keyMissing.length.toLocaleString()} เลขที่ในข้อมูล เช่น ${esc(keyMissing.slice(0,3).join(', '))}</span>`:'')+(ma!==null?' ใช้ยอดที่กรอกเอง':' ใช้ยอดจากข้อมูลที่นำเข้า');
+    }else if(km==='rand'){
+      const n=Math.floor(num($('keyN').value)||0);
+      kh=mat!==null&&data.length?`รายการสาระสำคัญในข้อมูล ${keyAll.length.toLocaleString()} รายการ`+(n>keyAll.length&&keyAll.length?` <span class="err">จำนวนที่ต้องการมากกว่าที่มี จะสุ่มทุกรายการ</span>`:''):'กรอกระดับความมีสาระสำคัญและนำเข้าข้อมูลก่อน';
+      if(keyPick&&keyPick.sig===keySig()){matItems=keyPick.items;matVal=matItems.reduce((t,x)=>t+x.amt,0);kh+=` | สุ่มแล้ว ${matItems.length.toLocaleString()} รายการ (สุ่มรวม ${keyPick.draws.toLocaleString()} ครั้ง ใช้ผลครั้งล่าสุด) รายการสาระสำคัญที่ไม่ถูกสุ่มกลับเข้าประชากรคงเหลือ`}
+      else if(keyPick)kh+=' | <span class="err">ข้อมูลหรือเงื่อนไขเปลี่ยน ต้องกดสุ่มรายการสาระสำคัญใหม่</span>';
+      else kh+=' | ยังไม่ได้สุ่ม';
+    }
+    const mset=new Set(matItems.map(x=>x.idx));
+    keyNot=km==='auto'||matVal===null?[]:keyAll.filter(x=>!mset.has(x.idx));
+    $('keyWhyBox').hidden=!keyNot.length;
+    if(keyNot.length)kh+=(kh?'<br>':'')+`<span class="err">มีรายการสาระสำคัญที่ยังไม่ได้ตรวจ ${keyNot.length.toLocaleString()} จาก ${keyAll.length.toLocaleString()} รายการ ควรระบุเหตุผล</span>`;
+    $('keyHint').innerHTML=kh;
+    $('mvn').textContent=km==='rand'?'c = ยอดรวมของรายการสาระสำคัญที่สุ่มได้':km==='manual'?'ยอดรวมรายการที่ตรวจแล้ว':'c';
+    $('mv').textContent=matVal!==null?fmt(matVal):'รอข้อมูล';
+    base=(tot!==null&&matVal!==null)?tot-matVal:null;
+    $('rem').textContent=base!==null?fmt(base):'รอข้อมูล';
+    const kReady=mat!==null&&data.length;
+    $('mc').textContent=km==='rand'?(kReady?keyAll.length.toLocaleString():'รอข้อมูล'):matVal!==null?(km==='manual'?keyDocN:matItems.length).toLocaleString():'รอข้อมูล';
+    $('mcn').textContent=km==='rand'&&kReady?(matVal!==null?`รายการ (ทั้งหมดในข้อมูล สุ่มตรวจ ${matItems.length.toLocaleString()} รายการ)`:'รายการ (ทั้งหมดในข้อมูล ใช้กำหนดจำนวนที่จะสุ่ม)'):'รายการ';
+  }
+  if(mat>0&&base!==null&&cf!==null&&base>=0){raw=base/mat*cf;sample=ceil(raw)}
+  $('smp').textContent=sample!==null?sample.toLocaleString():'-';
+  $('smpn').textContent=raw!==null?`c  |  คำนวณได้ ${raw.toFixed(2)} ปัดขึ้นเป็น ${sample}`:'c';
+  const matCount=method>=2?(km==='manual'?keyDocN:matItems.length):0;
+  const all=sample!==null&&(method===1||matVal!==null)?sample+matCount+ex:null;
+  $('all').textContent=all!==null?all.toLocaleString():'-';
+  /* จำกัดจำนวนสูงสุด: รายการสาระสำคัญตรวจทุกรายการเสมอ จึงจำกัดเฉพาะส่วนที่สุ่ม */
+  const capSel=document.querySelector('input[name=cap]:checked').value==='1';
+  const capV=Math.floor(num($('capN').value)||0);
+  let sampleN=all!==null?sample+ex:null,limited=false,eff=all;
+  if(all!==null&&capSel&&capV>0&&all>capV){sampleN=Math.max(0,capV-matCount);eff=matCount+sampleN;limited=true}
+  $('capA').textContent=all!==null?`เลือกตรวจสอบ ${all.toLocaleString()} รายการ`:'ยังไม่มีจำนวนที่คำนวณได้';
+  $('effRow').hidden=!limited;
+  $('eff').textContent=limited?eff.toLocaleString():'-';
+  let ch='';
+  if(capSel&&!(capV>0))ch='กรอกจำนวนรายการสูงสุดที่ต้องการ (มากกว่า 0)';
+  else if(capSel&&all!==null&&!limited)ch=`จำนวนที่คำนวณได้ (${all.toLocaleString()} รายการ) ไม่เกินค่าสูงสุดที่กำหนด จึงตรวจสอบตามจำนวนที่คำนวณได้`;
+  else if(limited&&capV<matCount)ch=`<span class="err">รายการที่มีสาระสำคัญมี ${matCount.toLocaleString()} รายการ มากกว่าจำนวนสูงสุด ${capV.toLocaleString()} รายการ ต้องตรวจทุกรายการที่มีสาระสำคัญ จึงไม่มีรายการสุ่มเพิ่ม</span>`;
+  else if(limited)ch=`จำกัดจาก ${all.toLocaleString()} เหลือ ${eff.toLocaleString()} รายการ`+(method>=2?` (รายการที่มีสาระสำคัญ ${matCount.toLocaleString()} รายการตรวจทุกรายการ ส่วนที่สุ่มลดเหลือ ${sampleN.toLocaleString()} รายการ)`+(method===3?' โดยลดส่วนที่สุ่มเพิ่มก่อน แล้วจึงลดจำนวนจุดสุ่ม MUS และคำนวณช่วงห่างใหม่':''):'');
+  $('capHint').innerHTML=ch;
+  const ds=sum(data);let h='';
+  const fi=data.length?frameInfo():null,tg=fi?fi.ft:0;
+  if(data.length){
+    h=`ยอดสุทธิในข้อมูลที่นำเข้า ${fmt(fi.net)} บาท (รายการบวก ${fmt(fi.pos)} / รายการติดลบ ${fmt(fi.neg)} จำนวน ${fi.negN.toLocaleString()} รายการ / รายการศูนย์ ${fi.zeroN.toLocaleString()} รายการ) ประชากรที่ใช้สุ่ม${fi.ab?' (ยอดรวมปกติ ใช้ค่าสัมบูรณ์เฉพาะตอนเลือกตัวอย่าง)':' (เฉพาะรายการยอดบวก)'} ${fmt(fi.ft)} บาท `;
+    if(tot===null||Math.abs(tot-tg)>0.005)h+=`<button class="link" id="useSum">ใช้ยอดนี้เป็นจำนวนประชากรทั้งหมด</button>`+(tot!==null?` <span class="err">จำนวนประชากรทั้งหมดที่กรอกต่างจากประชากรที่ใช้สุ่ม ${fmt(Math.abs(tot-tg))} บาท</span>`:'');
+    else h+='(ตรงกับจำนวนประชากรทั้งหมดที่กรอก)';
+    if(method===3)h+=' <span class="hint">ตามสมมติฐานของ MUS ระบบตัดรายการติดลบและรายการศูนย์ออกจากประชากรโดยอัตโนมัติ</span>';
+  }
+  $('totHint').innerHTML=h;
+  {const nw=$('negWarn');
+   if(method===3&&fi&&(fi.negN>0||fi.zeroN>0)){
+     const parts=[];
+     if(fi.negN>0)parts.push(`รายการติดลบ ${fi.negN.toLocaleString()} รายการ (รวม ${fmt(fi.neg)} บาท)`);
+     if(fi.zeroN>0)parts.push(`รายการยอดศูนย์ ${fi.zeroN.toLocaleString()} รายการ`);
+     const posN=data.filter(x=>x.amt>0).length;
+     nw.innerHTML=`<b>ข้อควรทราบ:</b> พบ${parts.join(' และ ')} ในข้อมูล เนื่องจาก MUS ใช้เฉพาะรายการยอดบวก ระบบจึงตัดรายการเหล่านี้ออกจากประชากรอัตโนมัติ เหลือรายการยอดบวก ${posN.toLocaleString()} รายการ รวม ${fmt(fi.pos)} บาท ผู้ตรวจสอบควรพิจารณาตรวจรายการที่ตัดออกแยกต่างหาก`;
+     nw.hidden=false;
+   }else{nw.hidden=true;nw.innerHTML=''}}
+  if($('useSum'))$('useSum').onclick=()=>{$('tot').value=fmt(tg);calc()};
+  let st=null,stErr='',stCapMsg='';
+  if(method===1||method===2){
+    const rem=(data.length&&sampleN!==null)?sampleN:null,maxK=rem===null?5:Math.min(5,rem);
+    const r1=document.querySelector('input[name=strat][value="1"]');
+    r1.disabled=maxK<2;
+    if(maxK<2&&stOn())document.querySelector('input[name=strat][value="0"]').checked=true;
+    $('stOff').textContent=maxK<2?`ไม่สามารถจัดกลุ่มได้ เพราะเหลือรายการที่ต้องสุ่ม ${rem.toLocaleString()} รายการ (ต้องมีอย่างน้อย 2 รายการจึงจัดกลุ่มได้ โดยแต่ละกลุ่มต้องได้อย่างน้อย 1 รายการ)`:'';
+    [...$('stK').options].forEach(o=>{o.disabled=+o.value>maxK});
+    if(maxK>=2&&+$('stK').value>maxK){const was=$('stK').value;$('stK').value=String(maxK);stCapMsg=`ลดจำนวนกลุ่มจาก ${was} เป็น ${maxK} กลุ่ม เพราะเหลือรายการที่ต้องสุ่ม ${rem.toLocaleString()} รายการ และแต่ละกลุ่มต้องได้อย่างน้อย 1 รายการ`}
+    else if(maxK>=2&&maxK<5&&rem!==null)stCapMsg=`เลือกได้สูงสุด ${maxK} กลุ่ม เพราะเหลือรายการที่ต้องสุ่ม ${rem.toLocaleString()} รายการ และแต่ละกลุ่มต้องได้อย่างน้อย 1 รายการ`;
+  }
+  $('stOpt').hidden=!stOn();
+  if((method===1||method===2)&&stOn()){
+    if(data.length&&sampleN!==null&&(method===1||matVal!==null)){
+      const pl=randPool(matItems,mat,km),kk=+$('stK').value,bd=autoBounds(pl.map(stV()),kk);
+      st=stPlan(pl,sampleN,bd,stV());
+      stErr='';
+      var stNote=bd.length+1<kk?`ข้อมูลมีช่วงยอดเงินไม่หลากหลายพอ จึงแบ่งได้ ${bd.length+1} กลุ่มจากที่เลือก ${kk} กลุ่ม`:'';
+    }
+    $('stHint').innerHTML=(stCapMsg?`<span class="err">${stCapMsg}</span> `:'')+(st&&st.over?'<span class="err">จำนวนตัวอย่างน้อยกว่าจำนวนกลุ่มที่มีรายการ แต่ทุกกลุ่มต้องมีอย่างน้อย 1 รายการ จำนวนที่เลือกจึงมากกว่าที่คำนวณได้</span>':'')+(typeof stNote!=='undefined'&&stNote?` <span class="err">${stNote}</span>`:'');
+    $('stTbl').innerHTML=st?stTable(st,false):'';
+  }
+  return {st,stErr,mat,tot,cf,ex,sample,raw,matItems,matVal,base,all,capSel,capV,sampleN,limited,eff,matCount,keyMode:km,keyAll,keyNot,keyDocN,keyMissing};
+}
+
+$('stK').addEventListener('change',calc);
+document.querySelectorAll('input[name=strat]').forEach(r=>r.addEventListener('change',()=>{$('stOpt').hidden=!stOn();calc()}));
+
+/* นำเข้าข้อมูล */
+let src=null,wbk=null,view={cols:[],lab:[],amtPos:-1};
+const colL=i=>{let t='';i++;while(i>0){const m=(i-1)%26;t=String.fromCharCode(65+m)+t;i=Math.floor((i-1)/26)}return t};
+const colI=t=>{let n=0;for(const ch of t)n=n*26+ch.charCodeAt(0)-64;return n-1};
+const numA=(d,r)=>{
+  if(typeof r==='number'&&isFinite(r))return r;
+  let t=String(r!=null&&r!==''?r:(d==null?'':d)).trim();
+  const neg=/^\(.*\)$/.test(t)||(/-$/.test(t)&&!/^-/.test(t));
+  t=t.replace(/^\((.*)\)$/,'$1').replace(/-$/,'');
+  const v=num(t);return v===null?null:(neg?-Math.abs(v):v);
+};
+const KW={
+  doc:[/เลขที่เอกสาร|เลขที่ใบ|เลขที่/,/doc(ument)?\.?\s*(no|number|id)/i,/voucher|ใบสำคัญ/i,/^(?!.*(ประเภท|วันที่)).*เอกสาร/],
+  amt:[/จำนวนเงิน|ยอดเงิน|amount|สุทธิ|เป็นเงิน/i,/ยอด/],
+  no:[/ลำดับ/,/^no\.?$/i,/^ที่$/],
+  type:[/ประเภท/,/type/i],
+  date:[/วันที่|date/i],
+  unit:[/หน่วย|รหัส|unit/i]
+};
+const TOT=/^(รวม|ยอดรวม|ยอดยก|ยกมา|ยกไป|total|grand total|sub ?total)/i;
+const anyKw=c=>Object.values(KW).some(l=>l.some(re=>re.test(c)));
+function findCol(hdr,list,used){for(const re of list){const i=hdr.findIndex((h,k)=>!used.has(k)&&re.test(String(h)));if(i>=0)return i}return -1}
+const ncolsOf=()=>Math.max(1,...src.disp.slice(0,200).map(r=>r.length));
+const isRaw=()=>src&&src.file&&document.querySelector('input[name=prep]:checked').value==='raw';
+function detectHdr(disp,lim){
+  let best=0,bs=0;
+  for(let r=0;r<Math.min(disp.length,lim);r++){
+    let kw=0,tx=0;
+    disp[r].forEach(c=>{const t=String(c).trim();if(!t)return;if(anyKw(t))kw++;if(numA(t,null)===null)tx++});
+    const sc=kw*3+tx;
+    if(kw>0&&sc>bs){bs=sc;best=r+1}
+  }
+  return best;
+}
+function numCols(h,nc){
+  const res=[];
+  for(let c=0;c<nc;c++){
+    let n=0,t=0;
+    for(let r=h;r<Math.min(src.disp.length,h+200);r++){
+      const v=String(src.disp[r][c]==null?'':src.disp[r][c]).trim();
+      if(!v)continue;t++;if(numA(v,src.raw[r]?src.raw[r][c]:undefined)!==null)n++;
+    }
+    if(t>=1&&n/t>0.8)res.push(c);
+  }
+  return res;
+}
+function lastTotal(h,D,A,nc){
+  const rows=[];
+  for(let r=h;r<src.disp.length;r++)if(src.disp[r].some(c=>String(c).trim()!==''))rows.push(r);
+  if(rows.length<4)return {is:false};
+  const r=rows[rows.length-1],row=src.disp[r];
+  if(numA(row[A],src.raw[r]?src.raw[r][A]:undefined)===null)return {is:false};
+  const kind=v=>{const t=String(v==null?'':v).trim();return t===''?0:(numA(t,null)!==null?1:2)};
+  const others=[];for(let c=0;c<nc;c++)if(c!==A)others.push(c);
+  if(!others.some(c=>kind(row[c])!==0))return {is:true,r,why:'ไม่มีข้อมูลในคอลัมน์อื่นเลย'};
+  if(kind(row[D])===0)return {is:true,r,why:'เลขที่เอกสารว่าง'};
+  const prev=rows.slice(0,-1).slice(-200);
+  let cmp=0,mis=0;
+  others.forEach(c=>{
+    const cnt=[0,0,0];prev.forEach(p=>cnt[kind(src.disp[p][c])]++);
+    const maj=cnt.indexOf(Math.max(...cnt));
+    if(maj!==0&&cnt[maj]/prev.length>=0.8){cmp++;if(kind(row[c])!==maj)mis++}
+  });
+  if(cmp>=2&&mis/cmp>=0.5)return {is:true,r,why:'ข้อมูลไม่เหมือนกับรายการอื่น'};
+  return {is:false};
+}
+function sysCols(hdr,nc,D,A,h){
+  const used=new Set([D,A]),pk=[D,A];
+  for(const k of ['no','type','date','unit']){const i=findCol(hdr,KW[k],used);if(i>=0){used.add(i);pk.push(i)}}
+  for(let i=0;i<nc&&pk.length<6;i++){
+    if(used.has(i))continue;
+    let has=false;for(let r=h;r<Math.min(src.disp.length,h+200);r++)if(String(src.disp[r][i]==null?'':src.disp[r][i]).trim()!==''){has=true;break}
+    if(has){used.add(i);pk.push(i)}
+  }
+  return pk.sort((p,q)=>p-q);
+}
+function fillSel(h){
+  const hdr=h>0?src.disp[h-1]:[],nc=Math.min(ncolsOf(),80);
+  let o='<option value="">เลือกคอลัมน์</option>';
+  for(let c=0;c<nc;c++){const t=String(hdr[c]==null?'':hdr[c]).trim();o+=`<option value="${c}">${colL(c)}${t?' — '+esc(t):''}</option>`}
+  $('colDoc').innerHTML=o;$('colAmt').innerHTML=o;
+}
+function autoCols(h){
+  const hdr=h>0?src.disp[h-1]:[],nc=ncolsOf();
+  fillSel(h);
+  let d=findCol(hdr,KW.doc,new Set()),a=findCol(hdr,KW.amt,new Set([d]));
+  if(a<0){
+    const nums=numCols(h,nc).filter(c=>c!==d&&!(h>0&&KW.no.some(re=>re.test(String(hdr[c]==null?'':hdr[c])))));
+    if(nums.length===1)a=nums[0];
+  }
+  if(h===0&&nc>=6){if(d<0)d=1;if(a<0)a=5}
+  $('colDoc').value=d<0?'':String(d);$('colAmt').value=a<0?'':String(a);
+  apply();
+}
+function autoMap(){
+  const h=detectHdr(src.disp,isRaw()?30:5);
+  $('hdrRow').value=h;autoCols(h);
+}
+function loadSrc(disp,raw,file,warn){
+  src={disp,raw,file,warn:warn||''};
+  $('keepLast').checked=false;
+  $('mapBox').hidden=false;autoMap();
+}
+function renderPv(h,D,A,cols){
+  const nc=Math.min(ncolsOf(),16),hdr=h>0?src.disp[h-1]:[];
+  let t='<thead><tr><th>แถว</th>';
+  for(let c=0;c<nc;c++){
+    const tag=[c===D?'เลขที่เอกสาร':'',c===A?'จำนวนเงิน':'',cols.includes(c)?'✓ แสดง':''].filter(Boolean).join(' / ');
+    t+=`<th>${colL(c)}<small>${tag||'&nbsp;'}</small></th>`;
+  }
+  t+='</tr></thead><tbody>';
+  const rows=[];if(h>0)rows.push(h-1);
+  for(let r=h;r<src.disp.length&&rows.length<6;r++)rows.push(r);
+  rows.forEach(r=>{t+=`<tr${h>0&&r===h-1?' style="font-weight:600"':''}><td>${r+1}</td>`;for(let c=0;c<nc;c++)t+=`<td>${esc(src.disp[r][c]==null?'':src.disp[r][c])}</td>`;t+='</tr>'});
+  $('pv').innerHTML=t+'</tbody>'+(ncolsOf()>16?'':'');
+}
+function apply(){
+  if(!src)return;
+  const disp=src.disp,raw=src.raw,nc=ncolsOf();
+  const h=Math.max(0,Math.min(Math.floor(num($('hdrRow').value)||0),disp.length));
+  const hdr=h>0?disp[h-1]:[];
+  const d=$('colDoc').value,a=$('colAmt').value;
+  $('report').hidden=true;
+  let bad='',note='',cols=[];
+  const D=d===''?-1:+d,A=a===''?-1:+a;
+  if(D<0||A<0)bad='ต้องเลือกคอลัมน์ "เลขที่เอกสาร" และ "จำนวนเงิน" ให้ครบ ระบบจึงจะเริ่มสุ่มได้'+(D<0&&A<0?'':D<0?' (ยังไม่ได้เลือกเลขที่เอกสาร)':' (ยังไม่ได้เลือกจำนวนเงิน)');
+  else if(D===A)bad='คอลัมน์เลขที่เอกสารและจำนวนเงินต้องเป็นคนละคอลัมน์';
+  if(!bad){
+    if(document.querySelector('input[name=disp]:checked').value==='own'){
+      const tk=$('dispCols').value.toUpperCase().split(/[\s,;]+/).filter(Boolean),bd=tk.filter(t=>!/^[A-Z]{1,2}$/.test(t));
+      if(!tk.length)bad='ระบุตัวอักษรคอลัมน์ที่ต้องการแสดง เช่น A C D';
+      else if(bd.length)bad='ระบุคอลัมน์ไม่ถูกต้อง: '+bd.join(', ');
+      else{
+        cols=[...new Set(tk.map(colI))];
+        const over=cols.filter(c=>c>=nc);
+        if(over.length)bad='ไม่มีคอลัมน์ '+over.map(colL).join(', ')+' ในข้อมูล (ข้อมูลมี '+nc+' คอลัมน์ คือ A ถึง '+colL(nc-1)+')';
+        else{
+          const add=[D,A].filter(c=>!cols.includes(c));
+          if(cols.length+add.length>10)bad=cols.length>10?'แสดงได้สูงสุด 10 คอลัมน์ (ระบุมา '+cols.length+' คอลัมน์)':'คอลัมน์เลขที่เอกสารและจำนวนเงินต้องแสดงเสมอ เมื่อรวมแล้วเกิน 10 คอลัมน์';
+          else if(add.length){cols=cols.concat(add);note='เพิ่มคอลัมน์ '+add.map(colL).join(', ')+' ให้อัตโนมัติ เพราะเลขที่เอกสารและจำนวนเงินต้องแสดงเสมอ'}
+        }
+      }
+    }else cols=sysCols(hdr,nc,D,A,h);
+  }
+  cols.sort((p,q)=>p-q);
+  renderPv(h,D,A,cols);
+  if(bad){
+    data=[];view={cols:[],lab:[],amtPos:-1};
+    $('mapMsg').className='msg err';$('mapMsg').textContent=bad;$('dmsg').textContent='';
+    calc();return;
+  }
+  const lab=cols.map(i=>{const t=String(hdr[i]==null?'':hdr[i]).trim();return t||colL(i)});
+  view={cols,lab,amtPos:cols.indexOf(A)};
+  $('mapMsg').className='msg';
+  $('mapMsg').innerHTML='คอลัมน์ที่แสดงในรายงาน: '+cols.map((c,k)=>`${colL(c)} (${esc(lab[k])})`).join(', ')+(note?`<br>${note}`:'');
+  const out=[],raw0=isRaw();let skipped=0,skTot=0,fileTot=null,skLast=0;
+  const lt=lastTotal(h,D,A,nc);
+  $('keepLastBox').hidden=!lt.is;
+  const dropLast=lt.is&&!$('keepLast').checked;
+  for(let r=h;r<disp.length;r++){
+    const row=disp[r];
+    if(!row.some(c=>String(c).trim()!==''))continue;
+    if(dropLast&&r===lt.r){skLast=r+1;const tv=numA(row[A],raw[r]?raw[r][A]:undefined);if(tv!==null&&fileTot===null)fileTot=tv;continue}
+    if(raw0&&row.some(c=>TOT.test(String(c).trim()))){skTot++;const tv=numA(row[A],raw[r]?raw[r][A]:undefined);if(tv!==null&&fileTot===null)fileTot=tv;continue}
+    const av=numA(row[A],raw[r]?raw[r][A]:undefined);
+    if(av===null){if(!(h===0&&r===0))skipped++;continue}
+    out.push({idx:out.length,doc:String(row[D]==null?'':row[D]).trim(),amt:av,c:cols.map(i=>String(row[i]==null?'':row[i]))});
+  }
+  data=out;
+  const filled=[];
+  if(out.length&&!touched.tot){autoTot();filled.push('จำนวนประชากรทั้งหมด')}
+  if(raw0||h>1){
+    const top=disp.slice(0,Math.max(h-1,0)).map(r=>r.map(c=>String(c).trim()).filter(Boolean).join(' ')).filter(Boolean);
+    const grab=(re)=>{for(const t of top){const m=t.match(re);if(m)return m[m.length-1].trim()}return ''};
+    const F={hOrg:grab(/(?:หน่วยงานผู้ตรวจสอบ)\s*[:：]?\s*(.+)/),hAud:grab(/(?:หน่วยรับตรวจ|ส่วนราชการ|หน่วยงาน)\s*[:：]?\s*(.+)/),hYear:grab(/((?:สำหรับ)?(?:ปี|งวด)?(?:สิ้นสุด|ณ วันที่|ถึงวันที่)\s*(?:วันที่)?\s*.+)/),hAcc:grab(/(?:ชื่อบัญชี|บัญชี)\s*[:：]?\s*(.+)/)};
+    const NM={hOrg:'หน่วยงานผู้ตรวจสอบ',hAud:'หน่วยรับตรวจ',hYear:'สำหรับปีสิ้นสุดวันที่',hAcc:'ชื่อบัญชี'};
+    for(const k in F)if(F[k]&&!touched[k]&&!$(k).value.trim()){$(k).value=F[k];filled.push(NM[k])}
+  }
+  const cnt=new Map();let noDoc=0;
+  out.forEach(x=>{if(!x.doc)noDoc++;else cnt.set(x.doc,(cnt.get(x.doc)||0)+1)});
+  const dup=[...cnt].filter(e=>e[1]>1);
+  $('dmsg').className='msg';
+  $('dmsg').innerHTML=out.length?`นำเข้าสำเร็จ ${out.length.toLocaleString()} รายการ ยอดรวม ${fmt(sum(out))} บาท`
+    +(skTot?` <span class="err">(ข้ามแถวรวม/ยอดยกมา ${skTot.toLocaleString()} แถว)</span>`:'')
+    +(skLast?` <span class="err">(ข้ามแถวที่ ${skLast} ซึ่งเป็นแถวสุดท้าย เพราะคาดว่าเป็นยอดรวม: ${esc(lt.why)})</span>`:'')
+    +(fileTot!==null?`<br>ยอดรวมในแถวรวมของไฟล์ ${fmt(fileTot)} บาท `+(Math.abs(fileTot-sum(out))<0.005?'ตรงกับยอดรวมรายการที่นำเข้า':'<span class="err">ไม่ตรงกับยอดรวมรายการที่นำเข้า ('+fmt(sum(out))+') ตรวจสอบก่อนใช้</span>'):'')
+    +(filled.length?`<br>ระบบเติมข้อมูลให้จากไฟล์: ${filled.join(', ')} (ตรวจสอบและแก้ไขได้)`:'')
+    +(skipped?` <span class="err">(ข้าม ${skipped.toLocaleString()} แถวที่คอลัมน์จำนวนเงินไม่ใช่ตัวเลข)</span>`:'')
+    +(noDoc?`<br><span class="err">มี ${noDoc.toLocaleString()} รายการที่เลขที่เอกสารว่าง</span>`:'')
+    +(dup.length?`<br><span class="err">พบเลขที่เอกสารซ้ำ ${dup.length.toLocaleString()} เลขที่ เช่น ${esc(dup.slice(0,3).map(e=>e[0]).join(', '))} (เอกสารเดียวอาจมีหลายรายการได้ ตรวจสอบว่าถูกต้อง)</span>`:'')
+    +(src.warn?`<br><span class="err">${src.warn}</span>`:''):'<span class="err">ไม่พบรายการที่ใช้ได้ ตรวจสอบแถวหัวตารางและคอลัมน์จำนวนเงิน</span>';
+  calc();
+}
+const touched={};
+['tot','hOrg','hAud','hYear','hAcc'].forEach(id=>$(id).addEventListener('input',()=>{touched[id]=true}));
+function loadSheet(i){
+  const ws=wbk.Sheets[wbk.SheetNames[i]];
+  loadSrc(XLSX.utils.sheet_to_json(ws,{header:1,raw:false,defval:''}),XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''}),true);
+}
+$('file').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader(),csv=/\.csv$/i.test(f.name);
+  r.onload=ev=>{
+    try{
+      wbk=csv?XLSX.read(ev.target.result,{type:'string',raw:true}):XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
+      const sn=wbk.SheetNames;
+      $('sheetSel').innerHTML=sn.map((n,i)=>`<option value="${i}">${esc(n)}</option>`).join('');
+      $('sheetBox').hidden=sn.length<2;
+      loadSheet(0);
+    }catch(x){$('dmsg').className='msg err';$('dmsg').textContent='อ่านไฟล์ไม่ได้ ตรวจสอบว่าเป็นไฟล์ Excel หรือ CSV'}
+  };
+  csv?r.readAsText(f,'UTF-8'):r.readAsArrayBuffer(f);
+});
+$('sheetSel').addEventListener('change',()=>loadSheet(+$('sheetSel').value));
+document.querySelectorAll('input[name=prep]').forEach(r=>r.addEventListener('change',()=>{if(src&&src.file)autoMap()}));
+$('hdrRow').addEventListener('input',()=>{if(src)autoCols(Math.max(0,Math.min(Math.floor(num($('hdrRow').value)||0),src.disp.length)))});
+['colDoc','colAmt'].forEach(id=>$(id).addEventListener('change',apply));
+document.querySelectorAll('input[name=disp]').forEach(r=>r.addEventListener('change',apply));
+$('keepLast').addEventListener('change',apply);
+$('dispCols').addEventListener('input',()=>{document.querySelector('input[name=disp][value="own"]').checked=true;apply()});
+$('paste').addEventListener('input',()=>{
+  const rows=$('paste').value.split(/\r?\n/).filter(l=>l.trim()).map(l=>l.split('\t'));
+  if(!rows.length){src=null;data=[];$('mapBox').hidden=true;$('dmsg').textContent='';calc();return}
+  const wide=rows.reduce((m,r)=>Math.max(m,r.length),0);
+  loadSrc(wide>10?rows.map(r=>r.slice(0,10)):rows,wide>10?rows.map(r=>r.slice(0,10)):rows,false,wide>10?`ข้อมูลที่วางมี ${wide} คอลัมน์ ระบบใช้เพียง 10 คอลัมน์แรก (A ถึง J)`:'');
+});
+$('clr').onclick=()=>{src=null;data=[];$('file').value='';$('paste').value='';$('dmsg').textContent='';$('emsg').textContent='';$('mapBox').hidden=true;$('sheetBox').hidden=true;$('report').hidden=true;calc()};
+$('t1').onclick=()=>tab(1);$('t2').onclick=()=>tab(2);
+function tab(n){$('p1').hidden=n!==1;$('p2').hidden=n!==2;$('t1').classList.toggle('on',n===1);$('t2').classList.toggle('on',n===2)}
+
+/* MUS: เลือกรายการที่ครอบคลุมจุดสุ่มบนยอดเงินสะสม จุดแรกสุ่มในช่วงห่างแรก แล้วเว้นห่างเท่ากัน */
+function rnd(){const b=new Uint32Array(2);crypto.getRandomValues(b);return ((b[0]>>>5)*67108864+(b[1]>>>6))/9007199254740992}
+function runMUS(p){
+  const absMode=false; /* MUS ใช้เฉพาะรายการยอดบวก */
+  const val=x=>absMode?Math.abs(x.amt):x.amt;
+  const kset=new Set(p.matItems.map(x=>x.idx));
+  const elig=data.filter(x=>val(x)>0&&!kset.has(x.idx));
+  const skippedNeg=absMode?0:data.filter(x=>x.amt<0).length;
+  const zero=data.filter(x=>x.amt===0).length;
+  const T=p.sampleN,m=Math.min(p.sample,T),e=T-m;
+  const interval=m>0?p.base/m:0;
+  const start=interval*(1-rnd());
+  /* เลือกตามลำดับ: ใช้จุดเลือกเดิมจนกว่าจะมีรายการที่ยอดสะสมถึงจุดนั้น แล้วบวกช่วงห่างและไปรายการถัดไป ไม่ย้อนกลับ จึงไม่มีรายการถูกเลือกซ้ำ */
+  const n=elig.length,cumA=new Array(n);let cum=0;
+  for(let i=0;i<n;i++){cum+=val(elig[i]);cumA[i]=cum}
+  const hits=[],set=new Set(),trace=[],small=n<=100;let r=0,missed=0;
+  for(let k=0;k<m;k++){if(start+k*interval>cum+1e-6)missed++}
+  for(let k=0;k<m;k++){
+    const pt=start+k*interval;
+    while(r<n&&cumA[r]<pt-1e-6){if(small)trace.push({x:elig[r],cum:cumA[r],pt,sel:false});r++}
+    if(r>=n)break;
+    hits.push({x:elig[r],hit:1,cum:cumA[r],pt});set.add(elig[r].idx);
+    if(small)trace.push({x:elig[r],cum:cumA[r],pt,sel:true});
+    r++;
+  }
+  if(small)for(;r<n;r++)trace.push({x:elig[r],cum:cumA[r],pt:null,sel:false});
+  /* ถ้าแถวหมดก่อนครบ: วนกลับต้นไฟล์ เลือกรายการแรกที่ยังไม่ถูกเลือกตามลำดับ */
+  const mode='seq',short=m-hits.length,comp=[],nextFrom=new Map();
+  for(const y of elig){if(comp.length>=short)break;if(!set.has(y.idx))comp.push(y)}
+  comp.sort((a,b)=>a.idx-b.idx);
+  const compSet=new Set(comp.map(x=>x.idx)),hitsF=hits,setF=set;
+  return {m,e,interval,start,hits:hitsF,set:setF,unique:hitsF.length,missed,cumTotal:cum,absMode,skippedNeg,zero,mode,short,comp,compSet,nextFrom,trace};
+}
+
+/* สุ่ม */
+/* สุ่มแบบช่วง: ช่วงห่าง k=N/n เลขสุ่ม u เป็นจำนวนเต็ม 1..N จุดเริ่ม r=u/n ตำแหน่งที่ i = ปัดขึ้น(r+i*k)=ปัดขึ้น((u+i*N)/n) ทุกรายการมีโอกาสถูกเลือกเท่ากัน n/N */
+function runSys(pool,n){
+  const N=pool.length;n=Math.min(n,N);
+  if(n<=0)return {items:[],pos:[],N,n:0,k:0,u:0,r:0};
+  const u=1+Math.min(N-1,Math.floor(rnd()*N)),items=[],pos=[];
+  for(let i=0;i<n;i++){const q=Math.floor((u+i*N+n-1)/n);pos.push(q);items.push(pool[q-1])}
+  return {items,pos,N,n,k:N/n,u,r:u/n};
+}
+function pick(pool,n){
+  const a=pool.map((_,i)=>i),b=new Uint32Array(1);
+  for(let i=0;i<n;i++){
+    const m=a.length-i,lim=Math.floor(4294967296/m)*m;
+    let x;do{crypto.getRandomValues(b);x=b[0]}while(x>=lim);
+    const j=i+(x%m);[a[i],a[j]]=[a[j],a[i]];
+  }
+  return a.slice(0,n).map(i=>pool[i]).sort((p,q)=>p.idx-q.idx);
+}
+$('run').addEventListener('click',()=>{
+  const p=calc(),e=[];
+  if(!(p.mat>0))e.push('กรอกระดับความมีสาระสำคัญ (มากกว่า 0)');
+  if(!(p.tot>0))e.push('กรอกจำนวนประชากรทั้งหมด');
+  if(!(p.cf>0))e.push('กรอกค่า Confidence Factor');
+  if(!data.length)e.push('นำเข้าข้อมูลรายการ (อัปโหลดไฟล์หรือวางข้อมูลจาก Excel)');
+  if(p.capSel&&!(p.capV>0))e.push('กรอกจำนวนรายการสูงสุด หรือเลือก "ตามจำนวนที่คำนวณได้จริง"');
+  if(method>=2&&p.keyMode==='rand'&&p.matVal===null&&p.mat>0&&data.length)e.push('กดปุ่ม "สุ่มรายการสาระสำคัญ" ก่อน (กรอกจำนวนรายการแล้วกดสุ่ม)');
+  if(method<3&&stOn()&&p.stErr)e.push(p.stErr);
+  if(!e.length&&p.sample===null)e.push(method>=2&&p.base<0?'จำนวนประชากรทั้งหมดน้อยกว่ายอดรวมรายการที่มีสาระสำคัญ ตรวจสอบค่าที่กรอก':'ไม่สามารถคำนวณจำนวนตัวอย่างได้ ตรวจสอบค่าที่กรอก');
+  $('emsg').innerHTML=e.length?'ยังเริ่มสุ่มไม่ได้: '+e.join(' / '):'';
+  if(e.length)return;
+  if(method>=2&&p.keyNot.length&&!$('keyWhy').value.trim()&&!keySkip){
+    $('emsg').innerHTML='คุณควรต้องกรอกเหตุผลที่ไม่ตรวจรายการสาระสำคัญครบทุกรายการ คุณต้องการจะข้ามใช่หรือไม่ <button class="link" id="skipYes" type="button">ใช่ ข้ามและสุ่มต่อ</button> <button class="link" id="skipNo" type="button">ไม่ กลับไปกรอกเหตุผล</button>';
+    $('skipYes').onclick=()=>{keySkip=true;$('run').click()};
+    $('skipNo').onclick=()=>{$('emsg').innerHTML='';$('keyWhy').focus()};
+    return;
+  }
+  keySkip=false;
+  let note='',picked=[],mus=null,stRes=null,sys=null;
+  if(method===3){
+    mus=runMUS(p);
+    const kk=new Set(p.matItems.map(x=>x.idx));
+    const rest=data.filter(x=>x.amt>0&&!mus.set.has(x.idx)&&!mus.compSet.has(x.idx)&&!kk.has(x.idx));
+    const k=Math.min(mus.e,rest.length);
+    if(k<mus.e)note=`จำนวนที่ต้องสุ่มเพิ่มมากกว่าจำนวนรายการที่เหลือ จึงเลือกทุกรายการที่เหลือ (${rest.length.toLocaleString()} รายการ)`;
+    picked=pick(rest,k);
+  }else{
+    const pool=randPool(p.matItems,p.mat,p.keyMode);
+    let n=p.sampleN;
+    if(n>pool.length){n=pool.length;note=`จำนวนที่ต้องสุ่มมากกว่าจำนวนรายการที่มี จึงเลือกทุกรายการ (${pool.length.toLocaleString()} รายการ)`}
+    if(stOn()){
+      stRes=stPlan(pool,n,autoBounds(pool.map(stV()),+$('stK').value),stV());
+      picked=[];
+      stRes.S.forEach(g=>{g.sel=g.a?pick(g.items,g.a):[];picked.push(...g.sel)});
+      picked.sort((a,b)=>a.idx-b.idx);
+    }else if(method===4){sys=runSys(pool,n);picked=sys.items}else picked=pick(pool,n);
+  }
+  const rows=[['ระดับความมีสาระสำคัญ',fmt(p.mat),'[MAT]'],['จำนวนประชากรทั้งหมด',fmt(p.tot),'√']];
+  if(method>=2)rows.push(['จำนวนประชากรที่เป็นสาระสำคัญ',fmt(p.matVal),'c'],['จำนวนประชากรคงเหลือ',fmt(p.base),'c']);
+  rows.push(['ค่า Confidence Factor',p.cf.toString(),'cf'],['จำนวนรายการประชากรตัวอย่าง',p.sample.toLocaleString(),`c (คำนวณได้ ${p.raw.toFixed(2)} ปัดขึ้น)`]);
+  if(method>=2){
+    const KM={auto:'ระบบคัดกรองข้อมูลให้ (ตรวจสอบทุกรายการที่มีสาระสำคัญ)',manual:'ผู้ตรวจสอบกรอกข้อมูลด้วยตนเอง (เลือกตัวอย่างรายการสาระสำคัญแล้ว ตามเลขที่เอกสารที่ระบุ)',rand:'ผู้ตรวจสอบต้องการให้สุ่มรายการสาระสำคัญ (ทุกรายการมีโอกาสเท่ากัน)'};
+    const ab2=(method===2||method===4)&&negMode()==='abs',v2=x=>ab2?Math.abs(x.amt):x.amt;
+    const msx=new Set(p.matItems.map(x=>x.idx)),exK=p.keyAll.filter(x=>msx.has(x.idx));
+    const kv=p.keyAll.reduce((t,x)=>t+v2(x),0),ev=exK.reduce((t,x)=>t+v2(x),0);
+    rows.push(['วิธีกำหนดรายการประชากรที่เป็นสาระสำคัญ',KM[p.keyMode],p.keyMode==='rand'&&keyPick?`สุ่ม ${keyPick.draws.toLocaleString()} ครั้ง ใช้ผลครั้งล่าสุด`:''],
+      ['จำนวนรายการประชากรที่มีสาระสำคัญ',p.matCount.toLocaleString(),'รายการ'],
+      ['รายการสาระสำคัญทั้งหมดในประชากร',p.keyAll.length.toLocaleString()+' รายการ / '+fmt(kv),'ยอดเกินระดับความมีสาระสำคัญ'],
+      ['รายการสาระสำคัญที่ตรวจแล้ว',exK.length.toLocaleString()+' รายการ / '+fmt(ev),'ความครอบคลุมตามจำนวนรายการ '+(p.keyAll.length?(exK.length/p.keyAll.length*100).toFixed(2):'0.00')+'% ตามมูลค่า '+(kv?(ev/kv*100).toFixed(2):'0.00')+'%']);
+    if(p.keyNot.length)rows.push(['เหตุผลที่ไม่ตรวจรายการสาระสำคัญครบทุกรายการ',esc($('keyWhy').value.trim()).replace(/\n/g,'<br>')||'ไม่ได้ระบุเหตุผล',`ไม่ได้ตรวจ ${p.keyNot.length.toLocaleString()} รายการ`]);
+    if(p.keyMissing.length)rows.push(['เลขที่เอกสารที่ระบุแต่ไม่พบในข้อมูล',p.keyMissing.length.toLocaleString()+' เลขที่',esc(p.keyMissing.slice(0,10).join(', '))+(p.keyMissing.length>10?' ...':'')]);
+  }
+  if(stRes)rows.push(['วิธีสุ่มรายการ',`จัดกลุ่มก่อนสุ่ม ${stRes.S.length} กลุ่ม`,'จัดสรรตามมูลค่ารวมของกลุ่ม อย่างน้อยกลุ่มละ 1 รายการ']);
+  rows.push(['จำนวนรายการประชากรตัวอย่างที่ต้องการเลือกเพิ่มเติม',p.ex.toLocaleString(),'รายการ']);
+  {
+    const nz=data.filter(x=>x.amt===0).length,ng=data.filter(x=>x.amt<0).length,abr=negMode()==='abs';
+    const fiR=frameInfo();
+    rows.push(['ยอดสุทธิของรายการที่นำเข้า',fmt(fiR.net),`รายการบวก ${fmt(fiR.pos)} / รายการติดลบ ${fmt(fiR.neg)}`],['ประชากรที่ใช้สุ่ม',fmt(fiR.ft),(fiR.ab?'ยอดรวมปกติ (ใช้ค่าสัมบูรณ์เฉพาะตอนเลือกตัวอย่าง)':'เฉพาะรายการยอดบวก (ไม่ได้ทดสอบรายการติดลบในการสุ่มนี้)')+(Math.abs(p.tot-fiR.ft)>0.005?` | ต่างจากจำนวนประชากรทั้งหมดที่กรอก ${fmt(Math.abs(p.tot-fiR.ft))}`:'')]);
+    rows.push(['การจัดการรายการที่จำนวนเงินเป็นศูนย์หรือติดลบ',abr?((method===2||method===4)?'ใช้ค่าสัมบูรณ์ คงไว้ในกลุ่มที่สุ่ม':'คงไว้ในกลุ่มที่สุ่ม'):(method===3?'ตัดรายการติดลบและรายการศูนย์ออก (ตามสมมติฐานของ MUS)':'ข้ามรายการศูนย์และติดลบ'),`ศูนย์ ${nz.toLocaleString()} / ติดลบ ${ng.toLocaleString()} รายการ`]);
+  }
+  if(mus)rows.push(['ช่วงห่างการสุ่ม (ประชากรคงเหลือ ÷ จำนวนจุดสุ่ม)',fmt(mus.interval),`${fmt(p.base)} ÷ ${mus.m.toLocaleString()}`],['จุดเริ่มต้นสุ่ม',fmt(mus.start),'สุ่มภายในช่วงห่างแรก'],['จำนวนรายการที่ MUS เลือกได้ (ไม่ซ้ำ)',mus.unique.toLocaleString(),`จาก ${mus.m.toLocaleString()} จุดสุ่ม`],[{in:'รายการชดเชย (นับรวมในรายการที่เลือกตรวจ)',next:'รายการที่เลือกต่อท้ายแทนจุดสุ่มที่ซ้ำ (นับรวมในรายการที่เลือกตรวจ)',sep:'รายการชดเชยสำรอง (แยกแสดง ไม่นับรวม)'}[mus.mode],mus.comp.length.toLocaleString(),'รายการ'],['รายการยอดติดลบ (MUS ไม่เลือก)',mus.skippedNeg.toLocaleString(),'รายการ'],['รายการยอดศูนย์ (MUS ไม่เลือก)',mus.zero.toLocaleString(),'รายการ'],['จำนวนรายการที่สุ่มเพิ่มเติม (โอกาสเท่ากัน)',picked.length.toLocaleString(),'รายการ']);
+  if(sys)rows.push(['ช่วงห่างการสุ่ม (จำนวนรายการที่ใช้สุ่ม ÷ จำนวนตัวอย่าง)',Number(sys.k.toFixed(4)).toLocaleString(),`${sys.N.toLocaleString()} ÷ ${sys.n.toLocaleString()}`],['เลขสุ่ม (จำนวนเต็ม)',sys.u.toLocaleString(),`สุ่มจาก 1 ถึง ${sys.N.toLocaleString()}`],['จุดเริ่มต้นสุ่ม (r)',Number(sys.r.toFixed(4)).toLocaleString(),`เลขสุ่ม ÷ ${sys.n.toLocaleString()} (ไม่เกินช่วงห่าง)`]);
+  if(p.limited)rows.push(['จำนวนรายการประชากรที่เลือกตรวจสอบทั้งสิ้น (ตามที่คำนวณได้)',p.all.toLocaleString(),'รายการ'],['จำนวนรายการสูงสุดที่ผู้ใช้กำหนด',p.capV.toLocaleString(),'รายการ']);
+  const total=picked.length+(method>=2?p.matCount:0)+(mus?mus.unique+(mus.mode!=='sep'?mus.comp.length:0):0);
+  const thd=()=>'<th class="n">ที่</th>'+view.lab.map((l,k)=>`<th${k===view.amtPos?' class="n"':''}>${esc(l)}</th>`).join('');
+  const trc=x=>view.cols.map((_,k)=>k===view.amtPos?`<td class="n">${fmt(x.amt)}</td>`:`<td>${esc(x.c[k])}</td>`).join('');
+  const foot=(arr,ex)=>`<tfoot><tr><td colspan="${view.amtPos+1}">รวม ${arr.length.toLocaleString()} รายการ</td><td class="n">${fmt(sum(arr))}</td>${'<td></td>'.repeat(view.cols.length-view.amtPos-1+ex)}</tr></tfoot>`;
+  const KT={auto:'รายการประชากรที่มีสาระสำคัญ (แสดงทุกรายการ)',manual:'รายการสาระสำคัญที่ตรวจไปแล้ว (ตามเลขที่เอกสารที่ผู้ตรวจสอบระบุ)',rand:'รายการสาระสำคัญที่สุ่มได้'};
+  const stHtml=stRes?`<h3>ผลการจัดกลุ่มก่อนสุ่ม (${stRes.S.length} กลุ่ม)</h3><div class="wrap"><table class="res">${stTable(stRes,false)}</table></div><div class="hint">จัดสรรจำนวนตัวอย่างตามมูลค่ารวมของแต่ละกลุ่ม ทุกกลุ่มที่มีรายการได้อย่างน้อย 1 รายการ ภายในกลุ่มทุกรายการมีโอกาสเท่ากัน แต่ความน่าจะเป็นต่างกันระหว่างกลุ่ม การประมาณการข้อผิดพลาดทั้งประชากรจึงต้องทำแยกทีละกลุ่ม มูลค่ารวมของแต่ละกลุ่มคำนวณตามวิธีจัดการรายการศูนย์และติดลบที่เลือก จึงอาจไม่เท่ากับจำนวนประชากรทั้งหมดที่กรอก</div>`:'';
+  const musTbl=(hs,n)=>`<h3>${n}. รายการที่ MUS เลือกได้ (เลือกตามจำนวนเงิน)</h3>`+(hs.length?`<div class="wrap"><table class="res"><thead><tr>${thd()}<th class="n">ยอดสะสม</th><th class="n">จุดเลือก</th></tr></thead><tbody>${hs.map((h,i)=>`<tr><td class="n">${i+1}</td>${trc(h.x)}<td class="n">${fmt(h.cum)}</td><td class="n">${fmt(h.pt)}</td></tr>`).join('')}</tbody>${foot(hs.map(h=>h.x),2)}</table></div>`:'<p class="hint">ไม่มีรายการ</p>');
+  const sysTbl=sy=>`<h3>2. รายการประชากรตัวอย่างที่สุ่มได้ (เลือกตามช่วงห่าง)</h3>`+(sy.items.length?`<div class="wrap"><table class="res"><thead><tr>${thd()}<th class="n">ลำดับในกลุ่มที่สุ่ม</th></tr></thead><tbody>${sy.items.map((x,i)=>`<tr><td class="n">${i+1}</td>${trc(x)}<td class="n">${sy.pos[i].toLocaleString()}</td></tr>`).join('')}</tbody>${foot(sy.items,1)}</table></div><div class="hint">เลือกรายการลำดับที่ ปัดขึ้น(จุดเริ่มต้น + ลำดับตัวอย่าง × ช่วงห่าง) ตามลำดับรายการในไฟล์ที่นำเข้า หลังตัดรายการสาระสำคัญและรายการที่ไม่อยู่ในกลุ่มที่สุ่มออกแล้ว ทุกรายการมีโอกาสถูกเลือกเท่ากัน</div>`:'<p class="hint">ไม่มีรายการ</p>');
+  const traceTbl=tr=>`<h3>ตารางแสดงการเลือก (ตามลำดับรายการในไฟล์)</h3><div class="wrap"><table class="res"><thead><tr>${thd()}<th class="n">ยอดสะสม</th><th class="n">จุดเลือก</th><th>เลือกรายการนี้เพื่อทดสอบ?</th></tr></thead><tbody>${tr.map((t,i)=>`<tr><td class="n">${i+1}</td>${trc(t.x)}<td class="n">${fmt(t.cum)}</td><td class="n">${t.pt===null?'-':fmt(t.pt)}</td><td>${t.sel?'ใช่':'ไม่'}</td></tr>`).join('')}</tbody></table></div>`;
+  let musNote='';
+  if(mus){
+    let info='';
+    const w=[];
+    info='เลือกตามลำดับรายการในไฟล์: ใช้จุดเลือกเดิมจนกว่าจะมีรายการที่ยอดสะสมถึงจุดนั้น เลือกรายการนั้น แล้วบวกช่วงห่างและไปดูรายการถัดไป จึงไม่มีรายการใดถูกเลือกซ้ำ';
+    if(mus.short>0){
+      if(mus.comp.length<mus.short)w.push(`ชดเชยได้เพียง ${mus.comp.length.toLocaleString()} จาก ${mus.short.toLocaleString()} รายการ เพราะไม่มีรายการเหลือให้เลือก`);
+      info+=`<br>จุดเลือก ${mus.m.toLocaleString()} จุด ได้รายการตามจุด ${mus.unique.toLocaleString()} รายการ อีก ${mus.short.toLocaleString()} จุดไม่มีรายการเหลือให้เลือกตามลำดับ ระบบวนกลับต้นไฟล์และเลือกรายการแรกที่ยังไม่ถูกเลือก ${mus.comp.length.toLocaleString()} รายการ นับรวมในรายการที่เลือกตรวจ`;
+    }
+    if(mus.missed>0)w.push(`มี ${mus.missed.toLocaleString()} จุดสุ่มตกเกินยอดรวมรายการที่ใช้ใน MUS (${fmt(mus.cumTotal)}) เพราะน้อยกว่าประชากรคงเหลือที่ใช้คำนวณช่วงห่าง (${fmt(p.base)}) ตรวจสอบจำนวนประชากรทั้งหมดและข้อมูลที่นำเข้า`);
+    if(mus.cumTotal>p.base+0.005)w.push(`ยอดรวมรายการที่ใช้ใน MUS (${fmt(mus.cumTotal)}) มากกว่าประชากรคงเหลือที่ใช้คำนวณช่วงห่าง (${fmt(p.base)}) รายการท้ายไฟล์บางรายการจึงไม่มีโอกาสถูกเลือก`);
+    musNote=`<div class="hint">ยอดสะสมคำนวณตามลำดับรายการในไฟล์ที่นำเข้า</div>`+(info?`<div class="hint">${info}</div>`:'')+(w.length?`<div class="msg err">${w.join('<br>')}</div>`:'');
+  }
+  const musSecs=()=>{
+    let n=1;const o=[];
+    if(method>=2)o.push(tbl(p.matItems,`${n++}. ${KT[p.keyMode]}`));
+    o.push(musTbl(mus.hits,n++));
+    if(mus.trace.length)o.push(traceTbl(mus.trace));
+    if(mus.mode==='seq'&&mus.comp.length)o.push(tbl(mus.comp,`${n++}. รายการที่ได้จากการวนกลับต้นไฟล์ (แถวหมดก่อนครบจำนวนจุดเลือก นับรวมในรายการที่เลือกตรวจ)`));
+    if(mus.mode==='in'&&mus.comp.length)o.push(tbl(mus.comp,`${n++}. รายการชดเชย (สุ่มแบบ MUS เพิ่มเพื่อให้ครบจำนวน นับรวมในรายการที่เลือกตรวจ)`));
+    if(mus.e)o.push(tbl(picked,`${n++}. รายการที่สุ่มเพิ่มเติม (ทุกรายการมีโอกาสเท่ากัน)`));
+    if(mus.mode==='sep'&&mus.comp.length)o.push(tbl(mus.comp,`${n++}. รายการชดเชยสำรอง (สุ่มแบบ MUS แยกแสดง ไม่นับรวมในรายการที่เลือกตรวจ ผู้ตรวจสอบพิจารณาเลือกใช้เอง)`));
+    return o.join('');
+  };
+  const tbl=(arr,t)=>`<h3>${t}</h3>`+(arr.length?`<div class="wrap"><table class="res"><thead><tr>${thd()}</tr></thead><tbody>${arr.map((x,i)=>`<tr><td class="n">${i+1}</td>${trc(x)}</tr>`).join('')}</tbody>${foot(arr,0)}</table></div>`:'<p class="hint">ไม่มีรายการ</p>');
+  $('report').innerHTML=`<div class="rhead"><div><h2 style="font-size:20px;margin:0">รายงานการสุ่มรายการตรวจสอบ</h2><div class="hdr">${hdrHtml()}</div><div class="hint">${method===1?'วิธีที่ 1 การสุ่มแบบทุกรายการมีโอกาสถูกเลือกเป็นตัวอย่างแบบเท่าเทียมกัน':method===2?'วิธีที่ 2 การสุ่มแบบคัดกรองรายการที่มีมูลค่าที่เป็นสาระสำคัญก่อน':method===4?'วิธีที่ 4 การสุ่มแบบช่วง (เลือกทุก ๆ ช่วงห่างที่เท่ากันตามลำดับรายการ)':'วิธีที่ 3 การเลือกตัวอย่างแบบถ่วงน้ำหนักตามมูลค่า (MUS)'}<br>สุ่มเมื่อ ${new Date().toLocaleString('th-TH',{dateStyle:'long',timeStyle:'short'})}</div></div><div class="noprint" style="text-align:right"><button id="print">พิมพ์รายงาน</button><div class="hint">ถ้าปุ่มไม่ทำงาน ให้กด Ctrl+P (Mac: Cmd+P) เพื่อพิมพ์หรือบันทึกเป็น PDF</div></div></div>
+  <h3>ข้อมูลการสุ่มตัวอย่าง</h3><div class="wrap"><table class="pt"><thead><tr><th>ข้อมูล</th><th class="n">จำนวน</th><th>หมายเหตุ</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}<tr class="sum"><td>${p.limited?'จำนวนรายการประชากรที่เลือกตรวจสอบจริง (หลังจำกัดสูงสุด)':'จำนวนรายการประชากรที่เลือกตรวจสอบทั้งสิ้น'}</td><td>${total.toLocaleString()}</td><td>รายการ</td></tr>${$('remark').value.trim()?`<tr><td>หมายเหตุ</td><td colspan="2" style="text-align:left;width:auto;white-space:pre-wrap">${esc($('remark').value.trim())}</td></tr>`:''}</tbody></table></div>
+  ${p.limited?`<div class="hint">ผู้ใช้กำหนดจำกัดจำนวนสูงสุด ${p.capV.toLocaleString()} รายการ จึงลดจำนวนจาก ${p.all.toLocaleString()} เป็น ${total.toLocaleString()} รายการ`+(method>=2?` (รายการที่มีสาระสำคัญตรวจทุกรายการ ${p.matCount.toLocaleString()} รายการ${p.capV<p.matCount?' ซึ่งมากกว่าจำนวนสูงสุดที่กำหนด จึงไม่มีรายการสุ่มเพิ่ม':''})`:'')+'</div>':''}
+  ${note?`<div class="msg err">${note}</div>`:''}
+  ${musNote}
+  ${method===3?musSecs():method===4?tbl(p.matItems,'1. '+KT[p.keyMode])+sysTbl(sys):method===2?tbl(p.matItems,'1. '+KT[p.keyMode])+stHtml+tbl(picked,'2. รายการประชากรตัวอย่างที่สุ่มได้'):stHtml+tbl(picked,'รายการประชากรตัวอย่างที่สุ่มได้')}`;
+  $('report').className=view.cols.length>7?'dense':'';
+  $('report').hidden=false;
+  $('print').onclick=()=>{try{window.print()}catch(e){}};
+  $('report').scrollIntoView({behavior:'smooth'});
+});
+</script>
+</body>
+</html>
