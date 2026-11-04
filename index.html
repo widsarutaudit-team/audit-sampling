@@ -123,10 +123,10 @@ table{font-size:11px}
 <h2>ขั้นตอนที่ 1 เลือกวิธีการสุ่มรายการ</h2>
 <div class="cards">
 <label class="card"><input type="radio" name="m" value="1"><span><b>วิธีที่ 1</b>การสุ่มแบบทุกรายการมีโอกาสถูกเลือกเป็นตัวอย่างแบบเท่าเทียมกัน (Random Selection)</span></label>
-<label class="card"><input type="radio" name="m" value="2"><span><b>วิธีที่ 2</b>การสุ่มแบบคัดกรองรายการที่มีมูลค่าที่เป็นสาระสำคัญก่อน (Random Selection - Key item)</span></label>
-<label class="card"><input type="radio" name="m" value="3"><span><b>วิธีที่ 3</b>การเลือกตัวอย่างแบบถ่วงน้ำหนักตามมูลค่า (MUS)</span></label>
-<label class="card"><input type="radio" name="m" value="4"><span><b>วิธีที่ 4</b>การสุ่มแบบช่วง (เลือกทุก ๆ ช่วงห่างที่เท่ากันตามลำดับรายการ) (Systematic Selection)</span></label>
+<label class="card"><input type="radio" name="m" value="3"><span><b>วิธีที่ 2</b>การเลือกตัวอย่างแบบถ่วงน้ำหนักตามมูลค่า (MUS)</span></label>
+<label class="card"><input type="radio" name="m" value="4"><span><b>วิธีที่ 3</b>การสุ่มแบบช่วง (เลือกทุก ๆ ช่วงห่างที่เท่ากันตามลำดับรายการ) (Systematic Selection)</span></label>
 </div>
+<label id="keyChkBox" class="card" style="display:none;margin-top:12px"><input type="checkbox" id="keyChk"><span><b>คัดรายการที่มีมูลค่าที่เป็นสาระสำคัญก่อน (Key item)</b></span></label>
 </section>
 
 <section id="s2" hidden>
@@ -258,16 +258,22 @@ NEGTXT[4]=NEGTXT[2];
 document.querySelectorAll('input[name=neg]').forEach(r=>r.addEventListener('change',()=>{negTouched=true;autoTot();calc()}));
 const hdrHtml=()=>[['หน่วยงานผู้ตรวจสอบ','hOrg'],['หน่วยรับตรวจ','hAud'],['สำหรับปีสิ้นสุดวันที่','hYear'],['ชื่อบัญชี','hAcc']].map(([l,id])=>`<div>${l}: <b>${esc($(id).value.trim())||'-'}</b></div>`).join('');
 
-document.querySelectorAll('input[name=m]').forEach(r=>r.addEventListener('change',()=>{
-  method=+r.value;$('s2').hidden=$('s3').hidden=false;
-  $('mname').textContent='(วิธีที่ '+method+')';
+const DISP={1:1,2:1,3:2,4:3};
+function applyMethod(){
+  const r=document.querySelector('input[name=m]:checked');if(!r)return;
+  const b=+r.value;$('keyChkBox').style.display=b===1?'flex':'none';
+  method=b===1&&$('keyChk').checked?2:b;$('s2').hidden=$('s3').hidden=false;
+  $('mname').textContent='(วิธีที่ '+DISP[method]+(method===2?' แบบคัดรายการสำคัญก่อน':'')+')';
   document.querySelectorAll('[data-m]').forEach(e=>e.hidden=!e.dataset.m.split(',').includes(String(method)));
   $('negBox').hidden=method===3;
   const T=NEGTXT[method];
   $('negHint').textContent=T[0];$('negSkipT').textContent=T[1];$('negSkipD').textContent=T[2];$('negAbsT').textContent=T[3];$('negAbsD').textContent=T[4];
   if(!negTouched)document.querySelector('input[name=neg][value="'+(method===3?'skip':'abs')+'"]').checked=true;
   $('report').hidden=true;autoTot();calc();
-}));
+}
+document.querySelectorAll('input[name=m]').forEach(r=>r.addEventListener('change',applyMethod));
+$('keyChk').addEventListener('change',applyMethod);
+
 ['mat','tot','cf','ex','keyDocs','keyAmt','keyN','keyWhy'].forEach(id=>$(id).addEventListener('input',calc));
 $('keyAmt').addEventListener('blur',()=>{const v=num($('keyAmt').value);if(v!==null)$('keyAmt').value=fmt(v)});
 document.querySelectorAll('input[name=keyMode]').forEach(r=>r.addEventListener('change',calc));
@@ -283,7 +289,7 @@ document.querySelectorAll('input[name=cap]').forEach(r=>r.addEventListener('chan
 ['input','focus'].forEach(ev=>$('capN').addEventListener(ev,()=>{document.querySelector('input[name=cap][value="1"]').checked=true;calc()}));
 ['mat','tot'].forEach(id=>$(id).addEventListener('blur',()=>{const v=num($(id).value);if(v!==null)$(id).value=fmt(v)}));
 
-/* ประชากรที่ใช้สุ่ม (วิธีที่ 1 และ 2): รวมเฉพาะรายการที่อยู่ในกลุ่มที่สุ่มตามวิธีจัดการศูนย์/ติดลบที่เลือก */
+/* ประชากรที่ใช้สุ่ม (สุ่มแบบเท่าเทียม ทั้งแบบมีและไม่มีการคัด key item): รวมเฉพาะรายการที่อยู่ในกลุ่มที่สุ่มตามวิธีจัดการศูนย์/ติดลบที่เลือก */
 function frameInfo(){
   const ab=negMode()==='abs';let pos=0,neg=0,negN=0,zeroN=0,abs=0;
   data.forEach(x=>{if(x.amt>0)pos+=x.amt;else if(x.amt<0){neg+=x.amt;negN++}else zeroN++;abs+=Math.abs(x.amt)});
@@ -843,7 +849,7 @@ $('run').addEventListener('click',()=>{
     return o.join('');
   };
   const tbl=(arr,t)=>`<h3>${t}</h3>`+(arr.length?`<div class="wrap"><table class="res"><thead><tr>${thd()}</tr></thead><tbody>${arr.map((x,i)=>`<tr><td class="n">${i+1}</td>${trc(x)}</tr>`).join('')}</tbody>${foot(arr,0)}</table></div>`:'<p class="hint">ไม่มีรายการ</p>');
-  $('report').innerHTML=`<div class="rhead"><div><div class="brand">Project by สำนักตรวจเงินแผ่นดินที่ 10 กลุ่มที่ 2</div><h2 style="font-size:20px;margin:0">รายงานการสุ่มรายการตรวจสอบ</h2><div class="hdr">${hdrHtml()}</div><div class="hint">${method===1?'วิธีที่ 1 การสุ่มแบบทุกรายการมีโอกาสถูกเลือกเป็นตัวอย่างแบบเท่าเทียมกัน (Random Selection)':method===2?'วิธีที่ 2 การสุ่มแบบคัดกรองรายการที่มีมูลค่าที่เป็นสาระสำคัญก่อน (Random Selection - Key item)':method===4?'วิธีที่ 4 การสุ่มแบบช่วง (เลือกทุก ๆ ช่วงห่างที่เท่ากันตามลำดับรายการ) (Systematic Selection)':'วิธีที่ 3 การเลือกตัวอย่างแบบถ่วงน้ำหนักตามมูลค่า (MUS)'}<br>สุ่มเมื่อ ${new Date().toLocaleString('th-TH',{dateStyle:'long',timeStyle:'short'})}</div></div><div class="noprint rtools"><button id="print" title="ถ้าปุ่มไม่ทำงาน ให้กด Ctrl+P (Mac: Cmd+P) เพื่อพิมพ์หรือบันทึกเป็น PDF">พิมพ์รายงาน</button><button id="xlsx" class="alt">บันทึกเป็น Excel</button></div></div>
+  $('report').innerHTML=`<div class="rhead"><div><div class="brand">Project by สำนักตรวจเงินแผ่นดินที่ 10 กลุ่มที่ 2</div><h2 style="font-size:20px;margin:0">รายงานการสุ่มรายการตรวจสอบ</h2><div class="hdr">${hdrHtml()}</div><div class="hint">${method===1?'วิธีที่ 1 การสุ่มแบบทุกรายการมีโอกาสถูกเลือกเป็นตัวอย่างแบบเท่าเทียมกัน (Random Selection)':method===2?'วิธีที่ 1 การสุ่มแบบคัดกรองรายการที่มีมูลค่าที่เป็นสาระสำคัญก่อน (Random Selection - Key item)':method===4?'วิธีที่ 3 การสุ่มแบบช่วง (เลือกทุก ๆ ช่วงห่างที่เท่ากันตามลำดับรายการ) (Systematic Selection)':'วิธีที่ 2 การเลือกตัวอย่างแบบถ่วงน้ำหนักตามมูลค่า (MUS)'}<br>สุ่มเมื่อ ${new Date().toLocaleString('th-TH',{dateStyle:'long',timeStyle:'short'})}</div></div><div class="noprint rtools"><button id="print" title="ถ้าปุ่มไม่ทำงาน ให้กด Ctrl+P (Mac: Cmd+P) เพื่อพิมพ์หรือบันทึกเป็น PDF">พิมพ์รายงาน</button><button id="xlsx" class="alt">บันทึกเป็น Excel</button></div></div>
   <h3>ข้อมูลการสุ่มตัวอย่าง</h3><div class="wrap"><table class="pt"><thead><tr><th>ข้อมูล</th><th class="n">จำนวน</th><th>หมายเหตุ</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}<tr class="sum"><td>${p.limited?'จำนวนรายการประชากรที่เลือกตรวจสอบจริง (หลังจำกัดสูงสุด)':'จำนวนรายการประชากรที่เลือกตรวจสอบทั้งสิ้น'}</td><td>${total.toLocaleString()}</td><td>รายการ</td></tr>${$('remark').value.trim()?`<tr><td>หมายเหตุ</td><td colspan="2" style="text-align:left;width:auto;white-space:pre-wrap">${esc($('remark').value.trim())}</td></tr>`:''}</tbody></table></div>
   <div class="legend">[MAT] : ระดับความมีสาระสำคัญในการปฏิบัติงาน (Performance Materiality), √ : งบทดลอง/สมุดรายวันทั่วไป/ข้อมูลทางบัญชี, c : การคำนวณ/การทดสอบ, cf : ตารางความเสี่ยงที่ต้องการจะลด ระดับความเชื่อมั่น และ Confidence Factor</div>
   ${p.limited?`<div class="hint">ผู้ใช้กำหนดจำกัดจำนวนสูงสุด ${p.capV.toLocaleString()} รายการ จึงลดจำนวนจาก ${p.all.toLocaleString()} เป็น ${total.toLocaleString()} รายการ`+(method>=2?` (รายการที่มีสาระสำคัญตรวจทุกรายการ ${p.matCount.toLocaleString()} รายการ${p.capV<p.matCount?' ซึ่งมากกว่าจำนวนสูงสุดที่กำหนด จึงไม่มีรายการสุ่มเพิ่ม':''})`:'')+'</div>':''}
