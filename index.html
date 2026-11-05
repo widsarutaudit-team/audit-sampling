@@ -192,8 +192,17 @@ table{font-size:11px}
 <label class="card"><input type="radio" name="strat" value="1"><span><b>สุ่มแบบจัดกลุ่มตามช่วงของยอดเงิน</b>แบ่งกลุ่มตามช่วงของยอดเงินและสุ่มตามสัดส่วนที่เหมาะสม</span></label>
 </div>
 <div id="stOpt" hidden>
-<div class="grid2" style="margin-top:10px"><div><label class="fl" for="stK">จำนวนกลุ่ม</label><select id="stK"><option value="2">2 กลุ่ม</option><option value="3" selected>3 กลุ่ม</option><option value="4">4 กลุ่ม</option><option value="5">5 กลุ่ม</option></select></div></div>
-<p class="hint">ระบบกำหนดช่วงของแต่ละกลุ่มจากข้อมูลให้อัตโนมัติ กลุ่มที่ 1 คือกลุ่มยอดต่อรายการสูงสุด</p>
+<div class="cards" style="margin-top:10px">
+<label class="card"><input type="radio" name="stMode" value="auto" checked><span><b>ระบบจัดกลุ่มให้</b>ระบบกำหนดช่วงยอดของทุกกลุ่มจากข้อมูลตามจำนวนกลุ่มที่เลือก</span></label>
+<label class="card"><input type="radio" name="stMode" value="custom"><span><b>ผู้ใช้กำหนดเอง</b>ผู้ใช้กรอกเส้นแบ่งยอดของทุกกลุ่มเอง</span></label>
+<label class="card"><input type="radio" name="stMode" value="top"><span><b>ผู้ใช้กำหนดเฉพาะกลุ่มชั้นสูงสุด</b>ผู้ใช้กำหนดยอดเริ่มต้นของกลุ่มที่ 1 กลุ่มที่เหลือระบบจัดกลุ่มให้</span></label>
+</div>
+<div class="grid2" style="margin-top:10px">
+<div id="stKBox"><label class="fl" for="stK" id="stKLab">จำนวนกลุ่ม</label><select id="stK"><option value="2">2 กลุ่ม</option><option value="3" selected>3 กลุ่ม</option><option value="4">4 กลุ่ม</option><option value="5">5 กลุ่ม</option></select></div>
+<div id="stTopBox" hidden><label class="fl" for="stTop">กลุ่มที่ 1 เริ่มตั้งแต่ยอดต่อรายการ (บาท)</label><input type="text" id="stTop" inputmode="decimal" autocomplete="off" placeholder="เช่น 500,000"></div>
+<div id="stCustBox" hidden style="grid-column:1/-1"><div id="stCustRows" class="grid2"></div></div>
+</div>
+<p class="hint" id="stModeHint"></p>
 <div class="hint" id="stHint"></div>
 <div class="wrap"><table class="res" id="stTbl"></table></div>
 </div>
@@ -313,6 +322,26 @@ function randPool(matItems,mat,km){
   return data.filter(x=>(abm||x.amt>0)&&((method!==2&&method!==4)||(km==='auto'?(abm?Math.abs(x.amt):x.amt)<=mat:!mset.has(x.idx))));
 }
 /* ระบบกำหนดช่วงของกลุ่มจากข้อมูล: แบ่งตามกฎ cumulative sqrt(f) บนสเกลลอการิทึมของยอดเงิน */
+const stMode=()=>document.querySelector('input[name=stMode]:checked').value;
+/* เส้นแบ่งกลุ่มตามโหมด: auto = ระบบกำหนดทั้งหมด, custom = ผู้ใช้กำหนดทั้งหมด, top = ผู้ใช้กำหนดกลุ่มสูงสุด ที่เหลือระบบแบ่งให้ */
+function stB(vals){
+  const m=stMode(),kk=+$('stK').value;
+  if(m==='custom'){
+    const a=[...document.querySelectorAll('#stCustRows input')].map(e=>num(e.value));
+    for(let i=0;i<a.length;i++){
+      if(a[i]===null)return {m,bd:[],err:`กรอกยอดเริ่มต้นของกลุ่มที่ ${i+1}`};
+      if(!(a[i]>0))return {m,bd:[],err:`ยอดเริ่มต้นของกลุ่มที่ ${i+1} ต้องมากกว่า 0`};
+      if(i>0&&!(a[i]<a[i-1]))return {m,bd:[],err:`ยอดเริ่มต้นของกลุ่มที่ ${i+1} ต้องน้อยกว่ากลุ่มที่ ${i}`};
+    }
+    return {m,bd:a};
+  }
+  if(m==='top'){
+    const T=num($('stTop').value);
+    if(!(T>0))return {m,bd:[],err:'กรอกยอดเริ่มต้นของกลุ่มที่ 1 (มากกว่า 0)'};
+    return {m,bd:[T].concat(autoBounds(vals.filter(a=>a<T),kk-1)),T};
+  }
+  return {m,bd:autoBounds(vals,kk)};
+}
 function autoBounds(vals,k){
   const pos=vals.filter(a=>a>0).sort((x,y)=>x-y);
   if(k<2||pos.length<2)return [];
@@ -451,32 +480,51 @@ function calc(){
      nw.hidden=false;
    }else{nw.hidden=true;nw.innerHTML=''}}
   if($('useSum'))$('useSum').onclick=()=>{$('tot').value=fmt(tg);calc()};
-  let st=null,stErr='',stCapMsg='';
+  let st=null,stErr='',stCapMsg='',maxK0=5,stSB=null;
   if(method===1||method===2){
     const rem=(data.length&&sampleN!==null)?sampleN:null,maxK=rem===null?5:Math.min(5,rem);
     const r1=document.querySelector('input[name=strat][value="1"]');
     r1.disabled=maxK<2;
     if(maxK<2&&stOn())document.querySelector('input[name=strat][value="0"]').checked=true;
     $('stOff').textContent=maxK<2?`ไม่สามารถจัดกลุ่มได้ เพราะเหลือรายการที่ต้องสุ่ม ${rem.toLocaleString()} รายการ (ต้องมีอย่างน้อย 2 รายการจึงจัดกลุ่มได้ โดยแต่ละกลุ่มต้องได้อย่างน้อย 1 รายการ)`:'';
+    maxK0=maxK;
     [...$('stK').options].forEach(o=>{o.disabled=+o.value>maxK});
     if(maxK>=2&&+$('stK').value>maxK){const was=$('stK').value;$('stK').value=String(maxK);stCapMsg=`ลดจำนวนกลุ่มจาก ${was} เป็น ${maxK} กลุ่ม เพราะเหลือรายการที่ต้องสุ่ม ${rem.toLocaleString()} รายการ และแต่ละกลุ่มต้องได้อย่างน้อย 1 รายการ`}
     else if(maxK>=2&&maxK<5&&rem!==null)stCapMsg=`เลือกได้สูงสุด ${maxK} กลุ่ม เพราะเหลือรายการที่ต้องสุ่ม ${rem.toLocaleString()} รายการ และแต่ละกลุ่มต้องได้อย่างน้อย 1 รายการ`;
   }
   $('stOpt').hidden=!stOn();
+  {const m=stMode();$('stTopBox').hidden=m!=='top';$('stCustBox').hidden=m!=='custom';
+   if(m==='custom'){
+     const k=+$('stK').value,box=$('stCustRows'),old=[...box.querySelectorAll('input')].map(e=>e.value);
+     if(box.querySelectorAll('input').length!==k-1||box.dataset.k!==String(k)){
+       box.dataset.k=String(k);
+       box.innerHTML=Array.from({length:k-1},(_,i)=>`<div><label class="fl">กลุ่มที่ ${i+1} เริ่มตั้งแต่ยอดต่อรายการ (บาท)</label><input type="text" inputmode="decimal" autocomplete="off" value="${esc(old[i]||'')}"></div>`).join('')+`<div><label class="fl">กลุ่มที่ ${k}</label><div class="hint" style="margin:10px 0 0">ต่ำกว่ายอดเริ่มต้นของกลุ่มที่ ${k-1} (กำหนดให้อัตโนมัติ)</div></div>`;
+     }
+   }
+   $('stKLab').textContent=m==='top'?'จำนวนกลุ่มรวม (รวมกลุ่มที่ 1)':'จำนวนกลุ่ม';
+   $('stModeHint').textContent=m==='auto'?'ระบบกำหนดช่วงของแต่ละกลุ่มจากข้อมูลให้อัตโนมัติ กลุ่มที่ 1 คือกลุ่มยอดต่อรายการสูงสุด':m==='custom'?'เลือกจำนวนกลุ่ม แล้วกรอกยอดเริ่มต้นของแต่ละกลุ่มจากกลุ่มที่ 1 (ยอดสูงสุด) ลงมา โดยแต่ละกลุ่มต้องน้อยกว่ากลุ่มก่อนหน้า (ยอดเทียบกับยอดต่อรายการ กรณีเลือกใช้ค่าสัมบูรณ์ ให้กรอกเป็นค่าสัมบูรณ์)':'กลุ่มที่ 1 คือยอดตั้งแต่ค่าที่กรอกขึ้นไป กลุ่มที่เหลือระบบแบ่งให้ตามจำนวนกลุ่มรวม (ยอดเทียบกับยอดต่อรายการ กรณีค่าสัมบูรณ์ให้กรอกเป็นค่าสัมบูรณ์)'}
   if((method===1||method===2)&&stOn()){
     if(data.length&&sampleN!==null&&(method===1||matVal!==null)){
-      const pl=randPool(matItems,mat,km),kk=+$('stK').value,bd=autoBounds(pl.map(stV()),kk);
-      st=stPlan(pl,sampleN,bd,stV());
-      stErr='';
-      var stNote=bd.length+1<kk?`ข้อมูลมีช่วงยอดเงินไม่หลากหลายพอ จึงแบ่งได้ ${bd.length+1} กลุ่มจากที่เลือก ${kk} กลุ่ม`:'';
+      const pl=randPool(matItems,mat,km),kk=+$('stK').value;
+      stSB=stB(pl.map(stV()));const bd=stSB.bd;
+      stErr=stSB.err||'';
+      if(!stErr&&bd.length+1>maxK0)stErr=`จำนวนกลุ่มจากเส้นแบ่งที่กำหนด (${bd.length+1} กลุ่ม) มากกว่าที่ทำได้ (ทำได้สูงสุด ${maxK0} กลุ่ม ซึ่งต้องไม่เกิน 5 กลุ่มและไม่เกินจำนวนรายการที่ต้องสุ่ม) ลดจำนวนเส้นแบ่งลง`;
+      if(!stErr)st=stPlan(pl,sampleN,bd,stV());
+      var stNote='';
+      if(st&&stSB.m==='auto'&&bd.length+1<kk)stNote=`ข้อมูลมีช่วงยอดเงินไม่หลากหลายพอ จึงแบ่งได้ ${bd.length+1} กลุ่มจากที่เลือก ${kk} กลุ่ม`;
+      if(st&&stSB.m==='top'&&bd.length+1<kk)stNote=`กลุ่มที่เหลือมีช่วงยอดเงินไม่หลากหลายพอ จึงแบ่งได้รวม ${bd.length+1} กลุ่มจากที่เลือก ${kk} กลุ่ม`;
+      if(st){const em=st.S.filter(g=>!g.items.length).map(g=>g.i+1);if(em.length)stNote+=(stNote?' ':'')+`กลุ่มที่ ${em.join(', ')} ไม่มีรายการ (ไม่ได้รับการจัดสรรตัวอย่าง)`}
     }
-    $('stHint').innerHTML=(stCapMsg?`<span class="err">${stCapMsg}</span> `:'')+(st&&st.over?'<span class="err">จำนวนตัวอย่างน้อยกว่าจำนวนกลุ่มที่มีรายการ แต่ทุกกลุ่มต้องมีอย่างน้อย 1 รายการ จำนวนที่เลือกจึงมากกว่าที่คำนวณได้</span>':'')+(typeof stNote!=='undefined'&&stNote?` <span class="err">${stNote}</span>`:'');
+    $('stHint').innerHTML=(stCapMsg?`<span class="err">${stCapMsg}</span> `:'')+(st&&st.over?'<span class="err">จำนวนตัวอย่างน้อยกว่าจำนวนกลุ่มที่มีรายการ แต่ทุกกลุ่มต้องมีอย่างน้อย 1 รายการ จำนวนที่เลือกจึงมากกว่าที่คำนวณได้</span>':'')+(typeof stNote!=='undefined'&&stNote?` <span class="err">${stNote}</span>`:'')+(stErr?` <span class="err">${stErr}</span>`:'');
     $('stTbl').innerHTML=st?stTable(st,false):'';
   }
   return {st,stErr,mat,tot,cf,ex,sample,raw,matItems,matVal,base,all,capSel,capV,sampleN,limited,eff,matCount,keyMode:km,keyAll,keyNot,keyDocN,keyMissing};
 }
 
 $('stK').addEventListener('change',calc);
+document.querySelectorAll('input[name=stMode]').forEach(r=>r.addEventListener('change',calc));
+$('stTop').addEventListener('input',calc);
+$('stCustBox').addEventListener('input',calc);
 document.querySelectorAll('input[name=strat]').forEach(r=>r.addEventListener('change',()=>{$('stOpt').hidden=!stOn();calc()}));
 
 /* นำเข้าข้อมูล */
@@ -830,7 +878,7 @@ $('run').addEventListener('click',()=>{
     let n=p.sampleN;
     if(n>pool.length){n=pool.length;note=`จำนวนที่ต้องสุ่มมากกว่าจำนวนรายการที่มี จึงเลือกทุกรายการ (${pool.length.toLocaleString()} รายการ)`}
     if(stOn()){
-      stRes=stPlan(pool,n,autoBounds(pool.map(stV()),+$('stK').value),stV());
+      {const sb=stB(pool.map(stV()));stRes=stPlan(pool,n,sb.bd,stV());stRes.mode=sb.m;stRes.T=sb.T}
       picked=[];
       stRes.S.forEach(g=>{g.sel=g.a?pick(g.items,g.a):[];picked.push(...g.sel)});
       picked.sort((a,b)=>a.idx-b.idx);
@@ -851,7 +899,7 @@ $('run').addEventListener('click',()=>{
     if(p.keyNot.length)rows.push(['เหตุผลที่ไม่ตรวจรายการสาระสำคัญครบทุกรายการ',esc($('keyWhy').value.trim()).replace(/\n/g,'<br>')||'ไม่ได้ระบุเหตุผล',`ไม่ได้ตรวจ ${p.keyNot.length.toLocaleString()} รายการ`]);
     if(p.keyMissing.length)rows.push(['เลขที่เอกสารที่ระบุแต่ไม่พบในข้อมูล',p.keyMissing.length.toLocaleString()+' เลขที่',esc(p.keyMissing.slice(0,10).join(', '))+(p.keyMissing.length>10?' ...':'')]);
   }
-  if(stRes)rows.push(['วิธีสุ่มรายการ',`จัดกลุ่มก่อนสุ่ม ${stRes.S.length} กลุ่ม`,'จัดสรรตามมูลค่ารวมของกลุ่ม อย่างน้อยกลุ่มละ 1 รายการ']);
+  if(stRes)rows.push(['วิธีสุ่มรายการ',`จัดกลุ่มก่อนสุ่ม ${stRes.S.length} กลุ่ม`,'จัดสรรตามมูลค่ารวมของกลุ่ม อย่างน้อยกลุ่มละ 1 รายการ'],['วิธีกำหนดช่วงของกลุ่ม',stRes.mode==='custom'?'ผู้ใช้กำหนดเอง':stRes.mode==='top'?'ผู้ใช้กำหนดกลุ่มสูงสุด':'ระบบจัดกลุ่มให้',stRes.mode==='custom'?'เส้นแบ่งทั้งหมดกำหนดโดยผู้ใช้':stRes.mode==='top'?`กลุ่มที่ 1 ตั้งแต่ ${fmt(stRes.T)} กลุ่มที่เหลือระบบแบ่งให้`:'ระบบกำหนดเส้นแบ่งจากข้อมูล']);
   rows.push(['จำนวนรายการประชากรตัวอย่างที่ต้องการเลือกเพิ่มเติม',p.ex.toLocaleString(),'รายการ']);
   {
     const nz=data.filter(x=>x.amt===0).length,ng=data.filter(x=>x.amt<0).length,abr=negMode()==='abs';
@@ -968,7 +1016,7 @@ ${method>=3?`<div class="cards" id="extModeBox"><label class="card"><input type=
       const before=E.rem.length,kk=Math.min(k,before);
       let items,extra=[],desc;
       if(mode==='same'&&method===3){const r=extMUS(E.rem.filter(x=>x.amt>0),kk);items=r.items;desc='สุ่มแบบ MUS ใหม่จากรายการที่ยังไม่ถูกเลือก';extra=[['ช่วงห่างการสุ่ม (ผลรวมรายการที่ยังไม่ถูกเลือก ÷ จำนวนจุดสุ่ม)',fmt(r.interval),`${fmt(r.base)} ÷ ${r.k.toLocaleString()}`],['จุดเริ่มต้นสุ่ม',fmt(r.start),'สุ่มภายในช่วงห่างแรก']]}
-      else if(mode==='same'&&method===4){const r=runSys(E.rem,kk);items=r.items;desc='สุ่มแบบช่วงใหม่จากรายการที่ยังไม่ถูกเลือก (ตามลำดับรายการ)';extra=[['ช่วงห่างการสุ่ม (จำนวนรายการที่ยังไม่ถูกเลือก ÷ จำนวนที่เลือกเพิ่ม)',Number(r.k.toFixed(4)).toLocaleString(),`${r.N.toLocaleString()} ÷ ${r.n.toLocaleString()}`],['เลขสุ่ม (จำนวนเต็ม)',r.u.toLocaleString(),`ช่วง 1 ถึง ${r.N.toLocaleString()}`]]}
+      else if(mode==='same'&&method===4){const r=runSys(E.rem,kk);items=r.items;desc='สุ่มแบบช่วงใหม่จากรายการที่ยังไม่ถูกเลือก (ตามลำดับรายการ)';extra=[['ช่วงห่างการสุ่ม (จำนวนรายการที่ยังไม่ถูกเลือก ÷ จำนวนที่เลือกเพิ่ม)',Number(r.k.toFixed(4)).toLocaleString(),`${r.N.toLocaleString()} ÷ ${r.n.toLocaleString()}`],['เลขสุ่ม (จำนวนเต็ม)',r.u.toLocaleString(),`สุ่มจาก 1 ถึง ${r.N.toLocaleString()}`],['จุดเริ่มต้นสุ่ม (r)',Number(r.r.toFixed(4)).toLocaleString(),`เลขสุ่ม ÷ ${r.n.toLocaleString()} (ไม่เกินช่วงห่าง)`]]}
       else{items=pick(E.rem,kk);desc='สุ่มแบบเท่าเทียมจากรายการที่ยังไม่ถูกเลือก (ทุกรายการมีโอกาสเท่ากัน)'}
       const got=new Set(items.map(x=>x.idx));
       E.rem=E.rem.filter(x=>!got.has(x.idx));
