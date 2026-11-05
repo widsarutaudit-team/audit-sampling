@@ -74,6 +74,8 @@ input.hf{text-align:left}
 .tabs button{background:transparent;color:var(--ink);border:1px solid var(--line)}
 .tabs button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .hint{font-size:13px;color:var(--muted);margin:6px 0}
+.ext{margin-top:22px;padding-top:6px;border-top:1px solid var(--line)}
+.sub{display:block;font-size:12px;font-weight:400;color:var(--muted);margin-top:2px}
 .susp{border-collapse:collapse;width:100%;font-size:13px}.susp th,.susp td{border-bottom:1px solid var(--line);padding:4px 8px;text-align:left}.susp td.n,.susp th.n{text-align:right}
 .msg{font-size:14px;margin-top:8px}.err{color:var(--warn)}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
@@ -135,14 +137,14 @@ table{font-size:11px}
 <div class="wrap"><table class="pt">
 <thead><tr><th>ข้อมูล</th><th class="n">จำนวน</th><th>หมายเหตุ</th></tr></thead>
 <tbody>
-<tr><td>ระดับความมีสาระสำคัญ</td><td><input type="text" id="mat" inputmode="decimal" autocomplete="off"></td><td>[MAT]</td></tr>
+<tr><td>ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้*<span class="sub">(* การแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้ ซึ่งต้องไม่เกินระดับความมีสาระสำคัญในการปฏิบัติงาน (PM))</span></td><td><input type="text" id="mat" inputmode="decimal" autocomplete="off"></td><td>[MAT]</td></tr>
 <tr><td>จำนวนประชากรทั้งหมด</td><td><input type="text" id="tot" inputmode="decimal" autocomplete="off"></td><td>√</td></tr>
 <tr data-m="2,3,4"><td colspan="3">
 <b>วิธีกำหนดรายการประชากรที่เป็นสาระสำคัญ</b>
 <div class="cards" style="margin-top:6px">
 <label class="card"><input type="radio" name="keyMode" value="auto" checked><span><b>ระบบคัดกรองข้อมูลให้ (ตรวจสอบทุกรายการที่มีสาระสำคัญ)</b>ดึงทุกรายการที่ยอดเกินระดับความมีสาระสำคัญ และตรวจทุกรายการ</span></label>
-<label class="card"><input type="radio" name="keyMode" value="manual"><span><b>ผู้ตรวจสอบกรอกข้อมูลด้วยตนเอง (ผู้ตรวจสอบทำการเลือกตัวอย่างรายการสาระสำคัญแล้ว)</b>ใช้เมื่อตรวจรายการสาระสำคัญไปแล้วบางส่วน ระบุเลขที่เอกสารที่ตรวจแล้ว</span></label>
-<label class="card"><input type="radio" name="keyMode" value="rand"><span><b>ผู้ตรวจสอบต้องการให้สุ่มรายการสาระสำคัญ</b>ระบุจำนวนรายการสาระสำคัญที่จะตรวจ ระบบสุ่มให้ทุกรายการมีโอกาสเท่ากัน</span></label>
+<label class="card"><input type="radio" name="keyMode" value="manual"><span><b>ผู้ตรวจสอบกรอกข้อมูลด้วยตนเอง (ผู้ตรวจสอบทำการเลือกตัวอย่างรายการสาระสำคัญหรือรายการอื่นแล้ว)</b>ใช้เมื่อตรวจรายการสาระสำคัญหรือรายการอื่นไปแล้วบางส่วน ระบุเลขที่เอกสารที่ตรวจแล้ว</span></label>
+<label class="card"><input type="radio" name="keyMode" value="rand"><span><b>ผู้ตรวจสอบต้องการให้สุ่มรายการสาระสำคัญ</b>ระบุจำนวนรายการสาระสำคัญที่จะตรวจ ระบบสุ่มให้ทุกรายการมีโอกาสเท่ากัน<span class="sub err" id="keyRandOff" style="display:none">ไม่มีรายการสาระสำคัญในข้อมูล จึงไม่ต้องสุ่ม</span></span></label>
 </div>
 <div id="keyManual" hidden style="margin-top:8px">
 <label>เลขที่เอกสารที่ตรวจไปแล้ว (หนึ่งเลขที่ต่อบรรทัด หรือคั่นด้วยจุลภาค)<textarea id="keyDocs" style="min-height:70px"></textarea></label>
@@ -165,7 +167,7 @@ table{font-size:11px}
 <tr class="sum" id="effRow" hidden><td>จำนวนรายการที่เลือกตรวจสอบจริง (หลังจำกัดสูงสุด)</td><td id="eff">-</td><td>รายการ</td></tr>
 <tr><td>หมายเหตุ</td><td colspan="2" style="text-align:left;width:auto"><textarea id="remark" style="min-height:70px;font:inherit" placeholder="ใส่ข้อความหรือข้อมูลเพิ่มเติม เช่น เรื่องที่เป็นสาระสำคัญที่ผู้ตรวจสอบต้องการบันทึกไว้ (ไม่บังคับ)"></textarea></td></tr>
 </tbody></table></div>
-<div class="legend">[MAT] : ระดับความมีสาระสำคัญในการปฏิบัติงาน (Performance Materiality), √ : งบทดลอง/สมุดรายวันทั่วไป/ข้อมูลทางบัญชี, c : การคำนวณ/การทดสอบ, cf : ตารางความเสี่ยงที่ต้องการจะลด ระดับความเชื่อมั่น และ Confidence Factor</div>
+<div class="legend">[MAT] : ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้ ซึ่งต้องไม่เกินระดับความมีสาระสำคัญในการปฏิบัติงาน (Performance Materiality), √ : งบทดลอง/สมุดรายวันทั่วไป/ข้อมูลทางบัญชี, c : การคำนวณ/การทดสอบ, cf : ตารางความเสี่ยงที่ต้องการจะลด ระดับความเชื่อมั่น และ Confidence Factor</div>
 <div class="hint" id="totHint"></div>
 <h3>เลือกจำนวนรายการที่จะตรวจสอบ</h3>
 <p class="hint" style="margin-top:0">ถ้าจำนวนที่คำนวณได้มากเกินกำลังของผู้ตรวจสอบ สามารถกำหนดจำนวนสูงสุดเองได้</p>
@@ -374,6 +376,12 @@ function calc(){
     km=keyMode();
     $('keyManual').hidden=km!=='manual';$('keyRand').hidden=km!=='rand';
     if(mat!==null&&data.length)keyAll=data.filter(x=>v(x)>mat);
+    {
+      /* ไม่มีรายการสาระสำคัญในข้อมูล: แสดงตัวเลือกสุ่มไว้แต่ไม่ให้เลือก */
+      const randOff=mat!==null&&data.length>0&&!keyAll.length,rr=document.querySelector('input[name=keyMode][value=rand]');
+      rr.disabled=randOff;rr.closest('.card').style.opacity=randOff?'.55':'';$('keyRandOff').style.display=randOff?'block':'none';
+      if(randOff&&km==='rand'){document.querySelector('input[name=keyMode][value=auto]').checked=true;km='auto';$('keyManual').hidden=true;$('keyRand').hidden=true}
+    }
     let kh='';
     if(km==='auto'&&mat!==null&&data.length){matItems=keyAll;matVal=matItems.reduce((t,x)=>t+x.amt,0)}
     else if(km==='manual'&&data.length){
@@ -760,6 +768,17 @@ function runMUS(p){
   return {m,e,interval,start,hits:hitsF,set:setF,unique:hitsF.length,missed,cumTotal:cum,absMode,skippedNeg,zero,mode,short,comp,compSet,nextFrom,trace};
 }
 
+/* เลือกเพิ่ม (MUS ใหม่): จากรายการยอดบวกที่ยังไม่ถูกเลือก ใช้ตัวชี้เดินหน้าอย่างเดียวเหมือนวิธีเดิม */
+function extMUS(elig,k){
+  const n=elig.length;k=Math.min(k,n);
+  if(k<=0)return {items:[],interval:0,start:0,base:0,k:0};
+  const cumA=[];let cum=0;for(const x of elig){cum+=x.amt;cumA.push(cum)}
+  const interval=cum/k,start=interval*(1-rnd()),items=[],set=new Set();let r=0;
+  for(let i=0;i<k;i++){const pt=start+i*interval;while(r<n&&cumA[r]<pt-1e-6)r++;if(r>=n)break;items.push(elig[r]);set.add(elig[r].idx);r++}
+  for(const y of elig){if(items.length>=k)break;if(!set.has(y.idx)){items.push(y);set.add(y.idx)}}
+  items.sort((a,b)=>a.idx-b.idx);
+  return {items,interval,start,base:cum,k};
+}
 /* สุ่ม */
 /* สุ่มแบบช่วง: ช่วงห่าง k=N/n เลขสุ่ม u เป็นจำนวนเต็ม 1..N จุดเริ่ม r=u/n ตำแหน่งที่ i = ปัดขึ้น(r+i*k)=ปัดขึ้น((u+i*N)/n) ทุกรายการมีโอกาสถูกเลือกเท่ากัน n/N */
 function runSys(pool,n){
@@ -798,7 +817,7 @@ $('run').addEventListener('click',()=>{
     return;
   }
   keySkip=false;
-  let note='',picked=[],mus=null,stRes=null,sys=null;
+  let note='',picked=[],mus=null,stRes=null,sys=null,poolAll=null;
   if(method===3){
     mus=runMUS(p);
     const kk=new Set(p.matItems.map(x=>x.idx));
@@ -807,7 +826,7 @@ $('run').addEventListener('click',()=>{
     if(k<mus.e)note=`จำนวนที่ต้องสุ่มเพิ่มมากกว่าจำนวนรายการที่เหลือ จึงเลือกทุกรายการที่เหลือ (${rest.length.toLocaleString()} รายการ)`;
     picked=pick(rest,k);
   }else{
-    const pool=randPool(p.matItems,p.mat,p.keyMode);
+    const pool=randPool(p.matItems,p.mat,p.keyMode);poolAll=pool;
     let n=p.sampleN;
     if(n>pool.length){n=pool.length;note=`จำนวนที่ต้องสุ่มมากกว่าจำนวนรายการที่มี จึงเลือกทุกรายการ (${pool.length.toLocaleString()} รายการ)`}
     if(stOn()){
@@ -817,11 +836,11 @@ $('run').addEventListener('click',()=>{
       picked.sort((a,b)=>a.idx-b.idx);
     }else if(method===4){sys=runSys(pool,n);picked=sys.items}else picked=pick(pool,n);
   }
-  const rows=[['ระดับความมีสาระสำคัญ',fmt(p.mat),'[MAT]'],['จำนวนประชากรทั้งหมด',fmt(p.tot),'√']];
+  const rows=[['ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้*'+'<span class="sub">(* การแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้ ซึ่งต้องไม่เกินระดับความมีสาระสำคัญในการปฏิบัติงาน (PM))</span>',fmt(p.mat),'[MAT]'],['จำนวนประชากรทั้งหมด',fmt(p.tot),'√']];
   if(method>=2)rows.push(['จำนวนประชากรที่เป็นสาระสำคัญ',fmt(p.matVal),'c'],['จำนวนประชากรคงเหลือ',fmt(p.base),'c']);
   rows.push(['ค่า Confidence Factor',p.cf.toString(),'cf'],['จำนวนรายการประชากรตัวอย่าง',p.sample.toLocaleString(),`c (คำนวณได้ ${p.raw.toFixed(2)} ปัดขึ้น)`]);
   if(method>=2){
-    const KM={auto:'ระบบคัดกรองข้อมูลให้ (ตรวจสอบทุกรายการที่มีสาระสำคัญ)',manual:'ผู้ตรวจสอบกรอกข้อมูลด้วยตนเอง (เลือกตัวอย่างรายการสาระสำคัญแล้ว ตามเลขที่เอกสารที่ระบุ)',rand:'ผู้ตรวจสอบต้องการให้สุ่มรายการสาระสำคัญ (ทุกรายการมีโอกาสเท่ากัน)'};
+    const KM={auto:'ระบบคัดกรองข้อมูลให้ (ตรวจสอบทุกรายการที่มีสาระสำคัญ)',manual:'ผู้ตรวจสอบกรอกข้อมูลด้วยตนเอง (เลือกตัวอย่างรายการสาระสำคัญหรือรายการอื่นแล้ว ตามเลขที่เอกสารที่ระบุ)',rand:'ผู้ตรวจสอบต้องการให้สุ่มรายการสาระสำคัญ (ทุกรายการมีโอกาสเท่ากัน)'};
     const ab2=(method===2||method===4)&&negMode()==='abs',v2=x=>ab2?Math.abs(x.amt):x.amt;
     const msx=new Set(p.matItems.map(x=>x.idx)),exK=p.keyAll.filter(x=>msx.has(x.idx));
     const kv=p.keyAll.reduce((t,x)=>t+v2(x),0),ev=exK.reduce((t,x)=>t+v2(x),0);
@@ -879,7 +898,7 @@ $('run').addEventListener('click',()=>{
   const tbl=(arr,t)=>`<h3>${t}</h3>`+(arr.length?`<div class="wrap"><table class="res"><thead><tr>${thd()}</tr></thead><tbody>${arr.map((x,i)=>`<tr><td class="n">${i+1}</td>${trc(x)}</tr>`).join('')}</tbody>${foot(arr,0)}</table></div>`:'<p class="hint">ไม่มีรายการ</p>');
   $('report').innerHTML=`<div class="rhead"><div><div class="brand">Project by สำนักตรวจเงินแผ่นดินที่ 10 กลุ่มที่ 2</div><h2 style="font-size:20px;margin:0">รายงานการสุ่มรายการตรวจสอบ</h2><div class="hdr">${hdrHtml()}</div><div class="hint">${method===1?'วิธีที่ 1 การสุ่มแบบทุกรายการมีโอกาสถูกเลือกเป็นตัวอย่างแบบเท่าเทียมกัน (Random Selection)':method===2?'วิธีที่ 1 การสุ่มแบบคัดกรองรายการที่มีมูลค่าที่เป็นสาระสำคัญก่อน (Random Selection - Key item)':method===4?'วิธีที่ 3 การสุ่มแบบช่วง (เลือกทุก ๆ ช่วงห่างที่เท่ากันตามลำดับรายการ) (Systematic Selection)':'วิธีที่ 2 การเลือกตัวอย่างแบบถ่วงน้ำหนักตามมูลค่า (MUS)'}<br>สุ่มเมื่อ ${new Date().toLocaleString('th-TH',{dateStyle:'long',timeStyle:'short'})}</div></div><div class="noprint rtools"><button id="print" title="ถ้าปุ่มไม่ทำงาน ให้กด Ctrl+P (Mac: Cmd+P) เพื่อพิมพ์หรือบันทึกเป็น PDF">พิมพ์รายงาน</button><button id="xlsx" class="alt">บันทึกเป็น Excel</button></div></div>
   <h3>ข้อมูลการสุ่มตัวอย่าง</h3><div class="wrap"><table class="pt"><thead><tr><th>ข้อมูล</th><th class="n">จำนวน</th><th>หมายเหตุ</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}<tr class="sum"><td>${p.limited?'จำนวนรายการประชากรที่เลือกตรวจสอบจริง (หลังจำกัดสูงสุด)':'จำนวนรายการประชากรที่เลือกตรวจสอบทั้งสิ้น'}</td><td>${total.toLocaleString()}</td><td>รายการ</td></tr>${$('remark').value.trim()?`<tr><td>หมายเหตุ</td><td colspan="2" style="text-align:left;width:auto;white-space:pre-wrap">${esc($('remark').value.trim())}</td></tr>`:''}</tbody></table></div>
-  <div class="legend">[MAT] : ระดับความมีสาระสำคัญในการปฏิบัติงาน (Performance Materiality), √ : งบทดลอง/สมุดรายวันทั่วไป/ข้อมูลทางบัญชี, c : การคำนวณ/การทดสอบ, cf : ตารางความเสี่ยงที่ต้องการจะลด ระดับความเชื่อมั่น และ Confidence Factor</div>
+  <div class="legend">[MAT] : ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้ ซึ่งต้องไม่เกินระดับความมีสาระสำคัญในการปฏิบัติงาน (Performance Materiality), √ : งบทดลอง/สมุดรายวันทั่วไป/ข้อมูลทางบัญชี, c : การคำนวณ/การทดสอบ, cf : ตารางความเสี่ยงที่ต้องการจะลด ระดับความเชื่อมั่น และ Confidence Factor</div>
   ${p.limited?`<div class="hint">ผู้ใช้กำหนดจำกัดจำนวนสูงสุด ${p.capV.toLocaleString()} รายการ จึงลดจำนวนจาก ${p.all.toLocaleString()} เป็น ${total.toLocaleString()} รายการ`+(method>=2?` (รายการที่มีสาระสำคัญตรวจทุกรายการ ${p.matCount.toLocaleString()} รายการ${p.capV<p.matCount?' ซึ่งมากกว่าจำนวนสูงสุดที่กำหนด จึงไม่มีรายการสุ่มเพิ่ม':''})`:'')+'</div>':''}
   ${note?`<div class="msg err">${note}</div>`:''}
   ${musNote}
@@ -910,6 +929,59 @@ $('run').addEventListener('click',()=>{
       XLSX.writeFile(wb,`ผลการสุ่ม_${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}_${p2(d.getHours())}${p2(d.getMinutes())}.xlsx`);
     }catch(e){alert('บันทึก Excel ไม่สำเร็จ: '+e.message)}
   };
+
+  /* ===== เลือกตัวอย่างเพิ่ม (ใช้ข้อมูล ณ ตอนสุ่มครั้งนี้ ไม่ขึ้นกับค่าที่แก้ภายหลัง) ===== */
+  {
+    const selAll=new Set(picked.map(x=>x.idx));
+    if(method>=2)p.matItems.forEach(x=>selAll.add(x.idx));
+    if(mus){mus.set.forEach(i=>selAll.add(i));mus.compSet.forEach(i=>selAll.add(i))}
+    const rem0=method===3?data.filter(x=>x.amt>0&&!selAll.has(x.idx)):poolAll.filter(x=>!selAll.has(x.idx));
+    const E={rem:rem0,rounds:0,total,skipWhy:false};
+    const MN={1:'สุ่มเท่าเทียม',2:'สุ่มเท่าเทียม',3:'MUS',4:'แบบช่วง'}[method];
+    $('report').insertAdjacentHTML('beforeend',`<div id="extRes"></div>
+<div id="extBox" class="noprint ext">
+<h3>เลือกตัวอย่างเพิ่ม</h3>
+<div class="hint" id="extAvail"></div>
+<div class="grid2">
+<label>จำนวนรายการที่ต้องการเลือกเพิ่ม<input type="text" id="extN" inputmode="numeric" autocomplete="off"></label>
+</div>
+${method>=3?`<div class="cards" id="extModeBox"><label class="card"><input type="radio" name="extMode" value="same" checked><span><b>สุ่มแบบ${MN}ใหม่</b>จากรายการที่ยังไม่ถูกเลือก (สอดคล้องกับวิธีที่ใช้ตอนแรก)</span></label><label class="card"><input type="radio" name="extMode" value="eq"><span><b>สุ่มแบบเท่าเทียม</b>ทุกรายการที่ยังไม่ถูกเลือกมีโอกาสเท่ากัน</span></label></div>`:''}
+<label style="display:block;margin-top:10px">เหตุผลที่เลือกตัวอย่างเพิ่ม (ไม่บังคับ แต่ควรระบุ)<textarea id="extWhy" rows="2" style="width:100%"></textarea></label>
+<div style="margin-top:10px"><button id="extGo">เลือกเพิ่ม</button></div>
+<div class="msg" id="extMsg"></div>
+</div>`);
+    const avail=()=>{$('extAvail').textContent=E.rem.length?`ประชากรที่ยังไม่ถูกเลือกและสุ่มเพิ่มได้ ${E.rem.length.toLocaleString()} รายการ`+(method===1||method===2?'':'')+(stRes?' (การเลือกเพิ่มไม่แบ่งกลุ่มตามช่วงยอด)':''):'ไม่มีรายการเหลือให้เลือกเพิ่ม';$('extGo').disabled=!E.rem.length};
+    avail();
+    const go=()=>{
+      const k=Math.floor(Number(String($('extN').value).replace(/,/g,'')));
+      if(!(k>0)){$('extMsg').className='msg err';$('extMsg').textContent='กรอกจำนวนรายการที่ต้องการเลือกเพิ่ม (มากกว่า 0)';return}
+      const why=$('extWhy').value.trim();
+      if(!why&&!E.skipWhy){
+        $('extMsg').className='msg err';
+        $('extMsg').innerHTML='คุณยังไม่ได้กรอกเหตุผลที่เลือกตัวอย่างเพิ่ม ควรระบุไว้เพื่อประกอบกระดาษทำการ ต้องการดำเนินการต่อโดยไม่ระบุเหตุผลหรือไม่ <button id="exY" type="button">ดำเนินการต่อ</button> <button id="exN" type="button">กลับไปกรอกเหตุผล</button>';
+        $('exY').onclick=()=>{E.skipWhy=true;go()};
+        $('exN').onclick=()=>{$('extMsg').innerHTML='';$('extWhy').focus()};
+        return;
+      }
+      E.skipWhy=false;
+      const mode=method>=3?document.querySelector('input[name=extMode]:checked').value:'eq';
+      const before=E.rem.length,kk=Math.min(k,before);
+      let items,extra=[],desc;
+      if(mode==='same'&&method===3){const r=extMUS(E.rem.filter(x=>x.amt>0),kk);items=r.items;desc='สุ่มแบบ MUS ใหม่จากรายการที่ยังไม่ถูกเลือก';extra=[['ช่วงห่างการสุ่ม (ผลรวมรายการที่ยังไม่ถูกเลือก ÷ จำนวนจุดสุ่ม)',fmt(r.interval),`${fmt(r.base)} ÷ ${r.k.toLocaleString()}`],['จุดเริ่มต้นสุ่ม',fmt(r.start),'สุ่มภายในช่วงห่างแรก']]}
+      else if(mode==='same'&&method===4){const r=runSys(E.rem,kk);items=r.items;desc='สุ่มแบบช่วงใหม่จากรายการที่ยังไม่ถูกเลือก (ตามลำดับรายการ)';extra=[['ช่วงห่างการสุ่ม (จำนวนรายการที่ยังไม่ถูกเลือก ÷ จำนวนที่เลือกเพิ่ม)',Number(r.k.toFixed(4)).toLocaleString(),`${r.N.toLocaleString()} ÷ ${r.n.toLocaleString()}`],['เลขสุ่ม (จำนวนเต็ม)',r.u.toLocaleString(),`ช่วง 1 ถึง ${r.N.toLocaleString()}`]]}
+      else{items=pick(E.rem,kk);desc='สุ่มแบบเท่าเทียมจากรายการที่ยังไม่ถูกเลือก (ทุกรายการมีโอกาสเท่ากัน)'}
+      const got=new Set(items.map(x=>x.idx));
+      E.rem=E.rem.filter(x=>!got.has(x.idx));
+      E.total+=items.length;const n=++E.rounds;
+      const info=[['วันเวลาที่เลือกเพิ่ม',new Date().toLocaleString('th-TH',{dateStyle:'long',timeStyle:'short'})],['วิธีที่ใช้เลือกเพิ่ม',desc],['จำนวนที่ต้องการเลือกเพิ่ม',k.toLocaleString()+' รายการ'],['จำนวนที่เลือกได้',items.length.toLocaleString()+' รายการ'+(k>before?' (เลือกทุกรายการที่เหลือ)':'')],['ประชากรที่ยังไม่ถูกเลือก (ก่อนเลือกเพิ่ม)',before.toLocaleString()+' รายการ'],['เหตุผลที่เลือกเพิ่ม',why?esc(why).replace(/\n/g,'<br>'):'ไม่ได้ระบุเหตุผล']].concat(extra.map(r=>[r[0],r[1]+(r[2]?' ('+r[2]+')':'')]),[['รวมรายการที่เลือกตรวจสอบทั้งหมด (หลังเลือกเพิ่มครั้งนี้)',E.total.toLocaleString()+' รายการ']]);
+      const html=`<h3>เลือกเพิ่มครั้งที่ ${n} — ข้อมูล</h3><div class="wrap"><table class="res"><thead><tr><th>ข้อมูล</th><th>รายละเอียด</th></tr></thead><tbody>${info.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</tbody></table></div>`+tbl(items,`เลือกเพิ่มครั้งที่ ${n} — รายการที่เลือกเพิ่ม`);
+      $('extRes').insertAdjacentHTML('beforeend',html);
+      $('extN').value='';$('extWhy').value='';$('extMsg').className='msg';$('extMsg').textContent=`เลือกเพิ่มครั้งที่ ${n} แล้ว ${items.length.toLocaleString()} รายการ ดูผลในรายงานด้านบน`;
+      avail();
+      $('extRes').lastElementChild.scrollIntoView({behavior:'smooth',block:'start'});
+    };
+    $('extGo').onclick=go;
+  }
   $('report').scrollIntoView({behavior:'smooth'});
 });
 </script>
