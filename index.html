@@ -552,7 +552,7 @@ document.querySelectorAll('input[name=strat]').forEach(r=>r.addEventListener('ch
 
 /* นำเข้าข้อมูล */
 let excl=new Set(),exclKey='';
-let src=null,wbk=null,view={cols:[],lab:[],amtPos:-1};
+let src=null,wbk=null,view={cols:[],lab:[],amtPos:-1},srcSeq=0,lastSeq=0,srcPrevHad=false,autoHdr={};
 const colL=i=>{let t='';i++;while(i>0){const m=(i-1)%26;t=String.fromCharCode(65+m)+t;i=Math.floor((i-1)/26)}return t};
 const colI=t=>{let n=0;for(const ch of t)n=n*26+ch.charCodeAt(0)-64;return n-1};
 const numA=(d,r)=>{
@@ -651,7 +651,7 @@ function autoMap(){
   $('hdrRow').value=h;autoCols(h);
 }
 function loadSrc(disp,raw,file,warn){
-  src={disp,raw,file,warn:warn||''};excl=new Set();exclKey='';
+  srcPrevHad=data.length>0;srcSeq++;src={disp,raw,file,warn:warn||''};excl=new Set();exclKey='';
   $('keepLast').checked=false;
   $('mapBox').hidden=false;autoMap();
 }
@@ -745,13 +745,23 @@ function apply(){
   renderSusp(susp);
   fileTot=lastTv!==null?lastTv:firstTv;
   const filled=[];
-  if(out.length&&!touched.tot){autoTot();filled.push('จำนวนประชากรทั้งหมด')}
+  const isNew=srcSeq!==lastSeq;lastSeq=srcSeq;let totNote='';
+  if(out.length){
+    if(!touched.tot){autoTot();filled.push('จำนวนประชากรทั้งหมด')}
+    else if(isNew&&srcPrevHad){
+      const old=$('tot').value.trim(),nf=frameInfo().ft;touched.tot=false;
+      if(old&&num(old)!==nf)totNote=`<br><span class="err">แจ้งเตือน: ปรับจำนวนประชากรทั้งหมดเป็น ${fmt(nf)} บาท ตามข้อมูลชุดใหม่ ซึ่งต่างจากยอดที่ระบุไว้ก่อนหน้า (${esc(old)} บาท) หากต้องการใช้ยอดเดิม ให้แก้ในช่องจำนวนประชากรทั้งหมด</span>`;
+      autoTot();
+    }
+  }
   if(raw0||h>1){
     const top=disp.slice(0,Math.max(h-1,0)).map(r=>r.map(c=>String(c).trim()).filter(Boolean).join(' ')).filter(Boolean);
     const grab=(re)=>{for(const t of top){const m=t.match(re);if(m)return m[m.length-1].trim()}return ''};
     const F={hOrg:grab(/(?:หน่วยงานผู้ตรวจสอบ)\s*[:：]?\s*(.+)/),hAud:grab(/(?:หน่วยรับตรวจ|ส่วนราชการ|หน่วยงาน)\s*[:：]?\s*(.+)/),hYear:grab(/((?:สำหรับ)?(?:ปี|งวด)?(?:สิ้นสุด|ณ วันที่|ถึงวันที่)\s*(?:วันที่)?\s*.+)/),hAcc:grab(/(?:ชื่อบัญชี|บัญชี)\s*[:：]?\s*(.+)/)};
     const NM={hOrg:'หน่วยงานผู้ตรวจสอบ',hAud:'หน่วยรับตรวจ',hYear:'สำหรับปีสิ้นสุดวันที่',hAcc:'ชื่อบัญชี'};
-    for(const k in F)if(F[k]&&!touched[k]&&!$(k).value.trim()){$(k).value=F[k];filled.push(NM[k])}
+    for(const k in F){const cur=$(k).value.trim();
+      if(F[k]&&!touched[k]&&(!cur||cur===autoHdr[k])){if(cur!==F[k])filled.push(NM[k]);$(k).value=F[k];autoHdr[k]=F[k]}
+      else if(!F[k]&&isNew&&!touched[k]&&cur&&cur===autoHdr[k]){$(k).value='';delete autoHdr[k]}}
   }
   const cnt=new Map();let noDoc=0;
   out.forEach(x=>{if(!x.doc)noDoc++;else cnt.set(x.doc,(cnt.get(x.doc)||0)+1)});
@@ -761,7 +771,7 @@ function apply(){
     +(skTot?` <span class="err">(นำออกตามที่เลือก ${skTot.toLocaleString()} แถว)</span>`:'')
     +(skLast?` <span class="err">(ข้ามแถวที่ ${skLast} ซึ่งเป็นแถวสุดท้าย เพราะคาดว่าเป็นยอดรวม: ${esc(lt.why)})</span>`:'')
     +(fileTot!==null?`<br>ยอดรวมในแถวรวมของไฟล์ ${fmt(fileTot)} บาท `+(Math.abs(fileTot-sum(out))<0.005?'ตรงกับยอดรวมรายการที่นำเข้า':(lastTv!==null&&skTot&&Math.abs(fileTot-(sum(out)+skAmt))<0.005)?'ตรงกับยอดรวมรายการที่นำเข้า รวมยอดแถวที่นำออก ('+fmt(skAmt)+' บาท)':'<span class="err">ไม่ตรงกับยอดรวมรายการที่นำเข้า ('+fmt(sum(out))+') ตรวจสอบก่อนใช้</span>'):'')
-    +(filled.length?`<br>ระบบเติมข้อมูลให้จากไฟล์: ${filled.join(', ')} (ตรวจสอบและแก้ไขได้)`:'')
+    +(filled.length?`<br>ระบบเติมข้อมูลให้จากไฟล์: ${filled.join(', ')} (ตรวจสอบและแก้ไขได้)`:'')+totNote
     +(skipped?` <span class="err">(ข้าม ${skipped.toLocaleString()} แถวที่คอลัมน์จำนวนเงินไม่ใช่ตัวเลข)</span>`:'')
     +(noDoc?`<br><span class="err">มี ${noDoc.toLocaleString()} รายการที่เลขที่เอกสารว่าง</span>`:'')
     +(dup.length?`<br><span class="err">พบเลขที่เอกสารซ้ำ ${dup.length.toLocaleString()} เลขที่ เช่น ${esc(dup.slice(0,3).map(e=>e[0]).join(', '))} (เอกสารเดียวอาจมีหลายรายการได้ ตรวจสอบว่าถูกต้อง)</span>`:'')
@@ -801,7 +811,7 @@ $('paste').addEventListener('input',()=>{
   const wide=rows.reduce((m,r)=>Math.max(m,r.length),0);
   loadSrc(wide>10?rows.map(r=>r.slice(0,10)):rows,wide>10?rows.map(r=>r.slice(0,10)):rows,false,wide>10?`ข้อมูลที่วางมี ${wide} คอลัมน์ ระบบใช้เพียง 10 คอลัมน์แรก (A ถึง J)`:'');
 });
-$('clr').onclick=()=>{src=null;data=[];$('file').value='';$('paste').value='';$('dmsg').textContent='';$('emsg').textContent='';$('mapBox').hidden=true;$('sheetBox').hidden=true;$('report').hidden=true;calc()};
+$('clr').onclick=()=>{src=null;data=[];touched.tot=false;$('tot').value='';$('file').value='';$('paste').value='';$('dmsg').textContent='';$('emsg').textContent='';$('mapBox').hidden=true;$('sheetBox').hidden=true;$('report').hidden=true;calc()};
 $('t1').onclick=()=>tab(1);$('t2').onclick=()=>tab(2);
 function tab(n){$('p1').hidden=n!==1;$('p2').hidden=n!==2;$('t1').classList.toggle('on',n===1);$('t2').classList.toggle('on',n===2)}
 
