@@ -198,7 +198,7 @@ table{font-size:11px}
 <label class="card"><input type="radio" name="stMode" value="top"><span><b>ผู้ใช้กำหนดเฉพาะกลุ่มชั้นสูงสุด</b>ผู้ใช้กำหนดยอดเริ่มต้นของกลุ่มที่ 1 กลุ่มที่เหลือระบบจัดกลุ่มให้</span></label>
 </div>
 <div class="grid2" style="margin-top:10px">
-<div id="stKBox"><label class="fl" for="stK" id="stKLab">จำนวนกลุ่ม</label><select id="stK"><option value="2">2 กลุ่ม</option><option value="3" selected>3 กลุ่ม</option><option value="4">4 กลุ่ม</option><option value="5">5 กลุ่ม</option></select></div>
+<div id="stKBox"><label class="fl" for="stK" id="stKLab">จำนวนกลุ่ม</label><select id="stK"><option value="2">2 กลุ่ม</option><option value="3" selected>3 กลุ่ม</option><option value="4">4 กลุ่ม</option><option value="5">5 กลุ่ม</option><option value="6">6 กลุ่ม</option><option value="7">7 กลุ่ม</option><option value="8">8 กลุ่ม</option><option value="9">9 กลุ่ม</option><option value="10">10 กลุ่ม</option></select></div>
 <div id="stTopBox" hidden><label class="fl" for="stTop">กลุ่มที่ 1 เริ่มตั้งแต่ยอดต่อรายการ (บาท)</label><input type="text" id="stTop" inputmode="decimal" autocomplete="off" placeholder="เช่น 500,000"></div>
 <div id="stCustBox" hidden style="grid-column:1/-1"><div id="stCustRows" class="grid2"></div></div>
 </div>
@@ -480,9 +480,9 @@ function calc(){
      nw.hidden=false;
    }else{nw.hidden=true;nw.innerHTML=''}}
   if($('useSum'))$('useSum').onclick=()=>{$('tot').value=fmt(tg);calc()};
-  let st=null,stErr='',stCapMsg='',maxK0=5,stSB=null;
+  let st=null,stErr='',stCapMsg='',maxK0=10,stSB=null;
   if(method===1||method===2){
-    const rem=(data.length&&sampleN!==null)?sampleN:null,maxK=rem===null?5:Math.min(5,rem);
+    const rem=(data.length&&sampleN!==null)?sampleN:null,maxK=rem===null?10:Math.min(10,rem);
     const r1=document.querySelector('input[name=strat][value="1"]');
     r1.disabled=maxK<2;
     if(maxK<2&&stOn())document.querySelector('input[name=strat][value="0"]').checked=true;
@@ -490,7 +490,7 @@ function calc(){
     maxK0=maxK;
     [...$('stK').options].forEach(o=>{o.disabled=+o.value>maxK});
     if(maxK>=2&&+$('stK').value>maxK){const was=$('stK').value;$('stK').value=String(maxK);stCapMsg=`ลดจำนวนกลุ่มจาก ${was} เป็น ${maxK} กลุ่ม เพราะเหลือรายการที่ต้องสุ่ม ${rem.toLocaleString()} รายการ และแต่ละกลุ่มต้องได้อย่างน้อย 1 รายการ`}
-    else if(maxK>=2&&maxK<5&&rem!==null)stCapMsg=`เลือกได้สูงสุด ${maxK} กลุ่ม เพราะเหลือรายการที่ต้องสุ่ม ${rem.toLocaleString()} รายการ และแต่ละกลุ่มต้องได้อย่างน้อย 1 รายการ`;
+    else if(maxK>=2&&maxK<10&&rem!==null)stCapMsg=`เลือกได้สูงสุด ${maxK} กลุ่ม เพราะเหลือรายการที่ต้องสุ่ม ${rem.toLocaleString()} รายการ และแต่ละกลุ่มต้องได้อย่างน้อย 1 รายการ`;
   }
   $('stOpt').hidden=!stOn();
   {const m=stMode();$('stTopBox').hidden=m!=='top';$('stCustBox').hidden=m!=='custom';
@@ -508,14 +508,14 @@ function calc(){
       const pl=randPool(matItems,mat,km),kk=+$('stK').value;
       stSB=stB(pl.map(stV()));const bd=stSB.bd;
       stErr=stSB.err||'';
-      if(!stErr&&bd.length+1>maxK0)stErr=`จำนวนกลุ่มจากเส้นแบ่งที่กำหนด (${bd.length+1} กลุ่ม) มากกว่าที่ทำได้ (ทำได้สูงสุด ${maxK0} กลุ่ม ซึ่งต้องไม่เกิน 5 กลุ่มและไม่เกินจำนวนรายการที่ต้องสุ่ม) ลดจำนวนเส้นแบ่งลง`;
+      if(!stErr&&bd.length+1>maxK0)stErr=`จำนวนกลุ่มจากเส้นแบ่งที่กำหนด (${bd.length+1} กลุ่ม) มากกว่าที่ทำได้ (ทำได้สูงสุด ${maxK0} กลุ่ม ซึ่งต้องไม่เกิน 10 กลุ่มและไม่เกินจำนวนรายการที่ต้องสุ่ม) ลดจำนวนเส้นแบ่งลง`;
       if(!stErr)st=stPlan(pl,sampleN,bd,stV());
       var stNote='';
       if(st&&stSB.m==='auto'&&bd.length+1<kk)stNote=`ข้อมูลมีช่วงยอดเงินไม่หลากหลายพอ จึงแบ่งได้ ${bd.length+1} กลุ่มจากที่เลือก ${kk} กลุ่ม`;
       if(st&&stSB.m==='top'&&bd.length+1<kk)stNote=`กลุ่มที่เหลือมีช่วงยอดเงินไม่หลากหลายพอ จึงแบ่งได้รวม ${bd.length+1} กลุ่มจากที่เลือก ${kk} กลุ่ม`;
       if(st){const em=st.S.filter(g=>!g.items.length).map(g=>g.i+1);if(em.length)stNote+=(stNote?' ':'')+`กลุ่มที่ ${em.join(', ')} ไม่มีรายการ (ไม่ได้รับการจัดสรรตัวอย่าง)`}
     }
-    $('stHint').innerHTML=(stCapMsg?`<span class="err">${stCapMsg}</span> `:'')+(st&&st.over?'<span class="err">จำนวนตัวอย่างน้อยกว่าจำนวนกลุ่มที่มีรายการ แต่ทุกกลุ่มต้องมีอย่างน้อย 1 รายการ จำนวนที่เลือกจึงมากกว่าที่คำนวณได้</span>':'')+(typeof stNote!=='undefined'&&stNote?` <span class="err">${stNote}</span>`:'')+(stErr?` <span class="err">${stErr}</span>`:'');
+    $('stHint').innerHTML=(+$('stK').value>5?'<span class="err">โดยทั่วไปแล้วนิยมใช้การจัดกลุ่มอยู่ระหว่าง 3-5 กลุ่ม</span> ':'')+(stCapMsg?`<span class="err">${stCapMsg}</span> `:'')+(st&&st.over?'<span class="err">จำนวนตัวอย่างน้อยกว่าจำนวนกลุ่มที่มีรายการ แต่ทุกกลุ่มต้องมีอย่างน้อย 1 รายการ จำนวนที่เลือกจึงมากกว่าที่คำนวณได้</span>':'')+(typeof stNote!=='undefined'&&stNote?` <span class="err">${stNote}</span>`:'')+(stErr?` <span class="err">${stErr}</span>`:'');
     $('stTbl').innerHTML=st?stTable(st,false):'';
   }
   return {st,stErr,mat,tot,cf,ex,sample,raw,matItems,matVal,base,all,capSel,capV,sampleN,limited,eff,matCount,keyMode:km,keyAll,keyNot,keyDocN,keyMissing};
