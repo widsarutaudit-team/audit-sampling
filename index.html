@@ -74,6 +74,7 @@ input.hf{text-align:left}
 .tabs button{background:transparent;color:var(--ink);border:1px solid var(--line)}
 .tabs button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .hint{font-size:13px;color:var(--muted);margin:6px 0}
+.susp{border-collapse:collapse;width:100%;font-size:13px}.susp th,.susp td{border-bottom:1px solid var(--line);padding:4px 8px;text-align:left}.susp td.n,.susp th.n{text-align:right}
 .msg{font-size:14px;margin-top:8px}.err{color:var(--warn)}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
 .wrap{overflow-x:auto}
@@ -211,6 +212,7 @@ table{font-size:11px}
 </div>
 <div id="p2" hidden><textarea id="paste" placeholder="คัดลอกช่วงข้อมูลพร้อมแถวหัวตารางจาก Excel (สูงสุด 10 คอลัมน์) แล้ววางที่นี่ (Ctrl+V)"></textarea></div>
 <div class="msg" id="dmsg"></div>
+<details id="suspBox" hidden style="margin-top:8px"><summary id="suspSum" class="hint" style="cursor:pointer"></summary><div id="suspBody" style="overflow:auto;margin-top:6px"></div></details>
 <div class="msg err" id="negWarn" hidden></div>
 <div id="mapBox" hidden>
 <h3>ตรวจสอบการจับคู่คอลัมน์</h3>
@@ -470,6 +472,7 @@ $('stK').addEventListener('change',calc);
 document.querySelectorAll('input[name=strat]').forEach(r=>r.addEventListener('change',()=>{$('stOpt').hidden=!stOn();calc()}));
 
 /* นำเข้าข้อมูล */
+let excl=new Set(),exclKey='';
 let src=null,wbk=null,view={cols:[],lab:[],amtPos:-1};
 const colL=i=>{let t='';i++;while(i>0){const m=(i-1)%26;t=String.fromCharCode(65+m)+t;i=Math.floor((i-1)/26)}return t};
 const colI=t=>{let n=0;for(const ch of t)n=n*26+ch.charCodeAt(0)-64;return n-1};
@@ -499,7 +502,8 @@ function detectHdr(disp,lim){
     let kw=0,tx=0;
     disp[r].forEach(c=>{const t=String(c).trim();if(!t)return;if(anyKw(t))kw++;if(numA(t,null)===null)tx++});
     const sc=kw*3+tx;
-    if(kw>0&&sc>bs){bs=sc;best=r+1}
+    /* แถวที่ 6 ขึ้นไปต้องมีคำหัวตารางอย่างน้อย 2 คำ เพื่อลดโอกาสเข้าใจผิดว่าแถวข้อมูลเป็นหัวตาราง */
+    if(kw>=(r<5?1:2)&&sc>bs){bs=sc;best=r+1}
   }
   return best;
 }
@@ -564,11 +568,11 @@ function autoCols(h){
   apply();
 }
 function autoMap(){
-  const h=detectHdr(src.disp,isRaw()?30:5);
+  const h=detectHdr(src.disp,30);
   $('hdrRow').value=h;autoCols(h);
 }
 function loadSrc(disp,raw,file,warn){
-  src={disp,raw,file,warn:warn||''};
+  src={disp,raw,file,warn:warn||''};excl=new Set();exclKey='';
   $('keepLast').checked=false;
   $('mapBox').hidden=false;autoMap();
 }
@@ -585,7 +589,23 @@ function renderPv(h,D,A,cols){
   rows.forEach(r=>{t+=`<tr${h>0&&r===h-1?' style="font-weight:600"':''}><td>${r+1}</td>`;for(let c=0;c<nc;c++)t+=`<td>${esc(src.disp[r][c]==null?'':src.disp[r][c])}</td>`;t+='</tr>'});
   $('pv').innerHTML=t+'</tbody>'+(ncolsOf()>16?'':'');
 }
+function renderSusp(list){
+  const box=$('suspBox');
+  if(!list.length){box.hidden=true;$('suspBody').innerHTML='';return}
+  box.hidden=false;
+  const n=excl.size;
+  $('suspSum').textContent='พบ '+list.length.toLocaleString()+' แถวที่ดูเหมือนแถวรวมหรือยอดยกมา (ระบบนำเข้าไว้ตามปกติ กดดูเพื่อเลือกนำออก)'+(n?' — นำออกแล้ว '+n.toLocaleString()+' แถว':'');
+  let t='<table class="susp"><thead><tr><th>นำออก</th><th>แถวในไฟล์</th><th>ข้อมูลในแถว</th><th class="n">จำนวนเงิน</th></tr></thead><tbody>';
+  list.slice(0,50).forEach(x=>{
+    const txt=x.row.map(c=>String(c).trim()).filter(Boolean).filter((c,i,a)=>c!==String(x.av)).slice(0,3).join(' | ');
+    t+=`<tr><td><input type="checkbox" data-r="${x.r}"${excl.has(x.r)?' checked':''}></td><td>${x.r+1}</td><td>${esc(txt)}</td><td class="n">${fmt(x.av)}</td></tr>`;
+  });
+  t+='</tbody></table>'+(list.length>50?`<div class="hint">แสดง 50 แถวแรกจาก ${list.length.toLocaleString()} แถว</div>`:'');
+  $('suspBody').innerHTML=t;
+}
+$('suspBody').addEventListener('change',e=>{const c=e.target.closest('input[data-r]');if(!c)return;const r=+c.dataset.r;if(c.checked)excl.add(r);else excl.delete(r);apply()});
 function apply(){
+  $('suspBox').hidden=true;
   if(!src)return;
   const disp=src.disp,raw=src.raw,nc=ncolsOf();
   const h=Math.max(0,Math.min(Math.floor(num($('hdrRow').value)||0),disp.length));
@@ -624,20 +644,27 @@ function apply(){
   view={cols,lab,amtPos:cols.indexOf(A)};
   $('mapMsg').className='msg';
   $('mapMsg').innerHTML='คอลัมน์ที่แสดงในรายงาน: '+cols.map((c,k)=>`${colL(c)} (${esc(lab[k])})`).join(', ')+(note?`<br>${note}`:'');
-  const out=[],raw0=isRaw();let skipped=0,skTot=0,fileTot=null,skLast=0;
+  const out=[],raw0=isRaw();let skipped=0,skTot=0,fileTot=null,skLast=0,lastTv=null,firstTv=null,skAmt=0;
+  /* แถวรวม: ตรวจเฉพาะแถวสุดท้ายของข้อมูล (lastTotal) แถวระหว่างข้อมูลไม่ถือว่าเป็นแถวรวม แม้บางช่องว่างหรือมีคำว่า "รวม" ในคำอธิบาย */
+  const ek=[src.file&&src.file.name||src.file||'',disp.length,h,D,A].join('|');if(ek!==exclKey){excl=new Set();exclKey=ek}
+  /* แถวระหว่างข้อมูลที่ดูเหมือนแถวรวม/ยอดยกมา: ไม่ข้ามเอง แต่เสนอให้ผู้ใช้เลือกนำออก */
+  const isSusp=row=>{const f=row.map(c=>String(c).trim()).filter(Boolean);return f.length>0&&f.length<=4&&TOT.test(f[0])};
+  const susp=[];
   const lt=lastTotal(h,D,A,nc);
   $('keepLastBox').hidden=!lt.is;
   const dropLast=lt.is&&!$('keepLast').checked;
   for(let r=h;r<disp.length;r++){
     const row=disp[r];
     if(!row.some(c=>String(c).trim()!==''))continue;
-    if(dropLast&&r===lt.r){skLast=r+1;const tv=numA(row[A],raw[r]?raw[r][A]:undefined);if(tv!==null&&fileTot===null)fileTot=tv;continue}
-    if(raw0&&row.some(c=>TOT.test(String(c).trim()))){skTot++;const tv=numA(row[A],raw[r]?raw[r][A]:undefined);if(tv!==null&&fileTot===null)fileTot=tv;continue}
+    if(dropLast&&r===lt.r){skLast=r+1;const tv=numA(row[A],raw[r]?raw[r][A]:undefined);if(tv!==null)lastTv=tv;continue}
     const av=numA(row[A],raw[r]?raw[r][A]:undefined);
+    if(av!==null&&isSusp(row)){susp.push({r,row,av});if(excl.has(r)){skTot++;skAmt+=av;continue}}
     if(av===null){if(!(h===0&&r===0))skipped++;continue}
     out.push({idx:out.length,doc:String(row[D]==null?'':row[D]).trim(),amt:av,c:cols.map(i=>String(row[i]==null?'':row[i]))});
   }
   data=out;
+  renderSusp(susp);
+  fileTot=lastTv!==null?lastTv:firstTv;
   const filled=[];
   if(out.length&&!touched.tot){autoTot();filled.push('จำนวนประชากรทั้งหมด')}
   if(raw0||h>1){
@@ -652,9 +679,9 @@ function apply(){
   const dup=[...cnt].filter(e=>e[1]>1);
   $('dmsg').className='msg';
   $('dmsg').innerHTML=out.length?`นำเข้าสำเร็จ ${out.length.toLocaleString()} รายการ ยอดรวม ${fmt(sum(out))} บาท`
-    +(skTot?` <span class="err">(ข้ามแถวรวม/ยอดยกมา ${skTot.toLocaleString()} แถว)</span>`:'')
+    +(skTot?` <span class="err">(นำออกตามที่เลือก ${skTot.toLocaleString()} แถว)</span>`:'')
     +(skLast?` <span class="err">(ข้ามแถวที่ ${skLast} ซึ่งเป็นแถวสุดท้าย เพราะคาดว่าเป็นยอดรวม: ${esc(lt.why)})</span>`:'')
-    +(fileTot!==null?`<br>ยอดรวมในแถวรวมของไฟล์ ${fmt(fileTot)} บาท `+(Math.abs(fileTot-sum(out))<0.005?'ตรงกับยอดรวมรายการที่นำเข้า':'<span class="err">ไม่ตรงกับยอดรวมรายการที่นำเข้า ('+fmt(sum(out))+') ตรวจสอบก่อนใช้</span>'):'')
+    +(fileTot!==null?`<br>ยอดรวมในแถวรวมของไฟล์ ${fmt(fileTot)} บาท `+(Math.abs(fileTot-sum(out))<0.005?'ตรงกับยอดรวมรายการที่นำเข้า':(lastTv!==null&&skTot&&Math.abs(fileTot-(sum(out)+skAmt))<0.005)?'ตรงกับยอดรวมรายการที่นำเข้า รวมยอดแถวที่นำออก ('+fmt(skAmt)+' บาท)':'<span class="err">ไม่ตรงกับยอดรวมรายการที่นำเข้า ('+fmt(sum(out))+') ตรวจสอบก่อนใช้</span>'):'')
     +(filled.length?`<br>ระบบเติมข้อมูลให้จากไฟล์: ${filled.join(', ')} (ตรวจสอบและแก้ไขได้)`:'')
     +(skipped?` <span class="err">(ข้าม ${skipped.toLocaleString()} แถวที่คอลัมน์จำนวนเงินไม่ใช่ตัวเลข)</span>`:'')
     +(noDoc?`<br><span class="err">มี ${noDoc.toLocaleString()} รายการที่เลขที่เอกสารว่าง</span>`:'')
@@ -754,7 +781,8 @@ function pick(pool,n){
 $('run').addEventListener('click',()=>{
   const p=calc(),e=[];
   if(!(p.mat>0))e.push('กรอกระดับความมีสาระสำคัญ (มากกว่า 0)');
-  if(!(p.tot>0))e.push('กรอกจำนวนประชากรทั้งหมด');
+  if(p.tot<0)e.push('จำนวนประชากรทั้งหมดมีค่าเป็นลบ โปรดกรอกจำนวนประชากรทั้งหมด');
+  else if(!(p.tot>0))e.push('กรอกจำนวนประชากรทั้งหมด');
   if(!(p.cf>0))e.push('กรอกค่า Confidence Factor');
   if(!data.length)e.push('นำเข้าข้อมูลรายการ (อัปโหลดไฟล์หรือวางข้อมูลจาก Excel)');
   if(p.capSel&&!(p.capV>0))e.push('กรอกจำนวนรายการสูงสุด หรือเลือก "ตามจำนวนที่คำนวณได้จริง"');
