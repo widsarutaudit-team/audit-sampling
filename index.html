@@ -185,8 +185,9 @@ table{font-size:11px}
 <h3>การจัดการรายการที่จำนวนเงินเป็นศูนย์หรือติดลบ</h3>
 <p class="hint" id="negHint" style="margin-top:0"></p>
 <div class="cards">
-<label class="card"><input type="radio" name="neg" value="skip" checked><span><b id="negSkipT">ข้ามรายการศูนย์และติดลบ</b><span id="negSkipD"></span></span></label>
-<label class="card"><input type="radio" name="neg" value="abs"><span><b id="negAbsT">ใช้ค่าสัมบูรณ์ของยอดเงิน</b><span id="negAbsD"></span></span></label>
+<label class="card"><input type="radio" name="neg" value="skip"><span><b id="negSkipT">ใช้ข้อมูลเฉพาะรายการที่เป็นบวก</b><span id="negSkipD"></span></span></label>
+<label class="card"><input type="radio" name="neg" value="neg"><span><b id="negNegT">ใช้ข้อมูลเฉพาะรายการติดลบ</b><span id="negNegD"></span></span></label>
+<label class="card"><input type="radio" name="neg" value="abs" checked><span><b id="negAbsT">ใช้ข้อมูลรายการทั้งที่เป็นบวกและติดลบ (ค่าสัมบูรณ์)</b><span id="negAbsD"></span></span></label>
 </div>
 </div>
 <div data-m="1,2" id="stratBox">
@@ -286,13 +287,22 @@ const matchKey=(ents,data)=>{
     if(rs.length>1)amb.push({doc:e.doc,n:rs.length});
     rs.forEach(x=>{used.add(x.idx);items.push(x);n++})});
   return {items,missing,amb,n}};
-const keySig=()=>[data.length,sum(data).toFixed(2),num($('mat').value),$('keyN').value.trim(),method===3?'skip':negMode()].join('|');
-const negMode=()=>document.querySelector('input[name=neg]:checked').value;
+const keySig=()=>[data.length,sum(data).toFixed(2),num($('mat').value),$('keyN').value.trim(),negMode()].join('|');
+const negMode=()=>method===3?'skip':document.querySelector('input[name=neg]:checked').value;
+/* nval = ค่าที่ใช้เลือก/เทียบ MAT/จัดกลุ่ม, nsum = ค่าที่ใช้รวมยอด (โหมดค่าสัมบูรณ์ยังรวมแบบมีเครื่องหมายเหมือนเดิม), inFrame = รายการที่อยู่ในประชากรที่ใช้สุ่ม */
+const nval=x=>{const m=negMode();return m==='neg'?-x.amt:m==='abs'?Math.abs(x.amt):x.amt};
+const nsum=x=>negMode()==='neg'?-x.amt:x.amt;
+const inFrame=x=>{const m=negMode();return m==='neg'?x.amt<0:m==='abs'?true:x.amt>0};
 const NEGTXT={
-  1:['วิธีนี้ทุกรายการมีโอกาสถูกเลือกเท่ากัน ผู้ตรวจสอบเลือกได้ว่าจะให้รายการยอดศูนย์และติดลบอยู่ในกลุ่มที่สุ่มหรือไม่','ข้ามรายการศูนย์และติดลบ','ตัดรายการยอดศูนย์และติดลบออกจากกลุ่มที่สุ่ม รายการเหล่านี้ไม่มีโอกาสถูกเลือก และแจ้งจำนวนที่ข้ามในรายงาน','คงรายการศูนย์และติดลบไว้','รายการเหล่านี้ยังอยู่ในกลุ่มที่สุ่มและมีโอกาสถูกเลือกเท่ากับรายการอื่น รายการติดลบใช้ค่าสัมบูรณ์เฉพาะตอนเลือกตัวอย่าง'],
-  2:['รายการศูนย์และติดลบมีผลต่อทั้งการคัดรายการที่มีสาระสำคัญและกลุ่มที่สุ่มส่วนที่เหลือ ผู้ตรวจสอบเลือกวิธีจัดการได้ตามดุลยพินิจ','ข้ามรายการศูนย์และติดลบ','ตัดรายการยอดศูนย์และติดลบออกจากกลุ่มที่สุ่ม และไม่นับเป็นรายการที่มีสาระสำคัญ แจ้งจำนวนที่ข้ามในรายงาน','คงรายการศูนย์และติดลบไว้','รายการศูนย์และติดลบยังอยู่ในกลุ่มที่สุ่ม และใช้ค่าสัมบูรณ์เทียบกับระดับความมีสาระสำคัญ รายการติดลบที่ยอดสูงจึงถูกนับเป็นรายการที่มีสาระสำคัญด้วย'],
-  4:null,
-  3:['MUS เลือกตามหน่วยเงิน รายการยอดศูนย์จึงไม่ถูกเลือกโดย MUS เสมอ ส่วนรายการติดลบ ผู้ตรวจสอบเลือกวิธีจัดการได้ตามดุลยพินิจ','ข้ามรายการศูนย์และติดลบ','MUS เลือกเฉพาะรายการยอดบวก และแจ้งจำนวนที่ข้ามในรายงาน','ใช้ค่าสัมบูรณ์ของยอดเงิน','รายการติดลบมีโอกาสถูกเลือกตามขนาดยอดเงินเช่นเดียวกับรายการบวก']
+  1:['เลือกว่าจะใช้รายการกลุ่มใดเป็นประชากรที่ใช้สุ่ม รายการยอดศูนย์ไม่ถูกใช้ในสองตัวเลือกแรก ถ้าแยกตรวจรายการบวกกับรายการติดลบ ให้สุ่มทีละชุดและแยกรายงาน',
+     'ตัดรายการติดลบและรายการศูนย์ออกจากประชากร รายการเหล่านี้ไม่มีโอกาสถูกเลือก และแจ้งจำนวนที่ข้ามในรายงาน',
+     'ตัดรายการบวกและรายการศูนย์ออกจากประชากร ใช้ขนาดของยอดติดลบในการคำนวณทุกอย่าง ประชากรทั้งหมดตั้งต้นคือผลรวมขนาดของรายการติดลบ',
+     'รายการบวกและติดลบอยู่ในประชากรที่สุ่ม ทุกรายการมีโอกาสถูกเลือกเท่ากัน รายการติดลบใช้ค่าสัมบูรณ์เฉพาะตอนเลือกตัวอย่าง'],
+  2:['เลือกว่าจะใช้รายการกลุ่มใดเป็นประชากรที่ใช้สุ่มและคัดรายการสาระสำคัญ รายการยอดศูนย์ไม่ถูกใช้ในสองตัวเลือกแรก ถ้าแยกตรวจรายการบวกกับรายการติดลบ ให้สุ่มทีละชุดและแยกรายงาน',
+     'ตัดรายการติดลบและรายการศูนย์ออกจากประชากร และไม่นับเป็นรายการที่มีสาระสำคัญ แจ้งจำนวนที่ข้ามในรายงาน',
+     'ตัดรายการบวกและรายการศูนย์ออกจากประชากร ใช้ขนาดของยอดติดลบทั้งในการเทียบกับระดับความมีสาระสำคัญและการสุ่ม ประชากรทั้งหมดตั้งต้นคือผลรวมขนาดของรายการติดลบ',
+     'รายการบวกและติดลบอยู่ในประชากรที่สุ่ม ใช้ค่าสัมบูรณ์เทียบกับระดับความมีสาระสำคัญ รายการติดลบที่ขนาดสูงจึงถูกนับเป็นรายการที่มีสาระสำคัญ'],
+  3:['MUS ใช้เฉพาะรายการยอดบวก','','','']
 };
 NEGTXT[4]=NEGTXT[2];
 document.querySelectorAll('input[name=neg]').forEach(r=>r.addEventListener('change',()=>{negTouched=true;autoTot();calc()}));
@@ -307,7 +317,7 @@ function applyMethod(){
   document.querySelectorAll('[data-m]').forEach(e=>e.hidden=!e.dataset.m.split(',').includes(String(method)));
   $('negBox').hidden=method===3;
   const T=NEGTXT[method];
-  $('negHint').textContent=T[0];$('negSkipT').textContent=T[1];$('negSkipD').textContent=T[2];$('negAbsT').textContent=T[3];$('negAbsD').textContent=T[4];
+  $('negHint').textContent=T[0];$('negSkipD').textContent=T[1];$('negNegD').textContent=T[2];$('negAbsD').textContent=T[3];
   if(!negTouched)document.querySelector('input[name=neg][value="'+(method===3?'skip':'abs')+'"]').checked=true;
   $('report').hidden=true;autoTot();calc();
 }
@@ -330,9 +340,9 @@ document.querySelectorAll('input[name=cap]').forEach(r=>r.addEventListener('chan
 
 /* ประชากรที่ใช้สุ่ม (สุ่มแบบเท่าเทียม ทั้งแบบมีและไม่มีการคัด key item): รวมเฉพาะรายการที่อยู่ในกลุ่มที่สุ่มตามวิธีจัดการศูนย์/ติดลบที่เลือก */
 function frameInfo(){
-  const ab=negMode()==='abs';let pos=0,neg=0,negN=0,zeroN=0,abs=0;
+  const nm=negMode(),ab=nm==='abs';let pos=0,neg=0,negN=0,zeroN=0,abs=0;
   data.forEach(x=>{if(x.amt>0)pos+=x.amt;else if(x.amt<0){neg+=x.amt;negN++}else zeroN++;abs+=Math.abs(x.amt)});
-  return {ab,pos,neg,negN,zeroN,net:pos+neg,ft:ab?pos+neg:pos};
+  return {ab,nm,pos,neg,negN,zeroN,net:pos+neg,ft:nm==='neg'?-neg:ab?pos+neg:pos};
 }
 function autoTot(){
   if(!data.length||touched.tot)return;
@@ -342,10 +352,10 @@ function autoTot(){
 
 /* สุ่มแบบจัดกลุ่มตามช่วงยอดเงินก่อน */
 const stOn=()=>method<3&&document.querySelector('input[name=strat]:checked').value==='1';
-const stV=()=>{const ab=negMode()==='abs';return x=>ab?Math.abs(x.amt):x.amt};
+const stV=()=>nval;
 function randPool(matItems,mat,km){
-  const abm=negMode()==='abs',mset=new Set(matItems.map(x=>x.idx));
-  return data.filter(x=>(abm||x.amt>0)&&((method!==2&&method!==4)||(km==='auto'?(abm?Math.abs(x.amt):x.amt)<=mat:!mset.has(x.idx))));
+  const mset=new Set(matItems.map(x=>x.idx));
+  return data.filter(x=>inFrame(x)&&((method!==2&&method!==4)||(km==='auto'?nval(x)<=mat:!mset.has(x.idx))));
 }
 /* ระบบกำหนดช่วงของกลุ่มจากข้อมูล: แบ่งตามกฎ cumulative sqrt(f) บนสเกลลอการิทึมของยอดเงิน */
 const stMode=()=>document.querySelector('input[name=stMode]:checked').value;
@@ -427,7 +437,7 @@ function calc(){
   const mat=num($('mat').value),tot=num($('tot').value),cf=num($('cf').value),ex=Math.max(0,Math.floor(num($('ex').value)||0));
   let matItems=[],matVal=null,base=tot,sample=null,raw=null,km='auto',keyAll=[],keyNot=[],keyDocN=0,keyMissing=[],keyAmb=[];
   if(method===2||method===3||method===4){
-    const ab=(method===2||method===4)&&negMode()==='abs',v=x=>ab?Math.abs(x.amt):x.amt;
+    const v=nval;
     km=keyMode();
     $('keyManual').hidden=km!=='manual';$('keyRand').hidden=km!=='rand';
     if(mat!==null&&data.length)keyAll=data.filter(x=>v(x)>mat);
@@ -438,16 +448,16 @@ function calc(){
       if(randOff&&km==='rand'){document.querySelector('input[name=keyMode][value=auto]').checked=true;km='auto';$('keyManual').hidden=true;$('keyRand').hidden=true}
     }
     let kh='';
-    if(km==='auto'&&mat!==null&&data.length){matItems=keyAll;matVal=matItems.reduce((t,x)=>t+x.amt,0)}
+    if(km==='auto'&&mat!==null&&data.length){matItems=keyAll;matVal=matItems.reduce((t,x)=>t+nsum(x),0)}
     else if(km==='manual'&&data.length){
       const ents=parseKey($('keyDocs').value),mk=matchKey(ents,data);
       matItems=mk.items;keyMissing=mk.missing;keyAmb=mk.amb;keyDocN=mk.n;
-      matVal=matItems.reduce((t,x)=>t+x.amt,0);
+      matVal=matItems.reduce((t,x)=>t+nsum(x),0);
       kh=`ระบบนับได้ ${mk.n.toLocaleString()} รายการ (พบในข้อมูลที่นำเข้า ${matItems.length.toLocaleString()} รายการ)`+(keyMissing.length?` <span class="err">ไม่พบ ${keyMissing.length.toLocaleString()} รายการในข้อมูล เช่น ${esc(keyMissing.slice(0,3).join(', '))}</span>`:'')+(keyAmb.length?`<br><span class="err">เลขที่เอกสารที่มีหลายยอดในข้อมูลแต่ไม่ได้ระบุจำนวนเงิน ระบบคัดออกทุกยอด: ${esc(keyAmb.slice(0,3).map(x=>x.doc+' ('+x.n+' รายการ)').join(', '))}${keyAmb.length>3?' ...':''} หากตรวจสอบเพียงบางยอด ให้ระบุจำนวนเงินต่อท้ายเลขที่เอกสาร</span>`:'');
     }else if(km==='rand'){
       const n=Math.floor(num($('keyN').value)||0);
       kh=mat!==null&&data.length?`รายการสาระสำคัญในข้อมูล ${keyAll.length.toLocaleString()} รายการ`+(n>keyAll.length&&keyAll.length?` <span class="err">จำนวนที่ต้องการมากกว่าที่มี จะสุ่มทุกรายการ</span>`:''):'กรอกระดับความมีสาระสำคัญและนำเข้าข้อมูลก่อน';
-      if(keyPick&&keyPick.sig===keySig()){matItems=keyPick.items;matVal=matItems.reduce((t,x)=>t+x.amt,0);kh+=` | สุ่มแล้ว ${matItems.length.toLocaleString()} รายการ (สุ่มรวม ${keyPick.draws.toLocaleString()} ครั้ง ใช้ผลครั้งล่าสุด) รายการสาระสำคัญที่ไม่ถูกสุ่มกลับเข้าประชากรคงเหลือ`}
+      if(keyPick&&keyPick.sig===keySig()){matItems=keyPick.items;matVal=matItems.reduce((t,x)=>t+nsum(x),0);kh+=` | สุ่มแล้ว ${matItems.length.toLocaleString()} รายการ (สุ่มรวม ${keyPick.draws.toLocaleString()} ครั้ง ใช้ผลครั้งล่าสุด) รายการสาระสำคัญที่ไม่ถูกสุ่มกลับเข้าประชากรคงเหลือ`}
       else if(keyPick)kh+=' | <span class="err">ข้อมูลหรือเงื่อนไขเปลี่ยน ต้องกดสุ่มรายการสาระสำคัญใหม่</span>';
       else kh+=' | ยังไม่ได้สุ่ม';
     }
@@ -487,7 +497,7 @@ function calc(){
   const ds=sum(data);let h='';
   const fi=data.length?frameInfo():null,tg=fi?fi.ft:0;
   if(data.length){
-    h=`ยอดสุทธิในข้อมูลที่นำเข้า ${fmt(fi.net)} บาท (รายการบวก ${fmt(fi.pos)} / รายการติดลบ ${fmt(fi.neg)} จำนวน ${fi.negN.toLocaleString()} รายการ / รายการศูนย์ ${fi.zeroN.toLocaleString()} รายการ) ประชากรที่ใช้สุ่ม${fi.ab?' (ยอดรวมปกติ ใช้ค่าสัมบูรณ์เฉพาะตอนเลือกตัวอย่าง)':' (เฉพาะรายการยอดบวก)'} ${fmt(fi.ft)} บาท `;
+    h=`ยอดสุทธิในข้อมูลที่นำเข้า ${fmt(fi.net)} บาท (รายการบวก ${fmt(fi.pos)} / รายการติดลบ ${fmt(fi.neg)} จำนวน ${fi.negN.toLocaleString()} รายการ / รายการศูนย์ ${fi.zeroN.toLocaleString()} รายการ) ประชากรที่ใช้สุ่ม${fi.nm==='neg'?' (เฉพาะรายการติดลบ ใช้ขนาดของยอด)':fi.ab?' (ยอดรวมปกติ ใช้ค่าสัมบูรณ์เฉพาะตอนเลือกตัวอย่าง)':' (เฉพาะรายการยอดบวก)'} ${fmt(fi.ft)} บาท `;
     if(tot===null||Math.abs(tot-tg)>0.005)h+=`<button class="link" id="useSum">ใช้ยอดนี้เป็นจำนวนประชากรทั้งหมด</button>`+(tot!==null?` <span class="err">จำนวนประชากรทั้งหมดที่กรอกต่างจากประชากรที่ใช้สุ่ม ${fmt(Math.abs(tot-tg))} บาท</span>`:'');
     else h+='(ตรงกับจำนวนประชากรทั้งหมดที่กรอก)';
     if(method===3)h+=' <span class="hint">ตามสมมติฐานของ MUS ระบบตัดรายการติดลบและรายการศูนย์ออกจากประชากรโดยอัตโนมัติ</span>';
@@ -922,7 +932,7 @@ $('run').addEventListener('click',()=>{
   rows.push(['ค่า Confidence Factor',p.cf.toString(),'cf'],['จำนวนรายการประชากรตัวอย่าง',p.sample.toLocaleString(),`c (คำนวณได้ ${p.raw.toFixed(2)} ปัดขึ้น)`]);
   if(method>=2){
     const KM={auto:'ระบบคัดกรองข้อมูลให้ (ตรวจสอบทุกรายการที่มีสาระสำคัญ)',manual:'ผู้ตรวจสอบกรอกข้อมูลด้วยตนเอง (เลือกตัวอย่างรายการสาระสำคัญหรือรายการอื่นแล้ว ตามเลขที่เอกสารที่ระบุ)',rand:'ผู้ตรวจสอบต้องการให้สุ่มรายการสาระสำคัญ (ทุกรายการมีโอกาสเท่ากัน)'};
-    const ab2=(method===2||method===4)&&negMode()==='abs',v2=x=>ab2?Math.abs(x.amt):x.amt;
+    const v2=nval;
     const msx=new Set(p.matItems.map(x=>x.idx)),exK=p.keyAll.filter(x=>msx.has(x.idx));
     const kv=p.keyAll.reduce((t,x)=>t+v2(x),0),ev=exK.reduce((t,x)=>t+v2(x),0);
     rows.push(['วิธีกำหนดรายการประชากรที่เป็นสาระสำคัญ',KM[p.keyMode],p.keyMode==='rand'&&keyPick?`สุ่ม ${keyPick.draws.toLocaleString()} ครั้ง ใช้ผลครั้งล่าสุด`:''],
@@ -938,8 +948,8 @@ $('run').addEventListener('click',()=>{
   {
     const nz=data.filter(x=>x.amt===0).length,ng=data.filter(x=>x.amt<0).length,abr=negMode()==='abs';
     const fiR=frameInfo();
-    rows.push(['ยอดสุทธิของรายการที่นำเข้า',fmt(fiR.net),`รายการบวก ${fmt(fiR.pos)} / รายการติดลบ ${fmt(fiR.neg)}`],['ประชากรที่ใช้สุ่ม',fmt(fiR.ft),(fiR.ab?'ยอดรวมปกติ (ใช้ค่าสัมบูรณ์เฉพาะตอนเลือกตัวอย่าง)':'เฉพาะรายการยอดบวก (ไม่ได้ทดสอบรายการติดลบในการสุ่มนี้)')+(Math.abs(p.tot-fiR.ft)>0.005?` | ต่างจากจำนวนประชากรทั้งหมดที่กรอก ${fmt(Math.abs(p.tot-fiR.ft))}`:'')]);
-    rows.push(['การจัดการรายการที่จำนวนเงินเป็นศูนย์หรือติดลบ',abr?((method===2||method===4)?'ใช้ค่าสัมบูรณ์ คงไว้ในกลุ่มที่สุ่ม':'คงไว้ในกลุ่มที่สุ่ม'):(method===3?'ตัดรายการติดลบและรายการศูนย์ออก (ตามสมมติฐานของ MUS)':'ข้ามรายการศูนย์และติดลบ'),`ศูนย์ ${nz.toLocaleString()} / ติดลบ ${ng.toLocaleString()} รายการ`]);
+    rows.push(['ยอดสุทธิของรายการที่นำเข้า',fmt(fiR.net),`รายการบวก ${fmt(fiR.pos)} / รายการติดลบ ${fmt(fiR.neg)}`],['ประชากรที่ใช้สุ่ม',fmt(fiR.ft),(fiR.nm==='neg'?'เฉพาะรายการติดลบ ใช้ขนาดของยอด (ไม่ได้ทดสอบรายการบวกในการสุ่มนี้)':fiR.ab?'ยอดรวมปกติ (ใช้ค่าสัมบูรณ์เฉพาะตอนเลือกตัวอย่าง)':'เฉพาะรายการยอดบวก (ไม่ได้ทดสอบรายการติดลบในการสุ่มนี้)')+(Math.abs(p.tot-fiR.ft)>0.005?` | ต่างจากจำนวนประชากรทั้งหมดที่กรอก ${fmt(Math.abs(p.tot-fiR.ft))}`:'')]);
+    rows.push(['การจัดการรายการที่จำนวนเงินเป็นศูนย์หรือติดลบ',abr?((method===2||method===4)?'ใช้ข้อมูลทั้งบวกและติดลบ (ค่าสัมบูรณ์) คงไว้ในกลุ่มที่สุ่ม':'ใช้ข้อมูลทั้งบวกและติดลบ (ค่าสัมบูรณ์) คงไว้ในกลุ่มที่สุ่ม'):(method===3?'ตัดรายการติดลบและรายการศูนย์ออก (ตามสมมติฐานของ MUS)':negMode()==='neg'?'ใช้ข้อมูลเฉพาะรายการติดลบ ข้ามรายการบวกและรายการศูนย์':'ใช้ข้อมูลเฉพาะรายการที่เป็นบวก ข้ามรายการติดลบและรายการศูนย์'),`ศูนย์ ${nz.toLocaleString()} / ติดลบ ${ng.toLocaleString()} / บวก ${data.filter(x=>x.amt>0).length.toLocaleString()} รายการ`]);
   }
   if(mus)rows.push(['ช่วงห่างการสุ่ม (ประชากรคงเหลือ ÷ จำนวนจุดสุ่ม)',fmt(mus.interval),`${fmt(p.base)} ÷ ${mus.m.toLocaleString()}`],['จุดเริ่มต้นสุ่ม',fmt(mus.start),'สุ่มภายในช่วงห่างแรก'],['จำนวนรายการที่ MUS เลือกได้ (ไม่ซ้ำ)',mus.unique.toLocaleString(),`จาก ${mus.m.toLocaleString()} จุดสุ่ม`],[{in:'รายการชดเชย (นับรวมในรายการที่เลือกตรวจสอบ)',next:'รายการที่เลือกต่อท้ายแทนจุดสุ่มที่ซ้ำ (นับรวมในรายการที่เลือกตรวจสอบ)',sep:'รายการชดเชยสำรอง (แยกแสดง ไม่นับรวม)'}[mus.mode],mus.comp.length.toLocaleString(),'รายการ'],['รายการยอดติดลบ (MUS ไม่เลือก)',mus.skippedNeg.toLocaleString(),'รายการ'],['รายการยอดศูนย์ (MUS ไม่เลือก)',mus.zero.toLocaleString(),'รายการ'],['จำนวนรายการที่สุ่มเพิ่มเติม (โอกาสเท่ากัน)',picked.length.toLocaleString(),'รายการ']);
   if(sys)rows.push(['ช่วงห่างการสุ่ม (จำนวนรายการที่ใช้สุ่ม ÷ จำนวนตัวอย่าง)',Number(sys.k.toFixed(4)).toLocaleString(),`${sys.N.toLocaleString()} ÷ ${sys.n.toLocaleString()}`],['เลขสุ่ม (จำนวนเต็ม)',sys.u.toLocaleString(),`สุ่มจาก 1 ถึง ${sys.N.toLocaleString()}`],['จุดเริ่มต้นสุ่ม (r)',Number(sys.r.toFixed(4)).toLocaleString(),`เลขสุ่ม ÷ ${sys.n.toLocaleString()} (ไม่เกินช่วงห่าง)`]);
