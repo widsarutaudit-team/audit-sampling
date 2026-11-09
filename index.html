@@ -35,7 +35,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1b1c;--surface:#172829;--ink:#e6f0ee;--muted:#93aaa8;--line:#2b4244;--accent:#3fb8aa;--accent-ink:#06201d;--soft:#1d3535;--must:#3b2f12;--warn:#ff8f84}}
 :root[data-theme="dark"]{--bg:#0f1b1c;--surface:#172829;--ink:#e6f0ee;--muted:#93aaa8;--line:#2b4244;--accent:#3fb8aa;--accent-ink:#06201d;--soft:#1d3535;--must:#3b2f12;--warn:#ff8f84}
 *{box-sizing:border-box}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html{scroll-padding-top:calc(64px + env(safe-area-inset-top,0px))}
 body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.6 "IBM Plex Sans Thai",system-ui,sans-serif}
 main{max-width:980px;margin:0 auto;padding:24px 16px 64px}
 h1{font-size:24px;margin:0 0 4px;font-weight:600}
@@ -91,7 +91,7 @@ input.hf{text-align:left}
 .rhead>div:first-child{flex:1 1 0;min-width:0}
 .rtools{flex:none;display:flex;flex-direction:column;gap:6px;align-items:stretch}
 .rtools button{padding:6px 12px;font-size:13px;white-space:nowrap}
-@media(max-width:640px){.rhead{flex-wrap:wrap}.rtools{flex-direction:row}}
+@media(max-width:640px){.rhead{flex-wrap:wrap}.rhead>div:first-child{flex-basis:100%}.rtools{flex-direction:row}}
 [hidden]{display:none!important}
 @media print{
 :root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:#fff;--surface:#fff;--ink:#000;--muted:#333;--line:#999;--soft:#eee;--accent:#000}
@@ -111,16 +111,128 @@ table{font-size:11px}
 .tbsw{display:inline-flex;margin-left:10px;border:1px solid var(--line);border-radius:6px;overflow:hidden;vertical-align:middle;font-size:13px}
 .tbsw[hidden]{display:none}@media(max-width:600px){.tbsw{display:flex;width:max-content;margin:4px 0 0;font-size:12px}.tbsw span{padding:2px 7px}}.tbsw label{cursor:pointer;margin:0}.tbsw input{position:absolute;opacity:0;pointer-events:none}
 .tbsw span{display:inline-block;white-space:nowrap;padding:2px 10px;background:var(--surface);color:var(--muted)}.tbsw input:checked+span{background:var(--accent);color:var(--accent-ink)}
+.tip{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1.3px solid var(--accent);color:var(--accent);font:italic 700 11px/1 Georgia,serif;margin-left:5px;cursor:help;position:relative;vertical-align:middle;flex:none}
+.tip:hover::after,.tip:focus::after{content:attr(data-tip);position:absolute;z-index:30;top:130%;right:-6px;width:min(300px,78vw);background:var(--ink);color:var(--surface);padding:8px 10px;border-radius:6px;font:400 12.5px/1.55 "IBM Plex Sans Thai",system-ui,sans-serif;text-align:left;white-space:normal;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.card .tip:hover::after,.card .tip:focus::after{right:auto;left:-6px}
+.tip:focus{outline:2px solid var(--accent);outline-offset:1px}
+.code{white-space:nowrap}
+.keyblk{margin:14px 0 6px;padding:14px 16px;border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:6px;background:var(--bg)}
+.keyblk .card{background:var(--surface)}.keyblk .card:has(input:checked){background:var(--soft)}
+details.adv{margin-top:18px;border:1px solid var(--line);border-radius:6px;padding:10px 14px}
+details.adv>summary{cursor:pointer;line-height:1.6}details.adv[open]>summary{margin-bottom:6px}
+.sumbar{border:1px solid var(--accent);background:var(--soft);border-radius:6px;padding:12px 14px;font-size:14px;line-height:1.75}
+.sumbar .big{font-size:18px;font-weight:600;color:var(--accent)}
+.sumbar .warnline{color:var(--warn);font-size:13px}
+details.seedbox{margin-top:12px}details.seedbox>summary{display:none}
+details.seedbox[open]{border:1px dashed var(--accent);border-radius:6px;padding:10px 12px}
+/* ---- โครงหน้าแบบแดชบอร์ด ---- */
+.app{display:grid;grid-template-columns:256px minmax(0,1fr);min-height:100vh}
+.app.mini{grid-template-columns:68px minmax(0,1fr)}
+.side{background:linear-gradient(180deg,#0c4f49 0%,#0f6b63 55%,#118576 100%);color:#e8f6f3;padding:16px 12px;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;gap:4px;z-index:40}
+.side .logo{display:flex;gap:11px;align-items:center;margin:2px 4px 10px}
+.side .logo .ic{width:42px;height:42px;border-radius:12px;background:#2dd4bf;display:grid;place-items:center;color:#063b36;flex:none}
+.side .logo b{display:block;font-size:15px;line-height:1.3;color:#fff}.side .logo small{display:block;color:#b9e3dc;font-size:11.5px;line-height:1.35}
+.side .grp{font-size:11.5px;color:#9fd3ca;margin:12px 8px 4px}
+.side a{display:flex;align-items:center;gap:10px;padding:8px 9px;border-radius:10px;color:#e8f6f3;text-decoration:none;font-size:14px;line-height:1.35;cursor:pointer}
+.side a:hover{background:rgba(255,255,255,.09)}
+.side a .n{width:26px;height:26px;border-radius:8px;background:rgba(255,255,255,.13);display:grid;place-items:center;font-size:12.5px;font-weight:600;flex:none}
+.side a.done .n{background:#2dd4bf;color:#063b36}
+.side a.on{background:rgba(255,255,255,.17);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+.side a.off{opacity:.45;pointer-events:none}
+.side a .ok{margin-left:auto;font-size:12px;color:#7ff0dd}
+.side .sfoot{margin-top:auto;font-size:11.5px;color:#a9d8cf;background:rgba(0,0,0,.15);border-radius:10px;padding:10px 12px;line-height:1.5}
+.side .mini-btn{margin:6px 4px 0;background:rgba(255,255,255,.1);color:#e8f6f3;border:0;border-radius:8px;padding:6px 8px;font-size:12px;cursor:pointer;text-align:left}
+.app.mini .side .t,.app.mini .side .grp,.app.mini .side .sfoot,.app.mini .side .ok,.app.mini .side .logo div{display:none}
+.app.mini .side a{justify-content:center}.app.mini .side .logo{justify-content:center}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 24px;background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
+.topbar h1{font-size:17px;margin:0;font-weight:600;color:var(--accent);line-height:1.35}
+.topbar .pill{display:inline-flex;align-items:center;background:var(--soft);color:var(--accent);border-radius:999px;padding:4px 12px;font-size:12.5px;font-weight:500;white-space:nowrap}
+.topbar .hb{display:none;padding:6px 11px;font-size:16px;line-height:1}
+.app main{max-width:1080px;margin:0 auto;padding:20px 24px 64px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:0 -24px 16px;padding:10px 24px;position:sticky;top:53px;z-index:20;background:var(--bg);transition:padding .15s}
+.kpis.compact .kpi{min-height:0;padding:7px 12px 8px}.kpis.compact .kpi .s,.kpis.compact .kpi::after{display:none}.kpis.compact .kpi .v{font-size:18px;margin-top:2px}.kpis.compact .kpi .l i{width:20px;height:20px;font-size:11px}.kpis.compact .kp4{box-shadow:0 0 0 2px rgba(15,118,110,.3)}
+.kpi{border-radius:14px;padding:14px 16px 16px;color:#fff;position:relative;overflow:hidden;min-height:112px}
+.kpi::after{content:"";position:absolute;left:0;right:0;bottom:0;height:52px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 60' preserveAspectRatio='none'%3E%3Cpath d='M0 40 C60 20 110 55 170 38 S290 10 400 30 L400 60 L0 60Z' fill='white' fill-opacity='.14'/%3E%3Cpath d='M0 50 C80 35 140 60 210 46 S320 28 400 44 L400 60 L0 60Z' fill='white' fill-opacity='.12'/%3E%3C/svg%3E") no-repeat bottom/100% 100%;pointer-events:none}
+.kpi .l{display:flex;align-items:center;gap:8px;font-size:12.5px;opacity:.95;position:relative}
+.kpi .l i{width:26px;height:26px;border-radius:8px;background:rgba(255,255,255,.2);display:grid;place-items:center;font-style:normal;font-size:13px;flex:none}
+.kpi .v{font-size:24px;font-weight:700;margin-top:6px;letter-spacing:-.01em;font-variant-numeric:tabular-nums;position:relative;line-height:1.25;word-break:break-all}
+.kpi .s{font-size:12px;opacity:.92;position:relative}
+.kp1{background:linear-gradient(135deg,#334155,#64748b)}
+.kp2{background:linear-gradient(135deg,#c55f1d,#e99650)}
+.kp3{background:linear-gradient(135deg,#1d5fc4,#4d97ec)}
+.kp4{background:linear-gradient(135deg,#0f766e,#2aa198);box-shadow:0 0 0 3px rgba(15,118,110,.25)}.kp4 .v{font-size:29px}
+section{border-radius:12px}
+#manualSec .mwrap{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px}
+#manualSec .toc{position:sticky;top:70px;align-self:start;border:1px solid var(--line);border-radius:12px;padding:12px}
+#manualSec .toc a{display:flex;gap:8px;padding:5px 2px;color:var(--ink);text-decoration:none;font-size:13.5px;line-height:1.4}#manualSec .toc a span{color:var(--accent);font-weight:600;width:20px;flex:none}
+#manualSec h3{display:flex;align-items:center;gap:10px;margin:22px 0 8px}#manualSec h3 .no{width:34px;height:34px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:13px;flex:none}
+#manualSec ol{padding-left:20px;margin:6px 0}#manualSec li{margin:3px 0}
+@media(max-width:900px){
+ .app,.app.mini{grid-template-columns:minmax(0,1fr)}
+ .side{position:fixed;left:0;top:0;bottom:0;width:260px;transform:translateX(-105%);transition:transform .2s;box-shadow:4px 0 20px rgba(0,0,0,.25)}
+ .app.navopen .side{transform:none}
+ .side .mini-btn{display:none}
+ .topbar{padding:10px 14px}.topbar .hb{display:inline-block}.topbar .pill{display:none}.topbar h1{font-size:15px}
+ .app main{padding:14px 12px 56px}
+ .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 -12px 12px;padding:8px 12px;top:47px}.kpis.compact .kpi .l{font-size:11px}.kpis.compact .kpi .v{font-size:15px}.kpi{min-height:100px;padding:12px}.kpi .v{font-size:19px}.kp4 .v{font-size:23px}.kpi .s{font-size:11px}
+ #manualSec .mwrap{grid-template-columns:minmax(0,1fr)}#manualSec .toc{position:static}
+}
+@media print{.side,.topbar,.kpis,#manualSec{display:none!important}.app{display:block}.app main{padding:0;max-width:none}}
 </style>
 </head>
 <body>
+<div class="app" id="app">
+<aside class="side noprint" id="side">
+<div class="logo"><div class="ic"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5M8.5 11h5M11 8.5v5"/></svg></div><div><b>ระบบสุ่มเลือกตัวอย่าง</b><small>สำหรับงานตรวจสอบ (ด้วยวิธีทางสถิติ)</small></div></div>
+<div class="grp">ขั้นตอนการทำงาน</div>
+<a data-go="s0" id="nv0"><span class="n">✎</span><span class="t">ข้อมูลหัวรายงาน</span><span class="ok"></span></a>
+<a data-go="s1" id="nv1"><span class="n">1</span><span class="t">เลือกวิธีการสุ่มตัวอย่าง</span><span class="ok"></span></a>
+<a data-go="s3" id="nv2"><span class="n">2</span><span class="t">นำเข้าข้อมูลรายการ</span><span class="ok"></span></a>
+<a data-go="s2" id="nv3"><span class="n">3</span><span class="t">กำหนดค่าและคำนวณ</span><span class="ok"></span></a>
+<a data-go="s4" id="nv4"><span class="n">4</span><span class="t">สรุปและเริ่มสุ่ม</span><span class="ok"></span></a>
+<div class="grp">ผลลัพธ์</div>
+<a data-go="report" id="nv5"><span class="n">▤</span><span class="t">รายงานผลการเลือกตัวอย่าง</span><span class="ok"></span></a>
+<div class="grp">ช่วยเหลือ</div>
+<a data-go="manualSec" id="nv6"><span class="n">?</span><span class="t">คู่มือการใช้งาน</span></a>
+<button class="mini-btn" id="miniBtn" type="button" title="ย่อ/ขยายเมนู">«<span class="t"> ย่อเมนู</span></button>
+<div class="sfoot">Project by สำนักตรวจเงินแผ่นดินที่ 10 กลุ่มที่ 2<br>© 2026 MRTEAM<br>ข้อมูลประมวลผลในเครื่องของคุณเท่านั้น ไม่ถูกส่งออกไปที่ใด</div>
+</aside>
+<div class="mainwrap">
+<header class="topbar noprint"><div style="display:flex;gap:10px;align-items:center;min-width:0"><button class="hb" id="hbBtn" type="button" aria-label="เมนู">☰</button><h1>ระบบสุ่มเลือกตัวอย่างสำหรับงานตรวจสอบ (ด้วยวิธีทางสถิติ)</h1></div><span class="pill" id="topPill">ยังไม่ได้เลือกวิธี</span></header>
 <main>
 <div class="noprint">
-<div class="brand brand-top">Project by สำนักตรวจเงินแผ่นดินที่ 10 กลุ่มที่ 2</div>
-<h1>ระบบสุ่มเลือกตัวอย่างสำหรับงานตรวจสอบ (ด้วยวิธีทางสถิติ)</h1>
-<p class="sub">ข้อมูลประมวลผลในเบราว์เซอร์ของคุณเท่านั้น ไม่ถูกส่งออกไปที่ใด</p>
+<div class="kpis" id="kpis">
+<div class="kpi kp1"><div class="l"><i>Σ</i>จำนวนประชากรทั้งหมด</div><div class="v" id="kv1">-</div><div class="s" id="ks1">ยังไม่ได้นำเข้าข้อมูล</div></div>
+<div class="kpi kp2"><div class="l"><i>★</i>รายการสาระสำคัญ</div><div class="v" id="kv2">-</div><div class="s" id="ks2">&nbsp;</div></div>
+<div class="kpi kp3"><div class="l"><i>#</i>ขนาดตัวอย่าง</div><div class="v" id="kv3">-</div><div class="s" id="ks3">&nbsp;</div></div>
+<div class="kpi kp4"><div class="l"><i>✓</i>รวมที่ต้องตรวจสอบ</div><div class="v" id="kv4">-</div><div class="s" id="ks4">รายการ</div></div>
+</div>
 
-<section>
+<section id="manualSec" class="noprint" hidden>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">คู่มือการใช้งาน</h2><button class="alt" type="button" id="manClose" style="padding:5px 12px;font-size:13px">ปิดคู่มือ</button></div>
+<div class="mwrap" style="margin-top:12px">
+<nav class="toc"><b style="display:block;color:var(--accent);margin-bottom:6px">สารบัญ</b>
+<a href="#m1"><span>01</span>ภาพรวมระบบ</a><a href="#m2"><span>02</span>เลือกวิธีการสุ่มตัวอย่าง</a><a href="#m3"><span>03</span>นำเข้าข้อมูลรายการ</a><a href="#m4"><span>04</span>กำหนดค่าและรายการสาระสำคัญ</a><a href="#m5"><span>05</span>รายการติดลบ ค่าสุทธิ/ค่าสัมบูรณ์</a><a href="#m6"><span>06</span>เริ่มสุ่มและรายงาน</a><a href="#m7"><span>07</span>เลขอ้างอิงการสุ่มและการสุ่มซ้ำ</a><a href="#m8"><span>08</span>ข้อควรระวัง</a></nav>
+<div>
+<h3 id="m1"><span class="no">01</span>ภาพรวมระบบ</h3>
+<p>ระบบช่วยคำนวณขนาดตัวอย่างและเลือกรายการตัวอย่างตามหลักสถิติ ขนาดตัวอย่าง = (ประชากรคงเหลือ ÷ ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้) × Confidence Factor ปัดขึ้นเป็นจำนวนเต็ม ข้อมูลทั้งหมดประมวลผลในเบราว์เซอร์ของผู้ใช้ ไม่ถูกส่งออกไปที่ใด การ์ดตัวเลขด้านบนสรุปผลการคำนวณล่าสุด และเมนูด้านซ้ายแสดงขั้นตอนที่ทำแล้ว</p>
+<h3 id="m2"><span class="no">02</span>เลือกวิธีการสุ่มตัวอย่าง</h3>
+<ol><li><b>วิธีที่ 1 Random Selection</b> ทุกรายการมีโอกาสถูกเลือกเท่ากัน เลือกคัดกรองรายการสาระสำคัญ (Key item) ก่อนได้ และเลือกสุ่มแบบจัดกลุ่มตามช่วงยอดเงินได้</li><li><b>วิธีที่ 2 MUS</b> รายการที่มูลค่าสูงมีโอกาสถูกเลือกมากกว่า ใช้เฉพาะรายการที่เป็นบวก</li><li><b>วิธีที่ 3 Systematic Selection</b> เลือกทุกช่วงห่างที่เท่ากันตามลำดับรายการในไฟล์</li></ol>
+<h3 id="m3"><span class="no">03</span>นำเข้าข้อมูลรายการ</h3>
+<ol><li>อัปโหลดไฟล์ .xlsx, .xls หรือ .csv (รองรับ CSV ภาษาไทยทั้งแบบ UTF-8 และแบบที่บันทึกจาก Excel ปกติ) หรือคัดลอกข้อมูลจาก Excel มาวาง</li><li>ถ้าเป็นไฟล์ดิบจากระบบ เลือก "ยังไม่ได้จัดเตรียมไฟล์ข้อมูล" ระบบจะหาแถวหัวตารางและข้ามแถวยอดรวมให้</li><li>ตรวจการจับคู่คอลัมน์เลขที่เอกสารและจำนวนเงิน และตรวจยอดรวมที่ระบบแจ้งกับงบทดลอง</li></ol>
+<h3 id="m4"><span class="no">04</span>กำหนดค่าและรายการสาระสำคัญ</h3>
+<ol><li>กรอกค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้ (MAT) และ Confidence Factor</li><li>ระบบเติมจำนวนประชากรทั้งหมดจากข้อมูลให้ แก้เองได้ด้วยสวิตช์ "กรอกข้อมูล"</li><li>รายการสาระสำคัญเลือกได้ 3 แบบ: ระบบคัดกรองให้ (ตรวจสอบทุกรายการ), ผู้ตรวจสอบกรอกรายการที่ตรวจสอบแล้วเอง, หรือให้ระบบสุ่มรายการสาระสำคัญ</li><li>เกณฑ์มูลค่ารายการสาระสำคัญใช้ค่า MAT เป็นค่าตั้งต้น หรือผู้ตรวจสอบกำหนดเกณฑ์เองได้ ขนาดตัวอย่างยังคำนวณจาก MAT</li><li>เอาเมาส์ชี้ (หรือแตะ) ไอคอน ⓘ เพื่อดูคำอธิบายเพิ่มเติม</li></ol>
+<h3 id="m5"><span class="no">05</span>รายการติดลบ ค่าสุทธิ/ค่าสัมบูรณ์</h3>
+<ol><li>ในหัวข้อ "ตั้งค่าเพิ่มเติม" เลือกใช้เฉพาะรายการบวก เฉพาะรายการติดลบ หรือทั้งบวกและติดลบ (ค่าสัมบูรณ์) รายการยอดศูนย์ไม่ถูกใช้ทุกตัวเลือก</li><li>เมื่อใช้ทั้งบวกและติดลบ เลือกสวิตช์ <b>ค่าสุทธิ</b> หรือ <b>ค่าสัมบูรณ์</b> ที่ช่องจำนวนประชากรทั้งหมดและช่องประชากรที่เป็นสาระสำคัญ (สองช่องเปลี่ยนตามกัน)</li><li>บัญชีรายได้/ค่าใช้จ่ายมักใช้ค่าสุทธิ ส่วนการสุ่มรายการเคลื่อนไหวของบัญชีงบแสดงฐานะการเงินควรใช้ค่าสัมบูรณ์ หรือแยกสุ่มเดบิตและเครดิต</li></ol>
+<h3 id="m6"><span class="no">06</span>เริ่มสุ่มและรายงาน</h3>
+<ol><li>ตรวจกล่องสรุปในขั้นตอนที่ 4 แล้วกด "เริ่มทำการสุ่มรายการ"</li><li>รายงานแสดงข้อมูลการคำนวณ รายการสาระสำคัญ และรายการตัวอย่าง พิมพ์หรือบันทึกเป็น Excel ได้</li><li>ต้องการตัวอย่างเพิ่มหลังสุ่มแล้ว ใช้กล่อง "เลือกตัวอย่างเพิ่ม" ใต้รายงาน พร้อมระบุเหตุผล</li></ol>
+<h3 id="m7"><span class="no">07</span>เลขอ้างอิงการสุ่มและการสุ่มซ้ำ</h3>
+<ol><li>ทุกครั้งที่สุ่ม ระบบสร้างเลขอ้างอิงการสุ่มและแสดงในรายงาน ควรเก็บรายงานไว้ในกระดาษทำการ</li><li>ผู้สอบทานพิสูจน์ผลได้โดยนำเข้าข้อมูลชุดเดิม กำหนดค่าทุกช่องตามรายงาน กดปุ่ม "สุ่มซ้ำด้วยเลขอ้างอิงเดิม" กรอกเลขจากรายงาน แล้วเริ่มสุ่ม จะได้รายการตัวอย่างเดิมทุกรายการ</li><li>การสุ่มรายการสาระสำคัญและการเลือกเพิ่มมีเลขอ้างอิงของตัวเอง กรอกในช่องของส่วนนั้น</li></ol>
+<h3 id="m8"><span class="no">08</span>ข้อควรระวัง</h3>
+<ol><li>ตรวจยอดรวมของข้อมูลที่นำเข้ากับงบทดลองทุกครั้ง</li><li>ใช้ระบบเวอร์ชันเดียวกันเมื่อพิสูจน์ผลด้วยเลขอ้างอิงเดิม</li><li>ระบบช่วยเลือกตัวอย่างเท่านั้น การประเมินผลจากตัวอย่างยังเป็นดุลยพินิจของผู้ตรวจสอบ</li></ol>
+</div></div>
+</section>
+<section id="s0">
 <h2>ข้อมูลหัวรายงาน</h2>
 <div class="grid2">
 <div><label class="fl" for="hOrg">หน่วยงานผู้ตรวจสอบ</label><input type="text" class="hf" id="hOrg" autocomplete="off"></div>
@@ -130,7 +242,7 @@ table{font-size:11px}
 </div>
 </section>
 
-<section>
+<section id="s1">
 <h2>ขั้นตอนที่ 1 เลือกวิธีการสุ่มตัวอย่าง</h2>
 <div class="cards">
 <label class="card"><input type="radio" name="m" value="1"><span><b>วิธีที่ 1</b>การเลือกตัวอย่างแบบทุกรายการมีโอกาสถูกเลือกเป็นตัวอย่างแบบเท่าเทียมกัน (Random Selection)</span></label>
@@ -140,28 +252,65 @@ table{font-size:11px}
 <label id="keyChkBox" class="card" style="display:none;margin-top:12px"><input type="checkbox" id="keyChk"><span><b>คัดกรองรายการที่มีมูลค่าที่เป็นสาระสำคัญ (Key item) / หรือรายการที่มีการเลือกเฉพาะเจาะจง</b></span></label>
 </section>
 
+<section id="s3" hidden>
+<h2>ขั้นตอนที่ 2 นำเข้าข้อมูลรายการ</h2>
+<p class="hint" style="margin-top:0">ข้อมูลต้องมีอย่างน้อยคอลัมน์ <b>เลขที่เอกสาร</b> และ <b>จำนวนเงิน</b> รองรับสูงสุด 10 คอลัมน์ในรายงาน ระบบจับคู่คอลัมน์จากหัวตาราง แล้วให้คุณตรวจสอบก่อนเริ่มสุ่ม</p>
+<div class="tabs"><button class="on" id="t1">อัปโหลดไฟล์ Excel / CSV</button><button id="t2">วางข้อมูลจาก Excel</button></div>
+<div id="p1">
+<div class="cards" style="margin-bottom:10px">
+<label class="card"><input type="radio" name="prep" value="ready" checked><span><b>จัดเตรียมไฟล์ข้อมูลแล้ว</b>มีแถวหัวตารางชัดเจน ระบบจับคู่คอลัมน์ตามหัวตาราง</span></label>
+<label class="card"><input type="radio" name="prep" value="raw"><span><b>ยังไม่ได้จัดเตรียมไฟล์ข้อมูล<i class="tip" tabindex="0" data-tip="ไฟล์ดิบจากระบบ ระบบจะค้นหาแถวหัวตาราง ข้ามแถวรวม และคาดเดาคอลัมน์ให้ คุณต้องตรวจสอบผลก่อนใช้">i</i></b>ไฟล์ดิบจากระบบ ระบบช่วยจัดให้</span></label>
+</div>
+<input type="file" id="file" accept=".xlsx,.xls,.csv">
+<div class="hint" style="margin-top:4px">รองรับไฟล์ .xlsx, .xls และ .csv (CSV ภาษาไทยทั้งแบบ UTF-8 และแบบที่บันทึกจาก Excel ปกติ)</div>
+<div id="sheetBox" hidden style="margin-top:8px"><label class="fl" for="sheetSel">เลือก Sheet</label><select id="sheetSel"></select></div>
+</div>
+<div id="p2" hidden><textarea id="paste" placeholder="คัดลอกช่วงข้อมูลพร้อมแถวหัวตารางจาก Excel (สูงสุด 10 คอลัมน์) แล้ววางที่นี่ (Ctrl+V)"></textarea></div>
+<div class="msg" id="dmsg"></div>
+<details id="suspBox" hidden style="margin-top:8px"><summary id="suspSum" class="hint" style="cursor:pointer"></summary><div id="suspBody" style="overflow:auto;margin-top:6px"></div></details>
+<div class="msg err" id="negWarn" hidden></div>
+<div id="mapBox" hidden>
+<h3>ตรวจสอบการจับคู่คอลัมน์</h3>
+<div class="grid2">
+<div><label class="fl" for="hdrRow">แถวหัวตาราง (ใส่ 0 ถ้าไม่มีหัวตาราง)</label><input type="text" class="hf" id="hdrRow" inputmode="numeric" autocomplete="off"></div>
+<div><label class="fl" for="colDoc">คอลัมน์เลขที่เอกสาร (จำเป็น)</label><select id="colDoc"></select></div>
+<div><label class="fl" for="colAmt">คอลัมน์จำนวนเงิน (จำเป็น)</label><select id="colAmt"></select></div>
+</div>
+<h3>คอลัมน์ที่แสดงในรายงาน</h3>
+<div class="cards">
+<label class="card"><input type="radio" name="disp" value="sys" checked><span><b>ให้ระบบเลือกให้<i class="tip" tabindex="0" data-tip="แสดง 6 คอลัมน์ ได้แก่ ลำดับที่ เลขที่เอกสาร ประเภทเอกสาร วันที่เอกสาร รหัสหน่วยเบิกจ่าย จำนวนเงิน (ตามหัวตารางที่พบ)">i</i></b>เลือกคอลัมน์สำคัญให้อัตโนมัติ</span></label>
+<label class="card"><input type="radio" name="disp" value="own"><span><b>ผู้ใช้ระบุเอง</b>ระบุตัวอักษรคอลัมน์ในไฟล์ สูงสุด 10 คอลัมน์ เช่น A C D<input type="text" class="hf" id="dispCols" placeholder="เช่น A C D" autocomplete="off" style="margin-top:6px"></span></label>
+</div>
+<label id="keepLastBox" class="hint" hidden style="display:block"><input type="checkbox" id="keepLast"> ระบบคาดว่าแถวสุดท้ายเป็นยอดรวม จึงไม่นำมาคิดเป็นรายการ หากเป็นรายการปกติ ให้ติ๊กช่องนี้ <b>(นำแถวสุดท้ายกลับมาเป็นรายการ)</b></label>
+<div class="msg" id="mapMsg"></div>
+<div class="wrap" style="margin-top:10px"><table class="res pv" id="pv"></table></div>
+</div>
+</section>
+
 <section id="s2" hidden>
-<h2>ขั้นตอนที่ 2 ข้อมูลก่อนทำการสุ่มตัวอย่าง <span id="mname" style="font-weight:400;color:var(--muted)"></span></h2>
+<h2>ขั้นตอนที่ 3 กำหนดค่าและคำนวณขนาดตัวอย่าง <span id="mname" style="font-weight:400;color:var(--muted)"></span></h2>
 <div class="wrap"><table class="pt">
 <thead><tr><th>ข้อมูล</th><th class="n">จำนวน</th><th>หมายเหตุ</th></tr></thead>
 <tbody>
 <tr><td>ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้*<span class="sub">(* การแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้ ซึ่งต้องไม่เกินระดับความมีสาระสำคัญในการปฏิบัติงาน (PM))</span></td><td><input type="text" id="mat" inputmode="decimal" autocomplete="off"></td><td>[MAT]</td></tr>
 <tr><td>จำนวนประชากรทั้งหมด<span class="tbsw" id="tbA" hidden><label><input type="radio" name="tbA" value="net" checked><span>ค่าสุทธิ</span></label><label><input type="radio" name="tbA" value="gross"><span>ค่าสัมบูรณ์</span></label><label><input type="radio" name="tbA" value="manual"><span>กรอกข้อมูล</span></label></span></td><td><input type="text" id="tot" inputmode="decimal" autocomplete="off"></td><td>√</td></tr>
-<tr data-m="2,3,4"><td colspan="3">
+</tbody></table></div>
+<div class="hint" id="totHint"></div>
+<div data-m="2,3,4" id="keyBlk" class="keyblk">
+<h3 style="margin-top:0">รายการสาระสำคัญ (Key item)</h3>
 <b>วิธีกำหนดรายการประชากรที่เป็นสาระสำคัญ</b>
 <div class="cards" style="margin-top:6px">
-<label class="card"><input type="radio" name="keyMode" value="auto" checked><span><b>ระบบคัดกรองข้อมูลให้ (ตรวจสอบทุกรายการที่มีสาระสำคัญ)</b>ดึงทุกรายการที่ยอดเกินเกณฑ์มูลค่ารายการสาระสำคัญ (ค่าตั้งต้นใช้ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้*) และตรวจสอบทุกรายการ</span></label>
-<label class="card"><input type="radio" name="keyMode" value="manual"><span><b>ผู้ตรวจสอบกรอกข้อมูลด้วยตนเอง (ผู้ตรวจสอบทำการเลือกตัวอย่างรายการสาระสำคัญหรือรายการอื่นแล้ว)</b>ใช้เมื่อตรวจสอบรายการสาระสำคัญหรือรายการอื่นไปแล้วบางส่วน ระบุเลขที่เอกสารที่ตรวจสอบแล้ว</span></label>
-<label class="card"><input type="radio" name="keyMode" value="rand"><span><b>ผู้ตรวจสอบต้องการให้สุ่มรายการสาระสำคัญ</b>ระบุจำนวนรายการสาระสำคัญที่จะตรวจสอบ ระบบสุ่มให้ทุกรายการมีโอกาสเท่ากัน<span class="sub err" id="keyRandOff" style="display:none">ไม่มีรายการสาระสำคัญในข้อมูล จึงไม่ต้องสุ่ม</span></span></label>
+<label class="card"><input type="radio" name="keyMode" value="auto" checked><span><b>ระบบคัดกรองข้อมูลให้<i class="tip" tabindex="0" data-tip="ดึงทุกรายการที่ยอดเกินเกณฑ์มูลค่ารายการสาระสำคัญ (ค่าตั้งต้นใช้ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้*) และตรวจสอบทุกรายการ">i</i></b>ตรวจสอบทุกรายการที่มีสาระสำคัญ</span></label>
+<label class="card"><input type="radio" name="keyMode" value="manual"><span><b>ผู้ตรวจสอบกรอกข้อมูลด้วยตนเอง<i class="tip" tabindex="0" data-tip="ใช้เมื่อผู้ตรวจสอบเลือกตัวอย่างรายการสาระสำคัญหรือรายการอื่น และตรวจสอบไปแล้วบางส่วน ให้ระบุเลขที่เอกสาร (และจำนวนเงิน) ที่ตรวจสอบแล้ว ระบบจะนำรายการเหล่านั้นมาหักออกก่อนสุ่ม">i</i></b>ระบุรายการที่ตรวจสอบไปแล้ว</span></label>
+<label class="card"><input type="radio" name="keyMode" value="rand"><span><b>ผู้ตรวจสอบต้องการให้สุ่มรายการสาระสำคัญ<i class="tip" tabindex="0" data-tip="ระบุจำนวนรายการสาระสำคัญที่จะตรวจสอบ ระบบสุ่มจากรายการสาระสำคัญทั้งหมด โดยทุกรายการมีโอกาสถูกเลือกเท่ากัน และต้องระบุเหตุผลที่ไม่ตรวจสอบครบทุกรายการ">i</i></b>ระบุจำนวน ระบบสุ่มให้<span class="sub err" id="keyRandOff" style="display:none">ไม่มีรายการสาระสำคัญในข้อมูล จึงไม่ต้องสุ่ม</span></span></label>
 </div>
 <div id="keyThrBox" style="margin-top:10px">
 <b>เกณฑ์มูลค่าที่ถือว่าเป็นรายการสาระสำคัญ</b>
 <div class="cards" style="margin-top:6px">
-<label class="card"><input type="radio" name="keyThrM" value="mat" checked><span><b>ใช้ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้*</b>รายการที่ยอดเกินค่าที่กรอกด้านบนถือเป็นรายการสาระสำคัญ (ค่าตั้งต้น)</span></label>
-<label class="card"><input type="radio" name="keyThrM" value="own"><span><b>ผู้ตรวจสอบกำหนดเกณฑ์เอง</b>ใช้เมื่อกำหนดรายการสาระสำคัญจากฐานอื่น เช่น ตามแนวทางของงานตรวจสอบหรือดุลยพินิจของผู้ตรวจสอบ</span></label>
+<label class="card"><input type="radio" name="keyThrM" value="mat" checked><span><b>ใช้ค่า MAT ที่กรอกด้านบน<i class="tip" tabindex="0" data-tip="รายการที่ยอดเกินค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้* ถือเป็นรายการสาระสำคัญ">i</i></b>ค่าตั้งต้น</span></label>
+<label class="card"><input type="radio" name="keyThrM" value="own"><span><b>ผู้ตรวจสอบกำหนดเกณฑ์เอง<i class="tip" tabindex="0" data-tip="ใช้เมื่อกำหนดรายการสาระสำคัญจากฐานอื่น เช่น ตามแนวทางของงานตรวจสอบหรือดุลยพินิจของผู้ตรวจสอบ ขนาดตัวอย่างยังคำนวณจาก MAT ตามสูตรเดิม">i</i></b>ใช้ฐานอื่นที่ไม่ใช่ MAT</span></label>
 </div>
 <label id="keyThrL" hidden style="margin-top:6px">เกณฑ์มูลค่ารายการสาระสำคัญ (บาท) — รายการที่ยอดเกินค่านี้ถือเป็นรายการสาระสำคัญ<input type="text" id="keyThr" inputmode="decimal" autocomplete="off"></label>
-<div class="hint" style="margin-top:4px">ขนาดตัวอย่างยังคำนวณจากค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้* ตามสูตรเดิม เกณฑ์นี้ใช้เฉพาะการคัดรายการสาระสำคัญ</div>
 </div>
 <div id="keyManual" hidden style="margin-top:8px">
 <label>เลขที่เอกสารและจำนวนเงินของรายการที่ตรวจสอบไปแล้ว (หนึ่งรายการต่อบรรทัด: เลขที่เอกสาร แล้วตามด้วยจำนวนเงิน คั่นด้วย Tab หรือเว้นวรรค — วางจาก Excel สองคอลัมน์ได้)<textarea id="keyDocs" style="min-height:90px" placeholder="1500001645&#9;-5,800.00&#10;1500002310&#9;120,000.00"></textarea></label>
@@ -174,7 +323,10 @@ table{font-size:11px}
 </div>
 <div class="hint" id="keyHint"></div>
 <div id="keyWhyBox" hidden><label>เหตุผลที่ไม่ตรวจสอบรายการสาระสำคัญครบทุกรายการ (ควรต้องกรอกเหตุผล)<textarea id="keyWhy" style="min-height:60px"></textarea></label></div>
-</td></tr>
+</div>
+<div class="wrap"><table class="pt">
+<thead><tr><th>ข้อมูล</th><th class="n">จำนวน</th><th>หมายเหตุ</th></tr></thead>
+<tbody>
 <tr data-m="2,3,4"><td>จำนวนประชากรที่เป็นสาระสำคัญ<span class="tbsw" id="tbB" hidden><label><input type="radio" name="tbB" value="net" checked><span>ค่าสุทธิ</span></label><label><input type="radio" name="tbB" value="gross"><span>ค่าสัมบูรณ์</span></label><label><input type="radio" name="tbB" value="manual"><span>กรอกข้อมูล</span></label></span></td><td><span id="mv">รอข้อมูล</span><input type="text" id="mvIn" inputmode="decimal" autocomplete="off" hidden><div class="hint" id="mvCalc" style="text-align:right"></div></td><td id="mvn">c</td></tr>
 <tr data-m="2,3,4"><td>จำนวนประชากรคงเหลือ</td><td id="rem">รอข้อมูล</td><td>c</td></tr>
 <tr><td>ค่า Confidence Factor</td><td><input type="text" id="cf" inputmode="decimal" autocomplete="off"></td><td>cf</td></tr>
@@ -185,24 +337,6 @@ table{font-size:11px}
 <tr class="sum" id="effRow" hidden><td>จำนวนรายการที่เลือกตรวจสอบจริง (หลังจำกัดสูงสุด)</td><td id="eff">-</td><td>รายการ</td></tr>
 <tr><td>หมายเหตุ</td><td colspan="2" style="text-align:left;width:auto"><textarea id="remark" style="min-height:70px;font:inherit" placeholder="ใส่ข้อความหรือข้อมูลเพิ่มเติม เช่น เรื่องที่เป็นสาระสำคัญที่ผู้ตรวจสอบต้องการบันทึกไว้ (ไม่บังคับ)"></textarea></td></tr>
 </tbody></table></div>
-<div class="legend">[MAT] : ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้ ซึ่งต้องไม่เกินระดับความมีสาระสำคัญในการปฏิบัติงาน (Performance Materiality), √ : งบทดลอง/สมุดรายวันทั่วไป/ข้อมูลทางบัญชี, c : การคำนวณ/การทดสอบ, cf : ตารางความเสี่ยงที่ต้องการจะลด ระดับความเชื่อมั่น และ Confidence Factor</div>
-<div class="hint" id="totHint"></div>
-<h3>เลือกจำนวนรายการที่จะตรวจสอบ</h3>
-<p class="hint" style="margin-top:0">ถ้าจำนวนที่คำนวณได้มากเกินกำลังของผู้ตรวจสอบ สามารถกำหนดจำนวนสูงสุดเองได้</p>
-<div class="cards">
-<label class="card"><input type="radio" name="cap" value="0" checked><span><b>ตามจำนวนที่คำนวณได้จริง</b><span id="capA">ยังไม่มีจำนวนที่คำนวณได้</span></span></label>
-<label class="card"><input type="radio" name="cap" value="1"><span><b>จำกัดจำนวนสูงสุด</b>กรอกจำนวนรายการสูงสุดที่ผู้ตรวจสอบตรวจสอบได้<input type="text" id="capN" inputmode="numeric" placeholder="จำนวนรายการสูงสุด" autocomplete="off" style="margin-top:6px"></span></label>
-</div>
-<div class="hint" id="capHint"></div>
-<div id="negBox" hidden>
-<h3>การจัดการรายการที่จำนวนเงินเป็นศูนย์หรือติดลบ</h3>
-<p class="hint" id="negHint" style="margin-top:0"></p>
-<div class="cards">
-<label class="card"><input type="radio" name="neg" value="skip"><span><b id="negSkipT">ใช้ข้อมูลเฉพาะรายการที่เป็นบวก</b><span id="negSkipD"></span></span></label>
-<label class="card"><input type="radio" name="neg" value="neg"><span><b id="negNegT">ใช้ข้อมูลเฉพาะรายการติดลบ</b><span id="negNegD"></span></span></label>
-<label class="card"><input type="radio" name="neg" value="abs" checked><span><b id="negAbsT">ใช้ข้อมูลรายการทั้งที่เป็นบวกและติดลบ (ค่าสัมบูรณ์)</b><span id="negAbsD"></span></span></label>
-</div>
-</div>
 <div data-m="1,2" id="stratBox">
 <h3>วิธีการสุ่มรายการ</h3>
 <div class="hint err" id="stOff"></div>
@@ -227,52 +361,45 @@ table{font-size:11px}
 <div class="wrap"><table class="res" id="stTbl"></table></div>
 </div>
 </div>
+<details id="advBox" class="adv"><summary><b>ตั้งค่าเพิ่มเติม</b> <span class="hint" id="advSum"></span></summary>
+<div class="advIn">
+<h3 style="margin-top:4px">เลือกจำนวนรายการที่จะตรวจสอบ</h3>
+<p class="hint" style="margin-top:0">ถ้าจำนวนที่คำนวณได้มากเกินกำลังของผู้ตรวจสอบ สามารถกำหนดจำนวนสูงสุดเองได้</p>
+<div class="cards">
+<label class="card"><input type="radio" name="cap" value="0" checked><span><b>ตามจำนวนที่คำนวณได้จริง</b><span id="capA">ยังไม่มีจำนวนที่คำนวณได้</span></span></label>
+<label class="card"><input type="radio" name="cap" value="1"><span><b>จำกัดจำนวนสูงสุด</b>กรอกจำนวนรายการสูงสุดที่ผู้ตรวจสอบตรวจสอบได้<input type="text" id="capN" inputmode="numeric" placeholder="จำนวนรายการสูงสุด" autocomplete="off" style="margin-top:6px"></span></label>
+</div>
+<div class="hint" id="capHint"></div>
+<div id="negBox" hidden>
+<h3>การจัดการรายการที่จำนวนเงินเป็นศูนย์หรือติดลบ</h3>
+<p class="hint" id="negHint" style="margin-top:0"></p>
+<div class="cards">
+<label class="card"><input type="radio" name="neg" value="skip"><span><b><span id="negSkipT">ใช้ข้อมูลเฉพาะรายการที่เป็นบวก</span><i class="tip" tabindex="0" id="negSkipD">i</i></b>ตัดรายการติดลบและยอดศูนย์ออก</span></label>
+<label class="card"><input type="radio" name="neg" value="neg"><span><b><span id="negNegT">ใช้ข้อมูลเฉพาะรายการติดลบ</span><i class="tip" tabindex="0" id="negNegD">i</i></b>ใช้เฉพาะรายการติดลบ โดยใช้ขนาดของยอด</span></label>
+<label class="card"><input type="radio" name="neg" value="abs" checked><span><b><span id="negAbsT">ใช้ข้อมูลรายการทั้งที่เป็นบวกและติดลบ (ค่าสัมบูรณ์)</span><i class="tip" tabindex="0" id="negAbsD">i</i></b>ใช้ทุกรายการยกเว้นยอดศูนย์ (ค่าตั้งต้น)</span></label>
+</div>
+</div>
+</div>
+</details>
 </section>
 
-<section id="s3" hidden>
-<h2>ขั้นตอนที่ 3 นำเข้าข้อมูลรายการ</h2>
-<p class="hint" style="margin-top:0">ข้อมูลต้องมีอย่างน้อยคอลัมน์ <b>เลขที่เอกสาร</b> และ <b>จำนวนเงิน</b> รองรับสูงสุด 10 คอลัมน์ในรายงาน ระบบจับคู่คอลัมน์จากหัวตาราง แล้วให้คุณตรวจสอบก่อนเริ่มสุ่ม</p>
-<div class="tabs"><button class="on" id="t1">อัปโหลดไฟล์ Excel / CSV</button><button id="t2">วางข้อมูลจาก Excel</button></div>
-<div id="p1">
-<div class="cards" style="margin-bottom:10px">
-<label class="card"><input type="radio" name="prep" value="ready" checked><span><b>จัดเตรียมไฟล์ข้อมูลแล้ว</b>มีแถวหัวตารางชัดเจน ระบบจับคู่คอลัมน์ตามหัวตาราง</span></label>
-<label class="card"><input type="radio" name="prep" value="raw"><span><b>ยังไม่ได้จัดเตรียมไฟล์ข้อมูล</b>ไฟล์ดิบจากระบบ ระบบจะค้นหาแถวหัวตาราง ข้ามแถวรวม และคาดเดาคอลัมน์ให้ คุณต้องตรวจสอบผลก่อนใช้</span></label>
-</div>
-<input type="file" id="file" accept=".xlsx,.xls,.csv">
-<div class="hint" style="margin-top:4px">รองรับไฟล์ .xlsx, .xls และ .csv (CSV ภาษาไทยทั้งแบบ UTF-8 และแบบที่บันทึกจาก Excel ปกติ)</div>
-<div id="sheetBox" hidden style="margin-top:8px"><label class="fl" for="sheetSel">เลือก Sheet</label><select id="sheetSel"></select></div>
-</div>
-<div id="p2" hidden><textarea id="paste" placeholder="คัดลอกช่วงข้อมูลพร้อมแถวหัวตารางจาก Excel (สูงสุด 10 คอลัมน์) แล้ววางที่นี่ (Ctrl+V)"></textarea></div>
-<div class="msg" id="dmsg"></div>
-<details id="suspBox" hidden style="margin-top:8px"><summary id="suspSum" class="hint" style="cursor:pointer"></summary><div id="suspBody" style="overflow:auto;margin-top:6px"></div></details>
-<div class="msg err" id="negWarn" hidden></div>
-<div id="mapBox" hidden>
-<h3>ตรวจสอบการจับคู่คอลัมน์</h3>
-<div class="grid2">
-<div><label class="fl" for="hdrRow">แถวหัวตาราง (ใส่ 0 ถ้าไม่มีหัวตาราง)</label><input type="text" class="hf" id="hdrRow" inputmode="numeric" autocomplete="off"></div>
-<div><label class="fl" for="colDoc">คอลัมน์เลขที่เอกสาร (จำเป็น)</label><select id="colDoc"></select></div>
-<div><label class="fl" for="colAmt">คอลัมน์จำนวนเงิน (จำเป็น)</label><select id="colAmt"></select></div>
-</div>
-<h3>คอลัมน์ที่แสดงในรายงาน</h3>
-<div class="cards">
-<label class="card"><input type="radio" name="disp" value="sys" checked><span><b>ให้ระบบเลือกให้</b>แสดง 6 คอลัมน์ ได้แก่ ลำดับที่ เลขที่เอกสาร ประเภทเอกสาร วันที่เอกสาร รหัสหน่วยเบิกจ่าย จำนวนเงิน (ตามหัวตารางที่พบ)</span></label>
-<label class="card"><input type="radio" name="disp" value="own"><span><b>ผู้ใช้ระบุเอง</b>ระบุตัวอักษรคอลัมน์ในไฟล์ สูงสุด 10 คอลัมน์ เช่น A C D<input type="text" class="hf" id="dispCols" placeholder="เช่น A C D" autocomplete="off" style="margin-top:6px"></span></label>
-</div>
-<label id="keepLastBox" class="hint" hidden style="display:block"><input type="checkbox" id="keepLast"> ระบบคาดว่าแถวสุดท้ายเป็นยอดรวม จึงไม่นำมาคิดเป็นรายการ หากเป็นรายการปกติ ให้ติ๊กช่องนี้ <b>(นำแถวสุดท้ายกลับมาเป็นรายการ)</b></label>
-<div class="msg" id="mapMsg"></div>
-<div class="wrap" style="margin-top:10px"><table class="res pv" id="pv"></table></div>
-</div>
-<details id="seedBox" style="margin-top:12px"><summary class="hint" style="cursor:pointer"><b>สุ่มซ้ำด้วยเลขอ้างอิงการสุ่มเดิม</b> (สำหรับผู้สอบทาน)</summary>
+<section id="s4" hidden>
+<h2>ขั้นตอนที่ 4 ตรวจสอบสรุปและเริ่มสุ่ม</h2>
+<div id="sumBar" class="sumbar"></div>
+<details id="seedBox" class="seedbox"><summary>สุ่มซ้ำด้วยเลขอ้างอิงการสุ่มเดิม</summary>
 <div style="margin-top:6px"><label>เลขอ้างอิงการสุ่ม<input type="text" id="seedIn" inputmode="numeric" autocomplete="off" placeholder="เว้นว่าง = ระบบสร้างเลขใหม่ให้"></label>
-<p class="hint" style="margin:4px 0 0">ปกติให้เว้นว่าง ระบบจะสร้างเลขอ้างอิงใหม่ทุกครั้งที่สุ่มและแสดงไว้ในรายงาน หากต้องการพิสูจน์ผลการสุ่มเดิม ให้นำเข้าข้อมูลชุดเดิม กำหนดค่าทุกช่องตามรายงานเดิม แล้วกรอกเลขอ้างอิงจากรายงาน ระบบจะได้รายการตัวอย่างเดิมทุกรายการ</p></div></details>
-<div class="row"><button id="run">เริ่มทำการสุ่มรายการ</button><button class="alt" id="clr">ล้างข้อมูลที่นำเข้า</button></div>
+<p class="hint" style="margin:4px 0 0"><b>สำหรับผู้สอบทาน:</b> ปกติให้เว้นว่าง ระบบจะสร้างเลขอ้างอิงใหม่ทุกครั้งที่สุ่มและแสดงไว้ในรายงาน หากต้องการพิสูจน์ผลการสุ่มเดิม ให้นำเข้าข้อมูลชุดเดิม กำหนดค่าทุกช่องตามรายงานเดิม แล้วกรอกเลขอ้างอิงจากรายงาน ระบบจะได้รายการตัวอย่างเดิมทุกรายการ</p></div></details>
+<div class="row"><button id="run">เริ่มทำการสุ่มรายการ</button><button class="alt" id="seedBtn" type="button">สุ่มซ้ำด้วยเลขอ้างอิงเดิม (สำหรับผู้สอบทาน)</button><button class="alt" id="clr">ล้างข้อมูลที่นำเข้า</button></div>
 <div class="msg err" id="emsg"></div>
 </section>
 </div>
 
 <section id="report" hidden></section>
+
 <p class="sub" style="text-align:center;margin:24px 0 0;font-size:13px">© 2026 MRTEAM. All rights reserved.</p>
 </main>
+</div>
+</div>
 
 <script>
 const $=id=>document.getElementById(id);
@@ -322,7 +449,7 @@ const NEGTXT={
   1:['เลือกว่าจะใช้รายการกลุ่มใดเป็นประชากรที่ใช้สุ่ม รายการยอดศูนย์ไม่ถูกใช้ในทุกตัวเลือก ถ้าแยกตรวจรายการบวกกับรายการติดลบ ให้สุ่มทีละชุดและแยกรายงาน',
      'ตัดรายการติดลบและรายการศูนย์ออกจากประชากร รายการเหล่านี้ไม่มีโอกาสถูกเลือก และแจ้งจำนวนที่ข้ามในรายงาน',
      'ตัดรายการบวกและรายการศูนย์ออกจากประชากร ใช้ขนาดของยอดติดลบในการคำนวณทุกอย่าง ประชากรทั้งหมดตั้งต้นคือผลรวมขนาดของรายการติดลบ',
-     'รายการบวกและติดลบอยู่ในประชากรที่สุ่ม (ข้ามรายการยอดศูนย์) ทุกรายการมีโอกาสถูกเลือกเท่ากัน รายการติดลบใช้ค่าสัมบูรณ์ในการคัดรายการสาระสำคัญและเลือกตัวอย่าง (เลือกฐานยอดสุทธิหรือค่าสัมบูรณ์ได้ที่ช่องจำนวนประชากรทั้งหมด)'],
+     'รายการบวกและติดลบอยู่ในประชากรที่สุ่ม (ข้ามรายการยอดศูนย์) ทุกรายการมีโอกาสถูกเลือกเท่ากัน รายการติดลบใช้ค่าสัมบูรณ์ในการคัดรายการสาระสำคัญและเลือกตัวอย่าง (เลือกค่าสุทธิหรือค่าสัมบูรณ์ได้ที่ช่องจำนวนประชากรทั้งหมด)'],
   2:['เลือกว่าจะใช้รายการกลุ่มใดเป็นประชากรที่ใช้สุ่มและคัดรายการสาระสำคัญ รายการยอดศูนย์ไม่ถูกใช้ในทุกตัวเลือก ถ้าแยกตรวจรายการบวกกับรายการติดลบ ให้สุ่มทีละชุดและแยกรายงาน',
      'ตัดรายการติดลบและรายการศูนย์ออกจากประชากร และไม่นับเป็นรายการที่มีสาระสำคัญ แจ้งจำนวนที่ข้ามในรายงาน',
      'ตัดรายการบวกและรายการศูนย์ออกจากประชากร ใช้ขนาดของยอดติดลบทั้งในการเทียบกับระดับความมีสาระสำคัญและการสุ่ม ประชากรทั้งหมดตั้งต้นคือผลรวมขนาดของรายการติดลบ',
@@ -341,18 +468,22 @@ document.querySelectorAll('input[name=tbA],input[name=tbB]').forEach(r=>r.addEve
 /* ผู้ใช้พิมพ์ยอดประชากรทั้งหมดเอง → สวิตช์แสดง "กรอกข้อมูล" */
 $('tot').addEventListener('input',()=>{document.querySelector('input[name=tbA][value=manual]').checked=true});
 $('mvIn').addEventListener('input',()=>calc());
-const hdrHtml=()=>[['หน่วยงานผู้ตรวจสอบ','hOrg'],['หน่วยรับตรวจ','hAud'],['สำหรับปีสิ้นสุดวันที่','hYear'],['ชื่อบัญชี','hAcc']].map(([l,id])=>`<div>${l}: <b>${esc($(id).value.trim())||'-'}</b></div>`).join('');
+$('seedBtn').addEventListener('click',()=>{const d=$('seedBox');d.open=!d.open;if(d.open)$('seedIn').focus()});
+document.addEventListener('click',e=>{if(e.target.classList&&e.target.classList.contains('tip'))e.preventDefault()},true);
+['hOrg','hAud','hYear','hAcc','capN'].forEach(id=>$(id).addEventListener('input',()=>calc()));
+document.querySelectorAll('input[name=cap]').forEach(r=>r.addEventListener('change',()=>calc()));
+const hdrHtml=()=>[['หน่วยงานผู้ตรวจสอบ','hOrg'],['หน่วยรับตรวจ','hAud'],['สำหรับปีสิ้นสุดวันที่','hYear'],['ชื่อบัญชี','hAcc']].map(([l,id])=>`<div>${l}: <b>${esc($(id).value.trim())||'<span style="font-weight:400;color:var(--muted);display:inline-block;max-width:100%;overflow:hidden;vertical-align:bottom;white-space:nowrap">............................................................</span>'}</b></div>`).join('');
 
 const DISP={1:1,2:1,3:2,4:3};
 function applyMethod(){
   const r=document.querySelector('input[name=m]:checked');if(!r)return;
   const b=+r.value;$('keyChkBox').style.display=b===1?'flex':'none';
-  method=b===1&&$('keyChk').checked?2:b;$('s2').hidden=$('s3').hidden=false;
+  method=b===1&&$('keyChk').checked?2:b;$('s2').hidden=$('s3').hidden=$('s4').hidden=false;
   $('mname').textContent='(วิธีที่ '+DISP[method]+(method===2?' แบบคัดรายการสำคัญก่อน':'')+')';
   document.querySelectorAll('[data-m]').forEach(e=>e.hidden=!e.dataset.m.split(',').includes(String(method)));
   $('negBox').hidden=method===3;
   const T=NEGTXT[method];
-  $('negHint').textContent=T[0];$('negSkipD').textContent=T[1];$('negNegD').textContent=T[2];$('negAbsD').textContent=T[3];
+  $('negHint').textContent=T[0];$('negSkipD').dataset.tip=T[1];$('negNegD').dataset.tip=T[2];$('negAbsD').dataset.tip=T[3];
   if(!negTouched)document.querySelector('input[name=neg][value="'+(method===3?'skip':'abs')+'"]').checked=true;
   $('report').hidden=true;autoTot();calc();
 }
@@ -473,6 +604,74 @@ function stTable(st,withSel){
   return h;
 }
 
+/* ---- ส่วนแสดงผล (ไม่กระทบการคำนวณ) ---- */
+const CODE_TIP={'[MAT]':'ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้ ซึ่งต้องไม่เกินระดับความมีสาระสำคัญในการปฏิบัติงาน (Performance Materiality)','√':'ยอดตามงบทดลอง/สมุดรายวันทั่วไป/ข้อมูลทางบัญชี ใช้กระทบยอด','cf':'ค่า Confidence Factor จากตารางความเสี่ยงที่ต้องการจะลดและระดับความเชื่อมั่น','c':'ค่าที่ได้จากการคำนวณ/การทดสอบของระบบ'};
+function decorCodes(){
+  document.querySelectorAll('#s2 table.pt td:nth-child(3)').forEach(td=>{
+    if(td.querySelector('.tip')||td.querySelector('textarea,input'))return;
+    const t=td.textContent,m=t.match(/^(\[MAT\]|√|cf|c)(?=\s|$|\|)/);if(!m)return;
+    const tip=CODE_TIP[m[1]];td.innerHTML='<span class="code">'+esc(m[1])+'<i class="tip" tabindex="0" data-tip="'+esc(tip)+'">i</i></span>'+esc(t.slice(m[1].length));
+  });
+}
+let advAuto=false;
+function updSum(P){
+  decorCodes();
+  if(!data.length&&!$('tot').value.trim()){$('sumBar').innerHTML='<span class="hint">นำเข้าข้อมูลรายการ (ขั้นตอนที่ 2) และกำหนดค่า (ขั้นตอนที่ 3) แล้วสรุปจะแสดงที่นี่</span>'}
+  else{
+    const lim=!$('effRow').hidden,tot=$('tot').value.trim()||'-';
+    const bits=[`<div><b>${esc($('mname').textContent.replace(/[()]/g,'').trim()||'')}</b></div>`,
+      `<div>ข้อมูลที่นำเข้า ${data.length.toLocaleString()} รายการ | จำนวนประชากรทั้งหมด ${esc(tot)} บาท${!$('tbA').hidden?' ('+esc(document.querySelector('input[name=tbA]:checked').nextElementSibling.textContent)+')':''}</div>`];
+    if(method>=2)bits.push(`<div>รายการสาระสำคัญ ${esc($('mc').textContent)} รายการ | ประชากรคงเหลือ ${esc($('rem').textContent)} บาท</div>`);
+    bits.push(`<div>ขนาดตัวอย่าง ${esc($('smp').textContent)} รายการ${+num($('ex').value)>0?' + เลือกเพิ่ม '+esc($('ex').value)+' รายการ':''}</div>`);
+    bits.push(`<div>รวมรายการที่เลือกตรวจสอบ <span class="big">${esc(lim?$('eff').textContent:$('all').textContent)}</span> รายการ${lim?' (จำกัดสูงสุด)':''}</div>`);
+    const miss=[['hOrg','หน่วยงานผู้ตรวจสอบ'],['hAud','หน่วยรับตรวจ'],['hYear','สำหรับปีสิ้นสุดวันที่'],['hAcc','ชื่อบัญชี']].filter(([id])=>!$(id).value.trim()).map(x=>x[1]);
+    if(miss.length)bits.push(`<div class="warnline">ยังไม่ได้กรอกข้อมูลหัวรายงาน: ${miss.join(', ')} (สุ่มได้ รายงานจะเว้นบรรทัดไว้ให้เขียนเพิ่ม)</div>`);
+    $('sumBar').innerHTML=bits.join('');
+  }
+  if(method!==3){
+    const hasNeg=data.some(x=>x.amt<0);
+    $('negBox').hidden=data.length>0&&!hasNeg&&negMode()!=='neg';
+    if(hasNeg&&!advAuto){advAuto=true;$('advBox').open=true}
+  }
+  const capOn=document.querySelector('input[name=cap]:checked').value==='1';
+  const nl={skip:'เฉพาะรายการที่เป็นบวก',neg:'เฉพาะรายการติดลบ',abs:'ทั้งบวกและติดลบ (ค่าสัมบูรณ์)'}[negMode()];
+  $('advSum').textContent='— จำนวนที่ตรวจสอบ: '+(capOn?'จำกัดสูงสุด '+($('capN').value.trim()||'-')+' รายการ':'ตามที่คำนวณได้')+(method===3?'':' | รายการติดลบ: '+($('negBox').hidden?'ไม่มีในข้อมูล':nl));
+}
+/* ---- เมนูซ้าย การ์ดตัวเลข และคู่มือ (ส่วนแสดงผล ไม่กระทบการคำนวณ) ---- */
+function updDash(){
+  const set=(id,v)=>{const e=$(id);if(e.textContent!==v)e.textContent=v};
+  const chosen=!$('s2').hidden;
+  set('topPill',chosen?($('mname').textContent.replace(/[()]/g,'').trim()||'เลือกวิธีแล้ว'):'ยังไม่ได้เลือกวิธี');
+  const tv=$('tot').value.trim();
+  set('kv1',tv||'-');set('ks1',data.length?data.length.toLocaleString()+' รายการที่นำเข้า'+(!$('tbA').hidden?' · '+document.querySelector('input[name=tbA]:checked').nextElementSibling.textContent:''):'ยังไม่ได้นำเข้าข้อมูล');
+  if(method>=2){set('kv2',$('mc').textContent);set('ks2',$('mv').hidden?'กรอกเอง '+($('mvIn').value||'-')+' บาท':$('mv').textContent+(/\d/.test($('mv').textContent)?' บาท':''))}
+  else{set('kv2',chosen?'ไม่ใช้':'-');set('ks2',chosen?'วิธีนี้ไม่ได้คัดรายการสาระสำคัญ':'\u00a0')}
+  set('kv3',$('smp').textContent);set('ks3',(()=>{const t=$('smpn').textContent.match(/คำนวณได้\s*([\d.,]+)/);return t?'คำนวณได้ '+t[1]+' ปัดขึ้น':'\u00a0'})());
+  const lim=!$('effRow').hidden;set('kv4',lim?$('eff').textContent:$('all').textContent);set('ks4',lim?'รายการ (จำกัดสูงสุด)':'รายการ');
+  const hdrOk=['hOrg','hAud','hYear','hAcc'].every(id=>$(id).value.trim());
+  const st=[hdrOk,chosen,data.length>0,chosen&&/\d/.test($('smp').textContent),!$('report').hidden,!$('report').hidden];
+  ['nv0','nv1','nv2','nv3','nv4','nv5'].forEach((id,k)=>{const a=$(id);a.classList.toggle('done',!!st[k]);a.querySelector('.ok').textContent=st[k]?'✓':'';});
+  ['nv2','nv3','nv4'].forEach(id=>$(id).classList.toggle('off',!chosen));$('nv5').classList.toggle('off',$('report').hidden);
+}
+function navSpy(){
+  const ids=['s0','s1','s3','s2','s4','report','manualSec'],nv=['nv0','nv1','nv2','nv3','nv4','nv5','nv6'];let cur=0;
+  const lim=document.querySelector('.topbar').offsetHeight+$('kpis').offsetHeight+70;
+  ids.forEach((id,k)=>{const e=$(id);if(!e||e.hidden)return;if(e.getBoundingClientRect().top<lim)cur=k});
+  nv.forEach((id,k)=>$(id).classList.toggle('on',k===cur));
+}
+document.querySelectorAll('#side a[data-go]').forEach(a=>a.addEventListener('click',()=>{
+  const id=a.dataset.go;if(id==='manualSec'){$('manualSec').hidden=false}
+  const e=$(id);if(e&&!e.hidden)e.scrollIntoView({behavior:'smooth',block:'start'});
+  $('app').classList.remove('navopen');}));
+$('manClose').addEventListener('click',()=>{$('manualSec').hidden=true;navSpy()});
+$('hbBtn').addEventListener('click',()=>$('app').classList.toggle('navopen'));
+$('miniBtn').addEventListener('click',()=>{const m=$('app').classList.toggle('mini');$('miniBtn').innerHTML=m?'»':'«<span class="t"> ย่อเมนู</span>';try{localStorage.setItem('navMini',m?'1':'')}catch(_){}});
+try{if(localStorage.getItem('navMini')){$('app').classList.add('mini');$('miniBtn').innerHTML='»'}}catch(_){}
+document.addEventListener('click',e=>{if($('app').classList.contains('navopen')&&!e.target.closest('#side')&&!e.target.closest('#hbBtn'))$('app').classList.remove('navopen')});
+window.addEventListener('scroll',()=>{navSpy();$('kpis').classList.toggle('compact',scrollY>140)},{passive:true});
+setInterval(()=>{try{updDash();navSpy()}catch(_){}},700);
+function fitTop(){const h=document.querySelector('.topbar').offsetHeight;$('kpis').style.top=h+'px';document.documentElement.style.scrollPaddingTop=(h+$('kpis').offsetHeight+12)+'px'}
+window.addEventListener('resize',fitTop);setTimeout(fitTop,50);setInterval(fitTop,1500);
 function calc(){
   {const sh=method!==3&&negMode()==='abs';$('tbA').hidden=!sh;$('tbB').hidden=!sh}
   const mat=num($('mat').value),tot=num($('tot').value),cf=num($('cf').value),ex=Math.max(0,Math.floor(num($('ex').value)||0));
@@ -547,12 +746,12 @@ function calc(){
   const ds=sum(data);let h='';
   const fi=data.length?frameInfo():null,tg=fi?fi.ft:0;
   if(data.length){
-    h=`ยอดสุทธิในข้อมูลที่นำเข้า ${fmt(fi.net)} บาท (รายการบวก ${fmt(fi.pos)} / รายการติดลบ ${fmt(fi.neg)} จำนวน ${fi.negN.toLocaleString()} รายการ / รายการศูนย์ ${fi.zeroN.toLocaleString()} รายการ) ประชากรที่ใช้สุ่ม${fi.nm==='neg'?' (เฉพาะรายการติดลบ ใช้ขนาดของยอด)':fi.ab?(fi.gr?' (ฐานยอดรวมค่าสัมบูรณ์: บวก + ขนาดของรายการติดลบ)':' (ฐานยอดสุทธิตามบัญชี ใช้ค่าสัมบูรณ์เฉพาะตอนเลือกตัวอย่าง)'):' (เฉพาะรายการยอดบวก)'} ${fmt(fi.ft)} บาท `;
+    h=`ยอดสุทธิในข้อมูลที่นำเข้า ${fmt(fi.net)} บาท (รายการบวก ${fmt(fi.pos)} / รายการติดลบ ${fmt(fi.neg)} จำนวน ${fi.negN.toLocaleString()} รายการ / รายการศูนย์ ${fi.zeroN.toLocaleString()} รายการ) ประชากรที่ใช้สุ่ม${fi.nm==='neg'?' (เฉพาะรายการติดลบ ใช้ขนาดของยอด)':fi.ab?(fi.gr?' (ฐานค่าสัมบูรณ์: บวก + ขนาดของรายการติดลบ)':' (ฐานค่าสุทธิ (ตามบัญชี) ใช้ค่าสัมบูรณ์เฉพาะตอนเลือกตัวอย่าง)'):' (เฉพาะรายการยอดบวก)'} ${fmt(fi.ft)} บาท `;
     if(tot===null||Math.abs(tot-tg)>0.005)h+=`<button class="link" id="useSum">ใช้ยอดนี้เป็นจำนวนประชากรทั้งหมด</button>`+(tot!==null?` <span class="err">จำนวนประชากรทั้งหมดที่กรอกต่างจากประชากรที่ใช้สุ่ม ${fmt(Math.abs(tot-tg))} บาท</span>`:'');
     else h+='(ตรงกับจำนวนประชากรทั้งหมดที่กรอก)';
     if(fi.ab&&!fi.gr&&fi.negN){
-      if(fi.net<=0)h+=`<br><span class="err">ยอดสุทธิ${fi.net<0?'ติดลบ':'เป็นศูนย์'} (รายการติดลบรวม ${fmt(-fi.neg)} บาท ${fi.net<0?'มากกว่า':'เท่ากับ'}รายการบวก) จึงคำนวณขนาดตัวอย่างไม่ได้ พิจารณาเลือก "ยอดรวมค่าสัมบูรณ์" เป็นฐานจำนวนประชากร หรือแยกทดสอบด้วย "ใช้ข้อมูลเฉพาะรายการติดลบ"</span>`;
-      else if(fi.negShare>NEGHI)h+=`<br><span class="err">รายการติดลบมีสัดส่วน ${(fi.negShare*100).toFixed(1)}% ของยอดรวมค่าสัมบูรณ์ (${fmt(fi.gross)} บาท) ขนาดตัวอย่างที่คำนวณจากยอดสุทธิอาจต่ำกว่าที่ควร พิจารณาเลือก "ยอดรวมค่าสัมบูรณ์" เป็นฐาน หรือแยกทดสอบรายการติดลบ</span>`;
+      if(fi.net<=0)h+=`<br><span class="err">ยอดสุทธิ${fi.net<0?'ติดลบ':'เป็นศูนย์'} (รายการติดลบรวม ${fmt(-fi.neg)} บาท ${fi.net<0?'มากกว่า':'เท่ากับ'}รายการบวก) จึงคำนวณขนาดตัวอย่างไม่ได้ พิจารณากดสวิตช์ "ค่าสัมบูรณ์" ที่ช่องจำนวนประชากรทั้งหมด หรือแยกทดสอบด้วย "ใช้ข้อมูลเฉพาะรายการติดลบ"</span>`;
+      else if(fi.negShare>NEGHI)h+=`<br><span class="err">รายการติดลบมีสัดส่วน ${(fi.negShare*100).toFixed(1)}% ของยอดรวมค่าสัมบูรณ์ (${fmt(fi.gross)} บาท) ขนาดตัวอย่างที่คำนวณจากค่าสุทธิอาจต่ำกว่าที่ควร พิจารณากดสวิตช์ "ค่าสัมบูรณ์" ที่ช่องจำนวนประชากรทั้งหมด หรือแยกทดสอบรายการติดลบ</span>`;
     }
     if(method===3)h+=' <span class="hint">ตามสมมติฐานของ MUS ระบบตัดรายการติดลบและรายการศูนย์ออกจากประชากรโดยอัตโนมัติ</span>';
   }
@@ -605,7 +804,10 @@ function calc(){
     $('stHint').innerHTML=(+$('stK').value>5?'<span class="err">โดยทั่วไปแล้วนิยมใช้การจัดกลุ่มอยู่ระหว่าง 3-5 กลุ่ม</span> ':'')+(stCapMsg?`<span class="err">${stCapMsg}</span> `:'')+(st&&st.over?'<span class="err">จำนวนตัวอย่างน้อยกว่าจำนวนกลุ่มที่มีรายการ แต่ทุกกลุ่มต้องมีอย่างน้อย 1 รายการ จำนวนที่เลือกจึงมากกว่าที่คำนวณได้</span>':'')+(typeof stNote!=='undefined'&&stNote?` <span class="err">${stNote}</span>`:'')+(stErr&&!/^กรอกยอดเริ่มต้น/.test(stErr)?` <span class="err">${stErr}</span>`:'');
     $('stTbl').innerHTML=st?stTable(st,false):'';
   }
-  return {st,stErr,mat,tot,cf,ex,sample,raw,matItems,matVal,base,all,capSel,capV,sampleN,limited,eff,matCount,keyMode:km,keyAll,keyNot,keyDocN,keyMissing,keyAmb,mvCalcV,mvMan,thr,thrOwn:thrO};
+  const P={st,stErr,mat,tot,cf,ex,sample,raw,matItems,matVal,base,all,capSel,capV,sampleN,limited,eff,matCount,keyMode:km,keyAll,keyNot,keyDocN,keyMissing,keyAmb,mvCalcV,mvMan,thr,thrOwn:thrO};
+  try{updSum(P)}catch(_){}
+  try{updDash()}catch(_){}
+  return P;
 }
 
 $('stK').addEventListener('change',calc);
@@ -963,7 +1165,7 @@ $('run').addEventListener('click',()=>{
   const p=calc(),e=[];
   if(!(p.mat>0))e.push('กรอกระดับความมีสาระสำคัญ (มากกว่า 0)');
   if(method>=2&&p.keyMode!=='manual'&&p.thrOwn&&!(p.thr>0))e.push('กรอกเกณฑ์มูลค่ารายการสาระสำคัญ (มากกว่า 0) หรือเลือกใช้ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้*');
-  if(p.tot<0)e.push('จำนวนประชากรทั้งหมดมีค่าเป็นลบ'+(negMode()==='abs'&&tbMode()==='net'?' (ยอดสุทธิติดลบเพราะรายการติดลบมากกว่ารายการบวก) พิจารณาเลือก "ยอดรวมค่าสัมบูรณ์" เป็นฐานจำนวนประชากร หรือแยกทดสอบด้วย "ใช้ข้อมูลเฉพาะรายการติดลบ"':' โปรดกรอกจำนวนประชากรทั้งหมด'));
+  if(p.tot<0)e.push('จำนวนประชากรทั้งหมดมีค่าเป็นลบ'+(negMode()==='abs'&&tbMode()==='net'?' (ยอดสุทธิติดลบเพราะรายการติดลบมากกว่ารายการบวก) พิจารณากดสวิตช์ "ค่าสัมบูรณ์" ที่ช่องจำนวนประชากรทั้งหมด หรือแยกทดสอบด้วย "ใช้ข้อมูลเฉพาะรายการติดลบ"':' โปรดกรอกจำนวนประชากรทั้งหมด'));
   else if(!(p.tot>0))e.push('กรอกจำนวนประชากรทั้งหมด');
   if(!(p.cf>0))e.push('กรอกค่า Confidence Factor');
   if(!data.length)e.push('นำเข้าข้อมูลรายการ (อัปโหลดไฟล์หรือวางข้อมูลจาก Excel)');
@@ -1013,10 +1215,10 @@ $('run').addEventListener('click',()=>{
     const msx=new Set(p.matItems.map(x=>x.idx)),exK=p.keyAll.filter(x=>msx.has(x.idx));
     const kv=p.keyAll.reduce((t,x)=>t+v2(x),0),ev=exK.reduce((t,x)=>t+v2(x),0);
     rows.push(['วิธีกำหนดรายการประชากรที่เป็นสาระสำคัญ',KM[p.keyMode],p.keyMode==='rand'&&keyPick?`สุ่ม ${keyPick.draws.toLocaleString()} ครั้ง ใช้ผลครั้งล่าสุด (เลขอ้างอิงการสุ่มรายการสาระสำคัญ ${keyPick.seed})`:''],
-      ['จำนวนรายการประชากรที่มีสาระสำคัญ',p.matCount.toLocaleString(),'รายการ'],
+      ['จำนวนรายการประชากรที่มีสาระสำคัญ',p.matCount.toLocaleString(),p.keyMode==='auto'?'รายการ | ยอดรวม '+fmt(kv)+' (ตรวจสอบครบทุกรายการ ความครอบคลุม 100%)':'รายการ'],
       ['เกณฑ์มูลค่ารายการสาระสำคัญ',p.thr!==null?fmt(p.thr):'-',p.thrOwn?'ผู้ตรวจสอบกำหนดเกณฑ์เอง (ไม่ใช้ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้*)':'ใช้ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้*'],
-      ['รายการสาระสำคัญทั้งหมดในประชากร',p.keyAll.length.toLocaleString()+' รายการ / '+fmt(kv),'ยอดเกินเกณฑ์มูลค่ารายการสาระสำคัญ'],
-      ['รายการสาระสำคัญที่ตรวจสอบแล้ว',exK.length.toLocaleString()+' รายการ / '+fmt(ev),'ความครอบคลุมตามจำนวนรายการ '+(p.keyAll.length?(exK.length/p.keyAll.length*100).toFixed(2):'0.00')+'% ตามมูลค่า '+(kv?(ev/kv*100).toFixed(2):'0.00')+'%']);
+      ...(p.keyMode==='auto'?[]:[['รายการสาระสำคัญทั้งหมดในประชากร',p.keyAll.length.toLocaleString()+' รายการ / '+fmt(kv),'ยอดเกินเกณฑ์มูลค่ารายการสาระสำคัญ']]),
+      ...(p.keyMode==='auto'?[]:[['รายการสาระสำคัญที่ตรวจสอบแล้ว',exK.length.toLocaleString()+' รายการ / '+fmt(ev),'ความครอบคลุมตามจำนวนรายการ '+(p.keyAll.length?(exK.length/p.keyAll.length*100).toFixed(2):'0.00')+'% ตามมูลค่า '+(kv?(ev/kv*100).toFixed(2):'0.00')+'%']]));
     if(p.keyNot.length)rows.push(['เหตุผลที่ไม่ตรวจสอบรายการสาระสำคัญครบทุกรายการ',esc($('keyWhy').value.trim()).replace(/\n/g,'<br>')||'ไม่ได้ระบุเหตุผล',`ไม่ได้ตรวจสอบ ${p.keyNot.length.toLocaleString()} รายการ`]);
     if(p.keyAmb&&p.keyAmb.length)rows.push(['เลขที่เอกสารที่ระบุโดยไม่มีจำนวนเงินและมีหลายยอดในข้อมูล (คัดออกทุกยอด)',p.keyAmb.length.toLocaleString()+' เลขที่',esc(p.keyAmb.slice(0,10).map(x=>x.doc).join(', '))+(p.keyAmb.length>10?' ...':'')]);
     if(p.keyMissing.length)rows.push(['รายการที่ระบุแต่ไม่พบในข้อมูล',p.keyMissing.length.toLocaleString()+' รายการ',esc(p.keyMissing.slice(0,10).join(', '))+(p.keyMissing.length>10?' ...':'')]);
@@ -1026,7 +1228,7 @@ $('run').addEventListener('click',()=>{
   {
     const nz=data.filter(x=>x.amt===0).length,ng=data.filter(x=>x.amt<0).length,abr=negMode()==='abs';
     const fiR=frameInfo();
-    rows.push(['ยอดสุทธิของรายการที่นำเข้า',fmt(fiR.net),`รายการบวก ${fmt(fiR.pos)} / รายการติดลบ ${fmt(fiR.neg)}`],['ประชากรที่ใช้สุ่ม',fmt(fiR.ft),(fiR.nm==='neg'?'เฉพาะรายการติดลบ ใช้ขนาดของยอด (ไม่ได้ทดสอบรายการบวกในการสุ่มนี้)':fiR.ab?(fiR.gr?`ฐานยอดรวมค่าสัมบูรณ์ (บวก ${fmt(fiR.pos)} + ขนาดของรายการติดลบ ${fmt(-fiR.neg)}) ยอดสุทธิตามบัญชี ${fmt(fiR.net)}`:`ฐานยอดสุทธิตามบัญชี (ใช้ค่าสัมบูรณ์เฉพาะตอนเลือกตัวอย่าง) ยอดรวมค่าสัมบูรณ์ ${fmt(fiR.gross)}`+(fiR.negShare>NEGHI?` | รายการติดลบ ${(fiR.negShare*100).toFixed(1)}% ของยอดรวมค่าสัมบูรณ์`:'')):'เฉพาะรายการยอดบวก (ไม่ได้ทดสอบรายการติดลบในการสุ่มนี้)')+(Math.abs(p.tot-fiR.ft)>0.005?` | ต่างจากจำนวนประชากรทั้งหมดที่กรอก ${fmt(Math.abs(p.tot-fiR.ft))}`:'')]);
+    rows.push(['ยอดสุทธิของรายการที่นำเข้า',fmt(fiR.net),`รายการบวก ${fmt(fiR.pos)} / รายการติดลบ ${fmt(fiR.neg)}`],['ประชากรที่ใช้สุ่ม',fmt(fiR.ft),(fiR.nm==='neg'?'เฉพาะรายการติดลบ ใช้ขนาดของยอด (ไม่ได้ทดสอบรายการบวกในการสุ่มนี้)':fiR.ab?(fiR.gr?`ฐานค่าสัมบูรณ์ (บวก ${fmt(fiR.pos)} + ขนาดของรายการติดลบ ${fmt(-fiR.neg)}) ยอดสุทธิตามบัญชี ${fmt(fiR.net)}`:`ฐานค่าสุทธิ (ตามบัญชี) (ใช้ค่าสัมบูรณ์เฉพาะตอนเลือกตัวอย่าง) ยอดรวมค่าสัมบูรณ์ ${fmt(fiR.gross)}`+(fiR.negShare>NEGHI?` | รายการติดลบ ${(fiR.negShare*100).toFixed(1)}% ของยอดรวมค่าสัมบูรณ์`:'')):'เฉพาะรายการยอดบวก (ไม่ได้ทดสอบรายการติดลบในการสุ่มนี้)')+(Math.abs(p.tot-fiR.ft)>0.005?` | ต่างจากจำนวนประชากรทั้งหมดที่กรอก ${fmt(Math.abs(p.tot-fiR.ft))}`:'')]);
     rows.push(['การจัดการรายการที่จำนวนเงินเป็นศูนย์หรือติดลบ',abr?((method===2||method===4)?'ใช้ข้อมูลทั้งบวกและติดลบ (ค่าสัมบูรณ์) คงไว้ในกลุ่มที่สุ่ม ข้ามรายการศูนย์':'ใช้ข้อมูลทั้งบวกและติดลบ (ค่าสัมบูรณ์) คงไว้ในกลุ่มที่สุ่ม ข้ามรายการศูนย์'):(method===3?'ตัดรายการติดลบและรายการศูนย์ออก (ตามสมมติฐานของ MUS)':negMode()==='neg'?'ใช้ข้อมูลเฉพาะรายการติดลบ ข้ามรายการบวกและรายการศูนย์':'ใช้ข้อมูลเฉพาะรายการที่เป็นบวก ข้ามรายการติดลบและรายการศูนย์'),`ศูนย์ ${nz.toLocaleString()} / ติดลบ ${ng.toLocaleString()} / บวก ${data.filter(x=>x.amt>0).length.toLocaleString()} รายการ`]);
   }
   rows.push(['เลขอ้างอิงการสุ่ม','<b>'+seed+'</b>',(seedGiven?'ผู้ใช้กรอกเลขอ้างอิงเพื่อสุ่มซ้ำ | ':'ระบบสร้างให้ | ')+'นำเข้าข้อมูลชุดเดิม กำหนดค่าตามรายงานนี้ และกรอกเลขนี้ จะได้รายการตัวอย่างเดิม'+(method>=2&&p.keyMode==='rand'&&keyPick?` (รายการสาระสำคัญที่สุ่ม ใช้เลข ${keyPick.seed} ในช่องสุ่มรายการสาระสำคัญ)`:'')]);
@@ -1067,7 +1269,7 @@ $('run').addEventListener('click',()=>{
     return o.join('');
   };
   const tbl=(arr,t)=>`<h3>${t}</h3>`+(arr.length?`<div class="wrap"><table class="res"><thead><tr>${thd()}</tr></thead><tbody>${arr.map((x,i)=>`<tr><td class="n">${i+1}</td>${trc(x)}</tr>`).join('')}</tbody>${foot(arr,0)}</table></div>`:'<p class="hint">ไม่มีรายการ</p>');
-  $('report').innerHTML=`<div class="rhead"><div><div class="brand">Project by สำนักตรวจเงินแผ่นดินที่ 10 กลุ่มที่ 2</div><h2 style="font-size:20px;margin:0">รายงานการสุ่มรายการตรวจสอบ</h2><div class="hdr">${hdrHtml()}</div><div class="hint">${method===1?'วิธีที่ 1 การเลือกตัวอย่างแบบทุกรายการมีโอกาสถูกเลือกเป็นตัวอย่างแบบเท่าเทียมกัน (Random Selection)':method===2?'วิธีที่ 1 การเลือกตัวอย่างแบบคัดกรองรายการที่มีมูลค่าที่เป็นสาระสำคัญก่อน (Random Selection - Key item)':method===4?'วิธีที่ 3 การเลือกตัวอย่างแบบช่วง (เลือกทุก ๆ ช่วงห่างที่เท่ากันตามลำดับรายการ) (Systematic Selection)':'วิธีที่ 2 การเลือกตัวอย่างแบบถ่วงน้ำหนักตามมูลค่า (MUS)'}<br>สุ่มเมื่อ ${new Date().toLocaleString('th-TH',{dateStyle:'long',timeStyle:'short'})} | เลขอ้างอิงการสุ่ม ${seed}</div></div><div class="noprint rtools"><button id="print" title="ถ้าปุ่มไม่ทำงาน ให้กด Ctrl+P (Mac: Cmd+P) เพื่อพิมพ์หรือบันทึกเป็น PDF">พิมพ์รายงาน</button><button id="xlsx" class="alt">บันทึกเป็น Excel</button></div></div>
+  $('report').innerHTML=`<div class="rhead"><div><h2 style="font-size:20px;margin:0;color:var(--accent)">รายงานการเลือกตัวอย่างสำหรับงานตรวจสอบ</h2><div class="hint" style="margin:0 0 4px">ระบบสุ่มเลือกตัวอย่างสำหรับงานตรวจสอบ (ด้วยวิธีทางสถิติ) · Project by สำนักตรวจเงินแผ่นดินที่ 10 กลุ่มที่ 2</div><div class="hdr">${hdrHtml()}</div><div class="hint">${method===1?'วิธีที่ 1 การเลือกตัวอย่างแบบทุกรายการมีโอกาสถูกเลือกเป็นตัวอย่างแบบเท่าเทียมกัน (Random Selection)':method===2?'วิธีที่ 1 การเลือกตัวอย่างแบบคัดกรองรายการที่มีมูลค่าที่เป็นสาระสำคัญก่อน (Random Selection - Key item)':method===4?'วิธีที่ 3 การเลือกตัวอย่างแบบช่วง (เลือกทุก ๆ ช่วงห่างที่เท่ากันตามลำดับรายการ) (Systematic Selection)':'วิธีที่ 2 การเลือกตัวอย่างแบบถ่วงน้ำหนักตามมูลค่า (MUS)'}<br>สุ่มเมื่อ ${new Date().toLocaleString('th-TH',{dateStyle:'long',timeStyle:'short'})} | เลขอ้างอิงการสุ่ม ${seed}</div></div><div class="noprint rtools"><button id="print" title="ถ้าปุ่มไม่ทำงาน ให้กด Ctrl+P (Mac: Cmd+P) เพื่อพิมพ์หรือบันทึกเป็น PDF">พิมพ์รายงาน</button><button id="xlsx" class="alt">บันทึกเป็น Excel</button></div></div>
   <h3>ข้อมูลการสุ่มตัวอย่าง</h3><div class="wrap"><table class="pt"><thead><tr><th>ข้อมูล</th><th class="n">จำนวน</th><th>หมายเหตุ</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}<tr class="sum"><td>${p.limited?'จำนวนรายการประชากรที่เลือกตรวจสอบจริง (หลังจำกัดสูงสุด)':'จำนวนรายการประชากรที่เลือกตรวจสอบทั้งสิ้น'}</td><td>${total.toLocaleString()}</td><td>รายการ</td></tr>${$('remark').value.trim()?`<tr><td>หมายเหตุ</td><td colspan="2" style="text-align:left;width:auto;white-space:pre-wrap">${esc($('remark').value.trim())}</td></tr>`:''}</tbody></table></div>
   <div class="legend">[MAT] : ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้ ซึ่งต้องไม่เกินระดับความมีสาระสำคัญในการปฏิบัติงาน (Performance Materiality), √ : งบทดลอง/สมุดรายวันทั่วไป/ข้อมูลทางบัญชี, c : การคำนวณ/การทดสอบ, cf : ตารางความเสี่ยงที่ต้องการจะลด ระดับความเชื่อมั่น และ Confidence Factor</div>
   ${p.limited?`<div class="hint">ผู้ใช้กำหนดจำกัดจำนวนสูงสุด ${p.capV.toLocaleString()} รายการ จึงลดจำนวนจาก ${p.all.toLocaleString()} เป็น ${total.toLocaleString()} รายการ`+(method>=2?` (รายการที่มีสาระสำคัญตรวจสอบทุกรายการ ${p.matCount.toLocaleString()} รายการ${p.capV<p.matCount?' ซึ่งมากกว่าจำนวนสูงสุดที่กำหนด จึงไม่มีรายการสุ่มเพิ่ม':''})`:'')+'</div>':''}
