@@ -178,6 +178,14 @@ section{border-radius:12px}
  #manualSec .mwrap{grid-template-columns:minmax(0,1fr)}#manualSec .toc{position:static}
 }
 @media print{.side,.topbar,.kpis,#manualSec{display:none!important}.app{display:block}.app main{padding:0;max-width:none}}
+.negblk{margin:0 0 14px;border-left-color:#c55f1d}
+.negcnt{display:block;margin-top:6px;font-size:12.5px;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
+@keyframes flashv{0%{box-shadow:0 0 0 0 rgba(197,95,29,.0)}25%{box-shadow:0 0 0 4px rgba(197,95,29,.55)}100%{box-shadow:0 0 0 0 rgba(197,95,29,0)}}
+.flash{animation:flashv 1.4s ease-out}
+.pgnav{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.pgnav .pgmsg{flex:1;text-align:center;font-size:13px;color:var(--warn)}
+.pghide{display:none!important}
+body.allpages .pghide{display:block!important}
 </style>
 </head>
 <body>
@@ -250,6 +258,7 @@ section{border-radius:12px}
 <label class="card"><input type="radio" name="m" value="4"><span><b>วิธีที่ 3</b>การเลือกตัวอย่างแบบช่วง (เลือกทุก ๆ ช่วงห่างที่เท่ากันตามลำดับรายการ) (Systematic Selection)</span></label>
 </div>
 <label id="keyChkBox" class="card" style="display:none;margin-top:12px"><input type="checkbox" id="keyChk"><span><b>คัดกรองรายการที่มีมูลค่าที่เป็นสาระสำคัญ (Key item) / หรือรายการที่มีการเลือกเฉพาะเจาะจง</b></span></label>
+<div class="pgnav"><span></span><span class="pgmsg"></span><button type="button" data-pg="2" data-need="method">ถัดไป: นำเข้าข้อมูล →</button></div>
 </section>
 
 <section id="s3" hidden>
@@ -285,10 +294,21 @@ section{border-radius:12px}
 <div class="msg" id="mapMsg"></div>
 <div class="wrap" style="margin-top:10px"><table class="res pv" id="pv"></table></div>
 </div>
+<div class="pgnav"><button type="button" class="alt" data-pg="1">← ย้อนกลับ</button><span class="pgmsg"></span><button type="button" data-pg="3" data-need="data">ถัดไป: กำหนดค่า →</button></div>
 </section>
 
 <section id="s2" hidden>
 <h2>ขั้นตอนที่ 3 กำหนดค่าและคำนวณขนาดตัวอย่าง <span id="mname" style="font-weight:400;color:var(--muted)"></span></h2>
+<div id="negBox" class="keyblk negblk" hidden>
+<h3 style="margin-top:0">ข้อมูลที่ใช้เป็นประชากร <span class="hint" style="font-weight:400">(ตัวเลือกนี้เปลี่ยนจำนวนประชากรทั้งหมดและขนาดตัวอย่าง)</span></h3>
+<p class="hint" id="negHint" style="margin-top:0"></p>
+<div class="cards">
+<label class="card"><input type="radio" name="neg" value="skip"><span><b><span id="negSkipT">ใช้ข้อมูลเฉพาะรายการที่เป็นบวก</span><i class="tip" tabindex="0" id="negSkipD">i</i></b>ตัดรายการติดลบและยอดศูนย์ออก<span class="negcnt" id="negSkipC"></span></span></label>
+<label class="card"><input type="radio" name="neg" value="neg"><span><b><span id="negNegT">ใช้ข้อมูลเฉพาะรายการติดลบ</span><i class="tip" tabindex="0" id="negNegD">i</i></b>ใช้เฉพาะรายการติดลบ โดยใช้ขนาดของยอด<span class="negcnt" id="negNegC"></span></span></label>
+<label class="card"><input type="radio" name="neg" value="abs" checked><span><b><span id="negAbsT">ใช้ข้อมูลรายการทั้งที่เป็นบวกและติดลบ (ค่าสัมบูรณ์)</span><i class="tip" tabindex="0" id="negAbsD">i</i></b>ใช้ทุกรายการยกเว้นยอดศูนย์ (ค่าตั้งต้น)<span class="negcnt" id="negAbsC"></span></span></label>
+</div>
+<div class="hint" id="negMsg" style="margin:8px 0 0"></div>
+</div>
 <div class="wrap"><table class="pt">
 <thead><tr><th>ข้อมูล</th><th class="n">จำนวน</th><th>หมายเหตุ</th></tr></thead>
 <tbody>
@@ -370,17 +390,9 @@ section{border-radius:12px}
 <label class="card"><input type="radio" name="cap" value="1"><span><b>จำกัดจำนวนสูงสุด</b>กรอกจำนวนรายการสูงสุดที่ผู้ตรวจสอบตรวจสอบได้<input type="text" id="capN" inputmode="numeric" placeholder="จำนวนรายการสูงสุด" autocomplete="off" style="margin-top:6px"></span></label>
 </div>
 <div class="hint" id="capHint"></div>
-<div id="negBox" hidden>
-<h3>การจัดการรายการที่จำนวนเงินเป็นศูนย์หรือติดลบ</h3>
-<p class="hint" id="negHint" style="margin-top:0"></p>
-<div class="cards">
-<label class="card"><input type="radio" name="neg" value="skip"><span><b><span id="negSkipT">ใช้ข้อมูลเฉพาะรายการที่เป็นบวก</span><i class="tip" tabindex="0" id="negSkipD">i</i></b>ตัดรายการติดลบและยอดศูนย์ออก</span></label>
-<label class="card"><input type="radio" name="neg" value="neg"><span><b><span id="negNegT">ใช้ข้อมูลเฉพาะรายการติดลบ</span><i class="tip" tabindex="0" id="negNegD">i</i></b>ใช้เฉพาะรายการติดลบ โดยใช้ขนาดของยอด</span></label>
-<label class="card"><input type="radio" name="neg" value="abs" checked><span><b><span id="negAbsT">ใช้ข้อมูลรายการทั้งที่เป็นบวกและติดลบ (ค่าสัมบูรณ์)</span><i class="tip" tabindex="0" id="negAbsD">i</i></b>ใช้ทุกรายการยกเว้นยอดศูนย์ (ค่าตั้งต้น)</span></label>
-</div>
-</div>
 </div>
 </details>
+<div class="pgnav"><button type="button" class="alt" data-pg="2">← ย้อนกลับ</button><span class="pgmsg"></span><button type="button" data-pg="4">ถัดไป: สรุปและเริ่มสุ่ม →</button></div>
 </section>
 
 <section id="s4" hidden>
@@ -391,10 +403,12 @@ section{border-radius:12px}
 <p class="hint" style="margin:4px 0 0"><b>สำหรับผู้สอบทาน:</b> ปกติให้เว้นว่าง ระบบจะสร้างเลขอ้างอิงใหม่ทุกครั้งที่สุ่มและแสดงไว้ในรายงาน หากต้องการพิสูจน์ผลการสุ่มเดิม ให้นำเข้าข้อมูลชุดเดิม กำหนดค่าทุกช่องตามรายงานเดิม แล้วกรอกเลขอ้างอิงจากรายงาน ระบบจะได้รายการตัวอย่างเดิมทุกรายการ</p></div></details>
 <div class="row"><button id="run">เริ่มทำการสุ่มรายการ</button><button class="alt" id="seedBtn" type="button">สุ่มซ้ำด้วยเลขอ้างอิงเดิม (สำหรับผู้สอบทาน)</button><button class="alt" id="clr">ล้างข้อมูลที่นำเข้า</button></div>
 <div class="msg err" id="emsg"></div>
+<div class="pgnav"><button type="button" class="alt" data-pg="3">← ย้อนกลับ</button><span class="pgmsg"></span></div>
 </section>
 </div>
 
 <section id="report" hidden></section>
+<div id="pg5nav" class="noprint pgnav" hidden><button type="button" class="alt" data-pg="4">← กลับไปแก้ค่า / สุ่มใหม่</button><span class="pgmsg"></span></div>
 
 <p class="sub" style="text-align:center;margin:24px 0 0;font-size:13px">© 2026 MRTEAM. All rights reserved.</p>
 </main>
@@ -459,6 +473,13 @@ const NEGTXT={
 NEGTXT[4]=NEGTXT[2];
 document.querySelectorAll('input[name=neg]').forEach(r=>r.addEventListener('change',()=>{negTouched=true;autoTot();calc()}));
 /* ฐานยอดประชากรทั้งหมดและประชากรที่เป็นสาระสำคัญผูกกัน: เปลี่ยนช่องหนึ่ง อีกช่องเปลี่ยนตาม และเติมยอดประชากรทั้งหมดตามฐานใหม่ทันที */
+document.querySelectorAll('input[name=neg]').forEach(r=>r.addEventListener('change',()=>{
+  if(!data.length)return;const fi=frameInfo(),tv=$('tot').value.trim();
+  const nm={skip:'เฉพาะรายการที่เป็นบวก',neg:'เฉพาะรายการติดลบ',abs:'ทั้งบวกและติดลบ'}[negMode()];
+  $('negMsg').innerHTML=touched.tot?`<span class="err">จำนวนประชากรทั้งหมดเป็นยอดที่กรอกเอง (${esc(tv)}) ไม่ได้เปลี่ยนตาม ยอดตามตัวเลือก "${nm}" คือ ${fmt(fi.ft)} บาท</span>`:`จำนวนประชากรทั้งหมดเปลี่ยนเป็น <b>${fmt(fi.ft)}</b> บาท (${nm}) ขนาดตัวอย่างและรายการสาระสำคัญคำนวณใหม่แล้ว`;
+  ['tot'].forEach(id=>{const e=$(id);e.classList.remove('flash');void e.offsetWidth;e.classList.add('flash')});
+  document.querySelectorAll('.kpi').forEach(e=>{e.classList.remove('flash');void e.offsetWidth;e.classList.add('flash')});
+}));
 document.querySelectorAll('input[name=tbA],input[name=tbB]').forEach(r=>r.addEventListener('change',()=>{
   const v=r.value;
   if(v==='manual'&&r.name==='tbA'){touched.tot=true;$('tot').focus();$('tot').select();calc();return}
@@ -614,15 +635,30 @@ function decorCodes(){
   });
 }
 let advAuto=false;
+/* จำนวนรายการในประชากรที่ใช้สุ่ม (ตรงกับฐานของยอดประชากร) */
+function frameStat(){
+  let n=0,xn=0,xp=0,z=0;for(const x of data){if(inFrame(x))n++;else if(x.amt===0)z++;else if(x.amt<0)xn++;else xp++}
+  const parts=[];if(xn)parts.push('รายการติดลบ '+xn.toLocaleString()+' รายการ');if(xp)parts.push('รายการบวก '+xp.toLocaleString()+' รายการ');if(z)parts.push('ยอดศูนย์ '+z.toLocaleString()+' รายการ');
+  return {n,note:parts.length?'นำเข้า '+data.length.toLocaleString()+' รายการ ข้าม'+parts.join(' และ'):''};
+}
 function updSum(P){
   decorCodes();
   if(!data.length&&!$('tot').value.trim()){$('sumBar').innerHTML='<span class="hint">นำเข้าข้อมูลรายการ (ขั้นตอนที่ 2) และกำหนดค่า (ขั้นตอนที่ 3) แล้วสรุปจะแสดงที่นี่</span>'}
   else{
-    const lim=!$('effRow').hidden,tot=$('tot').value.trim()||'-';
-    const bits=[`<div><b>${esc($('mname').textContent.replace(/[()]/g,'').trim()||'')}</b></div>`,
-      `<div>ข้อมูลที่นำเข้า ${data.length.toLocaleString()} รายการ | จำนวนประชากรทั้งหมด ${esc(tot)} บาท${!$('tbA').hidden?' ('+esc(document.querySelector('input[name=tbA]:checked').nextElementSibling.textContent)+')':''}</div>`];
-    if(method>=2)bits.push(`<div>รายการสาระสำคัญ ${esc($('mc').textContent)} รายการ | ประชากรคงเหลือ ${esc($('rem').textContent)} บาท</div>`);
-    bits.push(`<div>ขนาดตัวอย่าง ${esc($('smp').textContent)} รายการ${+num($('ex').value)>0?' + เลือกเพิ่ม '+esc($('ex').value)+' รายการ':''}</div>`);
+    const lim=!$('effRow').hidden,tot=$('tot').value.trim()||'-',fs=frameStat();
+    const MN={1:'การเลือกตัวอย่างแบบสุ่ม (Random Selection)',2:'การเลือกตัวอย่างแบบสุ่ม คัดรายการสาระสำคัญก่อน (Random Selection - Key item)',3:'การเลือกตัวอย่างแบบถ่วงน้ำหนักตามมูลค่า (MUS)',4:'การเลือกตัวอย่างแบบช่วง (Systematic Selection)'};
+    const bits=[`<div><b>วิธีที่ ${DISP[method]} ${MN[method]||''}</b></div>`,
+      `<div>ประชากรที่ใช้สุ่ม <b>${fs.n.toLocaleString()}</b> รายการ | จำนวนประชากรทั้งหมด <b>${esc(tot)}</b> บาท${touched.tot?' (ยอดที่กรอกเอง)':!$('tbA').hidden?' ('+esc(document.querySelector('input[name=tbA]:checked').nextElementSibling.textContent)+')':''}</div>`];
+    if(fs.note)bits.push(`<div class="hint" style="margin:0">(${fs.note})</div>`);
+    bits.push(`<div>ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้* <b>${esc($('mat').value.trim()||'-')}</b> บาท | ค่า Confidence Factor <b>${esc($('cf').value.trim()||'-')}</b></div>`);
+    if(method>=2){
+      const km=keyMode(),kn={auto:'ระบบคัดกรองให้',manual:'ผู้ตรวจสอบกรอกเอง',rand:'สุ่มรายการสาระสำคัญ'}[km];
+      const th=km==='manual'?'':(thrOwn()?' · เกณฑ์ที่กำหนดเอง '+esc($('keyThr').value.trim()||'-')+' บาท':' · เกณฑ์: ใช้ค่า MAT');
+      bits.push(`<div>รายการสาระสำคัญ <b>${esc($('mc').textContent)}</b> รายการ (${kn}${th}) | ประชากรคงเหลือ <b>${esc($('rem').textContent)}</b> บาท</div>`);
+    }
+    bits.push(`<div>ขนาดตัวอย่าง <b>${esc($('smp').textContent)}</b> รายการ${P&&P.raw!=null?' (คำนวณได้ '+P.raw.toFixed(2)+' ปัดขึ้น)':''}${+num($('ex').value)>0?' + เลือกเพิ่ม '+esc($('ex').value)+' รายการ':''}</div>`);
+    if(stOn())bits.push(`<div>สุ่มแบบจัดกลุ่มตามช่วงยอดเงิน ${esc(document.querySelector('input[name=stMode]:checked').value==='auto'?$('stK').value+' กลุ่ม (ระบบจัดกลุ่มให้)':document.querySelector('input[name=stMode]:checked').value==='top'?$('stK').value+' กลุ่ม (กำหนดกลุ่มชั้นสูงสุด)':'ผู้ใช้กำหนดช่วงเอง')}</div>`);
+    if(document.querySelector('input[name=cap]:checked').value==='1')bits.push(`<div>จำกัดจำนวนสูงสุด ${esc($('capN').value.trim()||'-')} รายการ</div>`);
     bits.push(`<div>รวมรายการที่เลือกตรวจสอบ <span class="big">${esc(lim?$('eff').textContent:$('all').textContent)}</span> รายการ${lim?' (จำกัดสูงสุด)':''}</div>`);
     const miss=[['hOrg','หน่วยงานผู้ตรวจสอบ'],['hAud','หน่วยรับตรวจ'],['hYear','สำหรับปีสิ้นสุดวันที่'],['hAcc','ชื่อบัญชี']].filter(([id])=>!$(id).value.trim()).map(x=>x[1]);
     if(miss.length)bits.push(`<div class="warnline">ยังไม่ได้กรอกข้อมูลหัวรายงาน: ${miss.join(', ')} (สุ่มได้ รายงานจะเว้นบรรทัดไว้ให้เขียนเพิ่ม)</div>`);
@@ -631,11 +667,14 @@ function updSum(P){
   if(method!==3){
     const hasNeg=data.some(x=>x.amt<0);
     $('negBox').hidden=data.length>0&&!hasNeg&&negMode()!=='neg';
-    if(hasNeg&&!advAuto){advAuto=true;$('advBox').open=true}
+    const pc=data.filter(x=>x.amt>0),nc=data.filter(x=>x.amt<0),sm=a=>a.reduce((t,x)=>t+x.amt,0);
+    $('negSkipC').textContent=data.length?`บวก ${pc.length.toLocaleString()} รายการ · ${fmt(sm(pc))} บาท`:'';
+    $('negNegC').textContent=data.length?`ติดลบ ${nc.length.toLocaleString()} รายการ · ${fmt(-sm(nc))} บาท (ขนาดของยอด)`:'';
+    $('negAbsC').textContent=data.length?`รวม ${(pc.length+nc.length).toLocaleString()} รายการ · ค่าสุทธิ ${fmt(sm(pc)+sm(nc))} / ค่าสัมบูรณ์ ${fmt(sm(pc)-sm(nc))} บาท`:'';
   }
   const capOn=document.querySelector('input[name=cap]:checked').value==='1';
   const nl={skip:'เฉพาะรายการที่เป็นบวก',neg:'เฉพาะรายการติดลบ',abs:'ทั้งบวกและติดลบ (ค่าสัมบูรณ์)'}[negMode()];
-  $('advSum').textContent='— จำนวนที่ตรวจสอบ: '+(capOn?'จำกัดสูงสุด '+($('capN').value.trim()||'-')+' รายการ':'ตามที่คำนวณได้')+(method===3?'':' | รายการติดลบ: '+($('negBox').hidden?'ไม่มีในข้อมูล':nl));
+  $('advSum').textContent='— จำนวนที่ตรวจสอบ: '+(capOn?'จำกัดสูงสุด '+($('capN').value.trim()||'-')+' รายการ':'ตามที่คำนวณได้');
 }
 /* ---- เมนูซ้าย การ์ดตัวเลข และคู่มือ (ส่วนแสดงผล ไม่กระทบการคำนวณ) ---- */
 function updDash(){
@@ -643,7 +682,7 @@ function updDash(){
   const chosen=!$('s2').hidden;
   set('topPill',chosen?($('mname').textContent.replace(/[()]/g,'').trim()||'เลือกวิธีแล้ว'):'ยังไม่ได้เลือกวิธี');
   const tv=$('tot').value.trim();
-  set('kv1',tv||'-');set('ks1',data.length?data.length.toLocaleString()+' รายการที่นำเข้า'+(!$('tbA').hidden?' · '+document.querySelector('input[name=tbA]:checked').nextElementSibling.textContent:''):'ยังไม่ได้นำเข้าข้อมูล');
+  set('kv1',tv||'-');set('ks1',data.length?frameStat().n.toLocaleString()+' รายการในประชากร'+(touched.tot?' · ยอดที่กรอกเอง':!$('tbA').hidden?' · '+document.querySelector('input[name=tbA]:checked').nextElementSibling.textContent:''):'ยังไม่ได้นำเข้าข้อมูล');
   if(method>=2){set('kv2',$('mc').textContent);set('ks2',$('mv').hidden?'กรอกเอง '+($('mvIn').value||'-')+' บาท':$('mv').textContent+(/\d/.test($('mv').textContent)?' บาท':''))}
   else{set('kv2',chosen?'ไม่ใช้':'-');set('ks2',chosen?'วิธีนี้ไม่ได้คัดรายการสาระสำคัญ':'\u00a0')}
   set('kv3',$('smp').textContent);set('ks3',(()=>{const t=$('smpn').textContent.match(/คำนวณได้\s*([\d.,]+)/);return t?'คำนวณได้ '+t[1]+' ปัดขึ้น':'\u00a0'})());
@@ -653,23 +692,41 @@ function updDash(){
   ['nv0','nv1','nv2','nv3','nv4','nv5'].forEach((id,k)=>{const a=$(id);a.classList.toggle('done',!!st[k]);a.querySelector('.ok').textContent=st[k]?'✓':'';});
   ['nv2','nv3','nv4'].forEach(id=>$(id).classList.toggle('off',!chosen));$('nv5').classList.toggle('off',$('report').hidden);
 }
+/* ---- แบ่งหน้าตามขั้นตอน (แสดง/ซ่อนส่วนเดิม ไม่กระทบการคำนวณ) ---- */
+const PAGES={1:['s0','s1'],2:['s3'],3:['s2'],4:['s4'],5:['report','pg5nav'],6:['manualSec']};
+const SEC2PG={s0:1,s1:1,s3:2,s2:3,s4:4,report:5,manualSec:6};
+let curPage=1,prevPage=1;
+function showPage(n){
+  if(n!==6)prevPage=n;curPage=n;
+  Object.entries(PAGES).forEach(([pg,ids])=>ids.forEach(id=>{const e=$(id);if(e)e.classList.toggle('pghide',+pg!==n)}));
+  $('manualSec').hidden=n!==6;$('pg5nav').hidden=n!==5;
+  document.querySelectorAll('.pgmsg').forEach(m=>m.textContent='');document.querySelectorAll('[data-pg]').forEach(b=>b.dataset.warned='');
+  navSpy();window.scrollTo({top:0});
+}
 function navSpy(){
-  const ids=['s0','s1','s3','s2','s4','report','manualSec'],nv=['nv0','nv1','nv2','nv3','nv4','nv5','nv6'];let cur=0;
-  const lim=document.querySelector('.topbar').offsetHeight+$('kpis').offsetHeight+70;
-  ids.forEach((id,k)=>{const e=$(id);if(!e||e.hidden)return;if(e.getBoundingClientRect().top<lim)cur=k});
-  nv.forEach((id,k)=>$(id).classList.toggle('on',k===cur));
+  const nv=['nv0','nv1','nv2','nv3','nv4','nv5','nv6'],sec=['s0','s1','s3','s2','s4','report','manualSec'];
+  nv.forEach((id,k)=>$(id).classList.toggle('on',SEC2PG[sec[k]]===curPage&&!(curPage===1&&k===0&&false)));
 }
 document.querySelectorAll('#side a[data-go]').forEach(a=>a.addEventListener('click',()=>{
-  const id=a.dataset.go;if(id==='manualSec'){$('manualSec').hidden=false}
-  const e=$(id);if(e&&!e.hidden)e.scrollIntoView({behavior:'smooth',block:'start'});
+  const pg=SEC2PG[a.dataset.go];
+  if((pg>=2&&pg<=4)&&$('s2').hidden){showPage(1);const m=document.querySelector('#s1 .pgmsg');if(m)m.textContent='เลือกวิธีการสุ่มตัวอย่างก่อน';}
+  else if(pg===5&&$('report').hidden){}
+  else{showPage(pg);if(a.dataset.go==='s0'||a.dataset.go==='s1'){const e=$(a.dataset.go);if(a.dataset.go==='s1')e.scrollIntoView({block:'start'})}}
   $('app').classList.remove('navopen');}));
-$('manClose').addEventListener('click',()=>{$('manualSec').hidden=true;navSpy()});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-pg]');if(!b)return;
+  const n=+b.dataset.pg,need=b.dataset.need,msg=b.parentElement.querySelector('.pgmsg');
+  if(need==='method'&&$('s2').hidden){msg.textContent='เลือกวิธีการสุ่มตัวอย่างก่อน';return}
+  if(need==='data'&&!data.length&&!b.dataset.warned){b.dataset.warned='1';msg.textContent='ยังไม่ได้นำเข้าข้อมูล กด "ถัดไป" อีกครั้งเพื่อไปต่อ';return}
+  showPage(n);});
+$('manClose').addEventListener('click',()=>showPage(prevPage||1));
+new MutationObserver(()=>{if(!$('report').hidden){showPage(5)}else if(curPage===5){showPage(4)}}).observe($('report'),{attributes:true,attributeFilter:['hidden'],childList:true});
 $('hbBtn').addEventListener('click',()=>$('app').classList.toggle('navopen'));
 $('miniBtn').addEventListener('click',()=>{const m=$('app').classList.toggle('mini');$('miniBtn').innerHTML=m?'»':'«<span class="t"> ย่อเมนู</span>';try{localStorage.setItem('navMini',m?'1':'')}catch(_){}});
 try{if(localStorage.getItem('navMini')){$('app').classList.add('mini');$('miniBtn').innerHTML='»'}}catch(_){}
 document.addEventListener('click',e=>{if($('app').classList.contains('navopen')&&!e.target.closest('#side')&&!e.target.closest('#hbBtn'))$('app').classList.remove('navopen')});
-window.addEventListener('scroll',()=>{navSpy();$('kpis').classList.toggle('compact',scrollY>140)},{passive:true});
+window.addEventListener('scroll',()=>{$('kpis').classList.toggle('compact',scrollY>140)},{passive:true});
 setInterval(()=>{try{updDash();navSpy()}catch(_){}},700);
+showPage(1);
 function fitTop(){const h=document.querySelector('.topbar').offsetHeight;$('kpis').style.top=h+'px';document.documentElement.style.scrollPaddingTop=(h+$('kpis').offsetHeight+12)+'px'}
 window.addEventListener('resize',fitTop);setTimeout(fitTop,50);setInterval(fitTop,1500);
 function calc(){
@@ -1086,7 +1143,7 @@ $('paste').addEventListener('input',()=>{
   const wide=rows.reduce((m,r)=>Math.max(m,r.length),0);
   loadSrc(wide>10?rows.map(r=>r.slice(0,10)):rows,wide>10?rows.map(r=>r.slice(0,10)):rows,false,wide>10?`ข้อมูลที่วางมี ${wide} คอลัมน์ ระบบใช้เพียง 10 คอลัมน์แรก (A ถึง J)`:'');
 });
-$('clr').onclick=()=>{src=null;data=[];touched.tot=false;tbAuto();$('mvIn').value='';document.querySelector(`input[name=tbB][value=${tbBasis}]`).checked=true;$('tot').value='';$('file').value='';$('paste').value='';$('dmsg').textContent='';$('emsg').textContent='';$('mapBox').hidden=true;$('sheetBox').hidden=true;$('report').hidden=true;calc()};
+$('clr').onclick=()=>{src=null;data=[];$('negMsg').innerHTML='';touched.tot=false;tbAuto();$('mvIn').value='';document.querySelector(`input[name=tbB][value=${tbBasis}]`).checked=true;$('tot').value='';$('file').value='';$('paste').value='';$('dmsg').textContent='';$('emsg').textContent='';$('mapBox').hidden=true;$('sheetBox').hidden=true;$('report').hidden=true;calc()};
 $('t1').onclick=()=>tab(1);$('t2').onclick=()=>tab(2);
 function tab(n){$('p1').hidden=n!==1;$('p2').hidden=n!==2;$('t1').classList.toggle('on',n===1);$('t2').classList.toggle('on',n===2)}
 
