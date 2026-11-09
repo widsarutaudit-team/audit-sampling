@@ -150,9 +150,18 @@ table{font-size:11px}
 <tr data-m="2,3,4"><td colspan="3">
 <b>วิธีกำหนดรายการประชากรที่เป็นสาระสำคัญ</b>
 <div class="cards" style="margin-top:6px">
-<label class="card"><input type="radio" name="keyMode" value="auto" checked><span><b>ระบบคัดกรองข้อมูลให้ (ตรวจสอบทุกรายการที่มีสาระสำคัญ)</b>ดึงทุกรายการที่ยอดเกินระดับความมีสาระสำคัญ และตรวจสอบทุกรายการ</span></label>
+<label class="card"><input type="radio" name="keyMode" value="auto" checked><span><b>ระบบคัดกรองข้อมูลให้ (ตรวจสอบทุกรายการที่มีสาระสำคัญ)</b>ดึงทุกรายการที่ยอดเกินเกณฑ์มูลค่ารายการสาระสำคัญ (ค่าตั้งต้นใช้ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้*) และตรวจสอบทุกรายการ</span></label>
 <label class="card"><input type="radio" name="keyMode" value="manual"><span><b>ผู้ตรวจสอบกรอกข้อมูลด้วยตนเอง (ผู้ตรวจสอบทำการเลือกตัวอย่างรายการสาระสำคัญหรือรายการอื่นแล้ว)</b>ใช้เมื่อตรวจสอบรายการสาระสำคัญหรือรายการอื่นไปแล้วบางส่วน ระบุเลขที่เอกสารที่ตรวจสอบแล้ว</span></label>
 <label class="card"><input type="radio" name="keyMode" value="rand"><span><b>ผู้ตรวจสอบต้องการให้สุ่มรายการสาระสำคัญ</b>ระบุจำนวนรายการสาระสำคัญที่จะตรวจสอบ ระบบสุ่มให้ทุกรายการมีโอกาสเท่ากัน<span class="sub err" id="keyRandOff" style="display:none">ไม่มีรายการสาระสำคัญในข้อมูล จึงไม่ต้องสุ่ม</span></span></label>
+</div>
+<div id="keyThrBox" style="margin-top:10px">
+<b>เกณฑ์มูลค่าที่ถือว่าเป็นรายการสาระสำคัญ</b>
+<div class="cards" style="margin-top:6px">
+<label class="card"><input type="radio" name="keyThrM" value="mat" checked><span><b>ใช้ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้*</b>รายการที่ยอดเกินค่าที่กรอกด้านบนถือเป็นรายการสาระสำคัญ (ค่าตั้งต้น)</span></label>
+<label class="card"><input type="radio" name="keyThrM" value="own"><span><b>ผู้ตรวจสอบกำหนดเกณฑ์เอง</b>ใช้เมื่อกำหนดรายการสาระสำคัญจากฐานอื่น เช่น ตามแนวทางของงานตรวจสอบหรือดุลยพินิจของผู้ตรวจสอบ</span></label>
+</div>
+<label id="keyThrL" hidden style="margin-top:6px">เกณฑ์มูลค่ารายการสาระสำคัญ (บาท) — รายการที่ยอดเกินค่านี้ถือเป็นรายการสาระสำคัญ<input type="text" id="keyThr" inputmode="decimal" autocomplete="off"></label>
+<div class="hint" style="margin-top:4px">ขนาดตัวอย่างยังคำนวณจากค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้* ตามสูตรเดิม เกณฑ์นี้ใช้เฉพาะการคัดรายการสาระสำคัญ</div>
 </div>
 <div id="keyManual" hidden style="margin-top:8px">
 <label>เลขที่เอกสารและจำนวนเงินของรายการที่ตรวจสอบไปแล้ว (หนึ่งรายการต่อบรรทัด: เลขที่เอกสาร แล้วตามด้วยจำนวนเงิน คั่นด้วย Tab หรือเว้นวรรค — วางจาก Excel สองคอลัมน์ได้)<textarea id="keyDocs" style="min-height:90px" placeholder="1500001645&#9;-5,800.00&#10;1500002310&#9;120,000.00"></textarea></label>
@@ -223,13 +232,14 @@ table{font-size:11px}
 <section id="s3" hidden>
 <h2>ขั้นตอนที่ 3 นำเข้าข้อมูลรายการ</h2>
 <p class="hint" style="margin-top:0">ข้อมูลต้องมีอย่างน้อยคอลัมน์ <b>เลขที่เอกสาร</b> และ <b>จำนวนเงิน</b> รองรับสูงสุด 10 คอลัมน์ในรายงาน ระบบจับคู่คอลัมน์จากหัวตาราง แล้วให้คุณตรวจสอบก่อนเริ่มสุ่ม</p>
-<div class="tabs"><button class="on" id="t1">อัปโหลดไฟล์ Excel</button><button id="t2">วางข้อมูลจาก Excel</button></div>
+<div class="tabs"><button class="on" id="t1">อัปโหลดไฟล์ Excel / CSV</button><button id="t2">วางข้อมูลจาก Excel</button></div>
 <div id="p1">
 <div class="cards" style="margin-bottom:10px">
 <label class="card"><input type="radio" name="prep" value="ready" checked><span><b>จัดเตรียมไฟล์ข้อมูลแล้ว</b>มีแถวหัวตารางชัดเจน ระบบจับคู่คอลัมน์ตามหัวตาราง</span></label>
 <label class="card"><input type="radio" name="prep" value="raw"><span><b>ยังไม่ได้จัดเตรียมไฟล์ข้อมูล</b>ไฟล์ดิบจากระบบ ระบบจะค้นหาแถวหัวตาราง ข้ามแถวรวม และคาดเดาคอลัมน์ให้ คุณต้องตรวจสอบผลก่อนใช้</span></label>
 </div>
 <input type="file" id="file" accept=".xlsx,.xls,.csv">
+<div class="hint" style="margin-top:4px">รองรับไฟล์ .xlsx, .xls และ .csv (CSV ภาษาไทยทั้งแบบ UTF-8 และแบบที่บันทึกจาก Excel ปกติ)</div>
 <div id="sheetBox" hidden style="margin-top:8px"><label class="fl" for="sheetSel">เลือก Sheet</label><select id="sheetSel"></select></div>
 </div>
 <div id="p2" hidden><textarea id="paste" placeholder="คัดลอกช่วงข้อมูลพร้อมแถวหัวตารางจาก Excel (สูงสุด 10 คอลัมน์) แล้ววางที่นี่ (Ctrl+V)"></textarea></div>
@@ -294,7 +304,9 @@ const matchKey=(ents,data)=>{
     if(rs.length>1)amb.push({doc:e.doc,n:rs.length});
     rs.forEach(x=>{used.add(x.idx);items.push(x);n++})});
   return {items,missing,amb,n}};
-const keySig=()=>[data.length,sum(data).toFixed(2),num($('mat').value),$('keyN').value.trim(),negMode()].join('|');
+const thrOwn=()=>document.querySelector('input[name=keyThrM]:checked').value==='own';
+const keyThrV=()=>thrOwn()?num($('keyThr').value):num($('mat').value);
+const keySig=()=>[data.length,sum(data).toFixed(2),keyThrV(),$('keyN').value.trim(),negMode()].join('|');
 const negMode=()=>method===3?'skip':document.querySelector('input[name=neg]:checked').value;
 /* nval = ค่าที่ใช้เลือก/เทียบ MAT/จัดกลุ่ม, nsum = ค่าที่ใช้รวมยอด (โหมดค่าสัมบูรณ์ยังรวมแบบมีเครื่องหมายเหมือนเดิม), inFrame = รายการที่อยู่ในประชากรที่ใช้สุ่ม */
 const nval=x=>{const m=negMode();return m==='neg'?-x.amt:m==='abs'?Math.abs(x.amt):x.amt};
@@ -347,11 +359,13 @@ function applyMethod(){
 document.querySelectorAll('input[name=m]').forEach(r=>r.addEventListener('change',applyMethod));
 $('keyChk').addEventListener('change',applyMethod);
 
-['mat','tot','cf','ex','keyDocs','keyN','keyWhy'].forEach(id=>$(id).addEventListener('input',calc));
+['mat','tot','cf','ex','keyDocs','keyN','keyWhy','keyThr'].forEach(id=>$(id).addEventListener('input',calc));
+document.querySelectorAll('input[name=keyThrM]').forEach(r=>r.addEventListener('change',()=>{calc();if(r.value==='own'&&r.checked){$('keyThr').focus()}}));
+$('keyThr').addEventListener('blur',()=>{const v=num($('keyThr').value);if(v!==null)$('keyThr').value=fmt(v)});
 document.querySelectorAll('input[name=keyMode]').forEach(r=>r.addEventListener('change',calc));
 $('keyDraw').addEventListener('click',()=>{
   const p=calc(),n=Math.floor(num($('keyN').value)||0);
-  if(!(p.mat>0)||!data.length){$('keyHint').innerHTML='<span class="err">กรอกระดับความมีสาระสำคัญและนำเข้าข้อมูลก่อนสุ่ม</span>';return}
+  if(!(p.thr>0)||!data.length){$('keyHint').innerHTML='<span class="err">กรอก'+(p.thrOwn?'เกณฑ์มูลค่ารายการสาระสำคัญ':'ระดับความมีสาระสำคัญ')+'และนำเข้าข้อมูลก่อนสุ่ม</span>';return}
   if(n<1){$('keyHint').innerHTML='<span class="err">กรอกจำนวนรายการสาระสำคัญที่ต้องการสุ่ม (มากกว่า 0)</span>';return}
   if(seedBad('keySeed')){$('keyHint').innerHTML='<span class="err">เลขอ้างอิงการสุ่มต้องเป็นตัวเลขจำนวนเต็มบวก (ไม่เกิน 10 หลัก) หรือเว้นว่าง</span>';return}
   keyDraws++;
@@ -463,20 +477,22 @@ function calc(){
   {const sh=method!==3&&negMode()==='abs';$('tbA').hidden=!sh;$('tbB').hidden=!sh}
   const mat=num($('mat').value),tot=num($('tot').value),cf=num($('cf').value),ex=Math.max(0,Math.floor(num($('ex').value)||0));
   let mvCalcV=null,mvMan=false;
+  const thrO=thrOwn(),thr0=thrO?num($('keyThr').value):mat,thr=thr0!==null&&thr0>0?thr0:null;
   let matItems=[],matVal=null,base=tot,sample=null,raw=null,km='auto',keyAll=[],keyNot=[],keyDocN=0,keyMissing=[],keyAmb=[];
   if(method===2||method===3||method===4){
     const v=nval;
     km=keyMode();
     $('keyManual').hidden=km!=='manual';$('keyRand').hidden=km!=='rand';
-    if(mat!==null&&data.length)keyAll=data.filter(x=>v(x)>mat);
+    $('keyThrBox').hidden=km==='manual';$('keyThrL').hidden=!thrOwn();
+    if(thr!==null&&data.length)keyAll=data.filter(x=>v(x)>thr);
     {
       /* ไม่มีรายการสาระสำคัญในข้อมูล: แสดงตัวเลือกสุ่มไว้แต่ไม่ให้เลือก */
-      const randOff=mat!==null&&data.length>0&&!keyAll.length,rr=document.querySelector('input[name=keyMode][value=rand]');
+      const randOff=thr!==null&&data.length>0&&!keyAll.length,rr=document.querySelector('input[name=keyMode][value=rand]');
       rr.disabled=randOff;rr.closest('.card').style.opacity=randOff?'.55':'';$('keyRandOff').style.display=randOff?'block':'none';
       if(randOff&&km==='rand'){document.querySelector('input[name=keyMode][value=auto]').checked=true;km='auto';$('keyManual').hidden=true;$('keyRand').hidden=true}
     }
     let kh='';
-    if(km==='auto'&&mat!==null&&data.length){matItems=keyAll;matVal=matItems.reduce((t,x)=>t+nsum(x),0)}
+    if(km==='auto'&&thr!==null&&data.length){matItems=keyAll;matVal=matItems.reduce((t,x)=>t+nsum(x),0)}
     else if(km==='manual'&&data.length){
       const ents=parseKey($('keyDocs').value),mk=matchKey(ents,data);
       const outF=mk.items.filter(x=>!inFrame(x));
@@ -485,7 +501,7 @@ function calc(){
       kh=(outF.length?`<span class="err">มี ${outF.length.toLocaleString()} รายการอยู่นอกประชากรที่ใช้สุ่ม (${negMode()==='neg'?'รายการบวกหรือยอดศูนย์':'รายการติดลบหรือยอดศูนย์'}) ระบบไม่นำมาหักเป็นรายการสาระสำคัญ เช่น ${esc(outF.slice(0,3).map(x=>x.doc+' '+fmt(x.amt)).join(', '))}</span><br>`:'')+`ระบบนับได้ ${mk.n.toLocaleString()} รายการ (พบในข้อมูลที่นำเข้า ${matItems.length.toLocaleString()} รายการ)`+(keyMissing.length?` <span class="err">ไม่พบ ${keyMissing.length.toLocaleString()} รายการในข้อมูล เช่น ${esc(keyMissing.slice(0,3).join(', '))}</span>`:'')+(keyAmb.length?`<br><span class="err">เลขที่เอกสารที่มีหลายยอดในข้อมูลแต่ไม่ได้ระบุจำนวนเงิน ระบบคัดออกทุกยอด: ${esc(keyAmb.slice(0,3).map(x=>x.doc+' ('+x.n+' รายการ)').join(', '))}${keyAmb.length>3?' ...':''} หากตรวจสอบเพียงบางยอด ให้ระบุจำนวนเงินต่อท้ายเลขที่เอกสาร</span>`:'');
     }else if(km==='rand'){
       const n=Math.floor(num($('keyN').value)||0);
-      kh=mat!==null&&data.length?`รายการสาระสำคัญในข้อมูล ${keyAll.length.toLocaleString()} รายการ`+(n>keyAll.length&&keyAll.length?` <span class="err">จำนวนที่ต้องการมากกว่าที่มี จะสุ่มทุกรายการ</span>`:''):'กรอกระดับความมีสาระสำคัญและนำเข้าข้อมูลก่อน';
+      kh=thr!==null&&data.length?`รายการสาระสำคัญในข้อมูล ${keyAll.length.toLocaleString()} รายการ`+(n>keyAll.length&&keyAll.length?` <span class="err">จำนวนที่ต้องการมากกว่าที่มี จะสุ่มทุกรายการ</span>`:''):(thrO?'กรอกเกณฑ์มูลค่ารายการสาระสำคัญและนำเข้าข้อมูลก่อน':'กรอกระดับความมีสาระสำคัญและนำเข้าข้อมูลก่อน');
       if(keyPick&&keyPick.sig===keySig()){matItems=keyPick.items;matVal=matItems.reduce((t,x)=>t+nsum(x),0);kh+=` | สุ่มแล้ว ${matItems.length.toLocaleString()} รายการ (สุ่มรวม ${keyPick.draws.toLocaleString()} ครั้ง ใช้ผลครั้งล่าสุด เลขอ้างอิงการสุ่ม <b>${keyPick.seed}</b>) รายการสาระสำคัญที่ไม่ถูกสุ่มกลับเข้าประชากรคงเหลือ`}
       else if(keyPick)kh+=' | <span class="err">ข้อมูลหรือเงื่อนไขเปลี่ยน ต้องกดสุ่มรายการสาระสำคัญใหม่</span>';
       else kh+=' | ยังไม่ได้สุ่ม';
@@ -504,7 +520,7 @@ function calc(){
     $('mv').textContent=matVal!==null?fmt(matVal):'รอข้อมูล';
     base=(tot!==null&&matVal!==null)?tot-matVal:null;
     $('rem').textContent=base!==null?fmt(base):'รอข้อมูล';
-    const kReady=mat!==null&&data.length;
+    const kReady=thr!==null&&data.length;
     $('mc').textContent=km==='rand'?(kReady?keyAll.length.toLocaleString():'รอข้อมูล'):matVal!==null?(km==='manual'?keyDocN:matItems.length).toLocaleString():'รอข้อมูล';
     $('mcn').textContent=km==='rand'&&kReady?(matVal!==null?`รายการ (ทั้งหมดในข้อมูล สุ่มตรวจสอบ ${matItems.length.toLocaleString()} รายการ)`:'รายการ (ทั้งหมดในข้อมูล ใช้กำหนดจำนวนที่จะสุ่ม)'):'รายการ';
   }
@@ -589,7 +605,7 @@ function calc(){
     $('stHint').innerHTML=(+$('stK').value>5?'<span class="err">โดยทั่วไปแล้วนิยมใช้การจัดกลุ่มอยู่ระหว่าง 3-5 กลุ่ม</span> ':'')+(stCapMsg?`<span class="err">${stCapMsg}</span> `:'')+(st&&st.over?'<span class="err">จำนวนตัวอย่างน้อยกว่าจำนวนกลุ่มที่มีรายการ แต่ทุกกลุ่มต้องมีอย่างน้อย 1 รายการ จำนวนที่เลือกจึงมากกว่าที่คำนวณได้</span>':'')+(typeof stNote!=='undefined'&&stNote?` <span class="err">${stNote}</span>`:'')+(stErr&&!/^กรอกยอดเริ่มต้น/.test(stErr)?` <span class="err">${stErr}</span>`:'');
     $('stTbl').innerHTML=st?stTable(st,false):'';
   }
-  return {st,stErr,mat,tot,cf,ex,sample,raw,matItems,matVal,base,all,capSel,capV,sampleN,limited,eff,matCount,keyMode:km,keyAll,keyNot,keyDocN,keyMissing,keyAmb,mvCalcV,mvMan};
+  return {st,stErr,mat,tot,cf,ex,sample,raw,matItems,matVal,base,all,capSel,capV,sampleN,limited,eff,matCount,keyMode:km,keyAll,keyNot,keyDocN,keyMissing,keyAmb,mvCalcV,mvMan,thr,thrOwn:thrO};
 }
 
 $('stK').addEventListener('change',calc);
@@ -837,14 +853,23 @@ $('file').addEventListener('change',e=>{
   const r=new FileReader(),csv=/\.csv$/i.test(f.name);
   r.onload=ev=>{
     try{
-      wbk=csv?XLSX.read(ev.target.result,{type:'string',raw:true}):XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
+      let enc='';
+      if(csv){
+        /* CSV: ลอง UTF-8 ก่อน ถ้าไม่ใช่ (เช่น บันทึกจาก Excel ภาษาไทยแบบ CSV ปกติ) อ่านแบบ Windows-874 */
+        const u=new Uint8Array(ev.target.result);let txt;
+        try{txt=new TextDecoder('utf-8',{fatal:true}).decode(u)}catch(_){txt=new TextDecoder('windows-874').decode(u);enc='windows-874'}
+        if(txt.charCodeAt(0)===0xFEFF)txt=txt.slice(1);
+        wbk=XLSX.read(txt,{type:'string',raw:true});
+      }else wbk=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
       const sn=wbk.SheetNames;
       $('sheetSel').innerHTML=sn.map((n,i)=>`<option value="${i}">${esc(n)}</option>`).join('');
       $('sheetBox').hidden=sn.length<2;
       loadSheet(0);
+      if(!data.length){$('dmsg').className='msg err';$('dmsg').innerHTML=($('dmsg').innerHTML?$('dmsg').innerHTML+'<br>':'')+'ไม่พบรายการที่นำเข้าได้ในไฟล์นี้ ตรวจสอบว่า (1) แถวแรกเป็นหัวตาราง และมีคอลัมน์เลขที่เอกสารกับจำนวนเงิน (2) เลือกชีตที่มีข้อมูล (3) ไฟล์ CSV คั่นด้วยเครื่องหมายจุลภาค หากยังไม่ได้ ลองเปิดไฟล์ใน Excel แล้วบันทึกเป็น .xlsx'}
+      else if(enc)$('dmsg').innerHTML+='<br><span class="hint">อ่านไฟล์ CSV แบบภาษาไทย (Windows-874) ให้อัตโนมัติ</span>';
     }catch(x){$('dmsg').className='msg err';$('dmsg').textContent='อ่านไฟล์ไม่ได้ ตรวจสอบว่าเป็นไฟล์ Excel หรือ CSV'}
   };
-  csv?r.readAsText(f,'UTF-8'):r.readAsArrayBuffer(f);
+  r.readAsArrayBuffer(f);
 });
 $('sheetSel').addEventListener('change',()=>loadSheet(+$('sheetSel').value));
 document.querySelectorAll('input[name=prep]').forEach(r=>r.addEventListener('change',()=>{if(src&&src.file)autoMap()}));
@@ -937,6 +962,7 @@ function pick(pool,n){
 $('run').addEventListener('click',()=>{
   const p=calc(),e=[];
   if(!(p.mat>0))e.push('กรอกระดับความมีสาระสำคัญ (มากกว่า 0)');
+  if(method>=2&&p.keyMode!=='manual'&&p.thrOwn&&!(p.thr>0))e.push('กรอกเกณฑ์มูลค่ารายการสาระสำคัญ (มากกว่า 0) หรือเลือกใช้ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้*');
   if(p.tot<0)e.push('จำนวนประชากรทั้งหมดมีค่าเป็นลบ'+(negMode()==='abs'&&tbMode()==='net'?' (ยอดสุทธิติดลบเพราะรายการติดลบมากกว่ารายการบวก) พิจารณาเลือก "ยอดรวมค่าสัมบูรณ์" เป็นฐานจำนวนประชากร หรือแยกทดสอบด้วย "ใช้ข้อมูลเฉพาะรายการติดลบ"':' โปรดกรอกจำนวนประชากรทั้งหมด'));
   else if(!(p.tot>0))e.push('กรอกจำนวนประชากรทั้งหมด');
   if(!(p.cf>0))e.push('กรอกค่า Confidence Factor');
@@ -967,7 +993,7 @@ $('run').addEventListener('click',()=>{
     if(k<mus.e)note=`จำนวนที่ต้องสุ่มเพิ่มมากกว่าจำนวนรายการที่เหลือ จึงเลือกทุกรายการที่เหลือ (${rest.length.toLocaleString()} รายการ)`;
     picked=pick(rest,k);
   }else{
-    const pool=randPool(p.matItems,p.mat,p.keyMode);poolAll=pool;
+    const pool=randPool(p.matItems,p.thr,p.keyMode);poolAll=pool;
     let n=p.sampleN;
     if(n>pool.length){n=pool.length;note=`จำนวนที่ต้องสุ่มมากกว่าจำนวนรายการที่มี จึงเลือกทุกรายการ (${pool.length.toLocaleString()} รายการ)`}
     if(stOn()){
@@ -988,7 +1014,8 @@ $('run').addEventListener('click',()=>{
     const kv=p.keyAll.reduce((t,x)=>t+v2(x),0),ev=exK.reduce((t,x)=>t+v2(x),0);
     rows.push(['วิธีกำหนดรายการประชากรที่เป็นสาระสำคัญ',KM[p.keyMode],p.keyMode==='rand'&&keyPick?`สุ่ม ${keyPick.draws.toLocaleString()} ครั้ง ใช้ผลครั้งล่าสุด (เลขอ้างอิงการสุ่มรายการสาระสำคัญ ${keyPick.seed})`:''],
       ['จำนวนรายการประชากรที่มีสาระสำคัญ',p.matCount.toLocaleString(),'รายการ'],
-      ['รายการสาระสำคัญทั้งหมดในประชากร',p.keyAll.length.toLocaleString()+' รายการ / '+fmt(kv),'ยอดเกินระดับความมีสาระสำคัญ'],
+      ['เกณฑ์มูลค่ารายการสาระสำคัญ',p.thr!==null?fmt(p.thr):'-',p.thrOwn?'ผู้ตรวจสอบกำหนดเกณฑ์เอง (ไม่ใช้ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้*)':'ใช้ค่าการแสดงข้อมูลที่ขัดต่อข้อเท็จจริงที่ยอมรับได้*'],
+      ['รายการสาระสำคัญทั้งหมดในประชากร',p.keyAll.length.toLocaleString()+' รายการ / '+fmt(kv),'ยอดเกินเกณฑ์มูลค่ารายการสาระสำคัญ'],
       ['รายการสาระสำคัญที่ตรวจสอบแล้ว',exK.length.toLocaleString()+' รายการ / '+fmt(ev),'ความครอบคลุมตามจำนวนรายการ '+(p.keyAll.length?(exK.length/p.keyAll.length*100).toFixed(2):'0.00')+'% ตามมูลค่า '+(kv?(ev/kv*100).toFixed(2):'0.00')+'%']);
     if(p.keyNot.length)rows.push(['เหตุผลที่ไม่ตรวจสอบรายการสาระสำคัญครบทุกรายการ',esc($('keyWhy').value.trim()).replace(/\n/g,'<br>')||'ไม่ได้ระบุเหตุผล',`ไม่ได้ตรวจสอบ ${p.keyNot.length.toLocaleString()} รายการ`]);
     if(p.keyAmb&&p.keyAmb.length)rows.push(['เลขที่เอกสารที่ระบุโดยไม่มีจำนวนเงินและมีหลายยอดในข้อมูล (คัดออกทุกยอด)',p.keyAmb.length.toLocaleString()+' เลขที่',esc(p.keyAmb.slice(0,10).map(x=>x.doc).join(', '))+(p.keyAmb.length>10?' ...':'')]);
