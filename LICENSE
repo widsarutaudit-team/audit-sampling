@@ -1,5 +1,52 @@
 Copyright (c) 2026 MRTEAM. All rights reserved.
 
+This software, "Audit Sampling System" (ระบบสุ่มเลือกตัวอย่างสำหรับงานตรวจสอบ
+(ด้วยวิธีทางสถิติ)), including its source code, user interface, documentation
+and associated files (the "Software"), is the property of MRTEAM.
+
 No permission is granted to use, copy, modify, merge, publish, distribute,
-sublicense, or sell copies of this software without prior written permission
-from the copyright holder.
+sublicense, or sell copies of the Software, in whole or in part, without the
+prior written permission of the copyright holder.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+The Software assists with sample size calculation and sample selection only.
+Professional judgment, audit conclusions and the review of all results remain
+the responsibility of the user.
+
+-------------------------------------------------------------------------------
+ภาษาไทย (สรุปสาระสำคัญ)
+
+ลิขสิทธิ์ (c) 2026 MRTEAM สงวนลิขสิทธิ์ทั้งหมด
+
+ซอฟต์แวร์ "ระบบสุ่มเลือกตัวอย่างสำหรับงานตรวจสอบ (ด้วยวิธีทางสถิติ)" รวมถึงซอร์สโค้ด
+หน้าจอ เอกสารประกอบ และไฟล์ที่เกี่ยวข้อง เป็นกรรมสิทธิ์ของ MRTEAM
+ห้ามใช้ ทำซ้ำ ดัดแปลง รวมกับงานอื่น เผยแพร่ แจกจ่าย อนุญาตช่วง หรือจำหน่าย
+ไม่ว่าทั้งหมดหรือบางส่วน โดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษรจากเจ้าของลิขสิทธิ์
+
+ซอฟต์แวร์นี้ให้ไว้ "ตามสภาพ" โดยไม่มีการรับประกันใด ๆ ระบบเป็นเพียงเครื่องมือช่วย
+คำนวณขนาดตัวอย่างและเลือกรายการตัวอย่าง การใช้ดุลยพินิจทางวิชาชีพ การสรุปผล
+และการสอบทานผลลัพธ์ทั้งหมดเป็นความรับผิดชอบของผู้ใช้งาน
+หากข้อความภาษาไทยกับภาษาอังกฤษขัดหรือแย้งกัน ให้ถือตามข้อความภาษาอังกฤษ
+
+-------------------------------------------------------------------------------
+THIRD-PARTY COMPONENTS / ส่วนประกอบของบุคคลภายนอก
+
+The Software uses the following open-source libraries. They remain under their
+own licenses and are not covered by the copyright notice above.
+ไลบรารีต่อไปนี้อยู่ภายใต้สัญญาอนุญาตของผู้พัฒนาแต่ละราย ไม่อยู่ภายใต้ลิขสิทธิ์ข้างต้น
+
+- SheetJS Community Edition 0.18.5 (reading and writing Excel files)
+  Copyright (C) 2012-present SheetJS LLC
+  Licensed under the Apache License, Version 2.0
+  https://www.apache.org/licenses/LICENSE-2.0
+
+- PDF.js (pdfjs-dist) 6.2.108 (reading PDF files)
+  Copyright Mozilla Foundation and contributors
+  Licensed under the Apache License, Version 2.0
+  https://www.apache.org/licenses/LICENSE-2.0
