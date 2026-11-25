@@ -803,6 +803,17 @@ function lockInputs(){
   document.querySelectorAll(LOCKSEC).forEach(sec=>sec.querySelectorAll('input,select,textarea,button').forEach(el=>{
     if(el.closest('.pgnav')||el.dataset.lkok||el.disabled)return;el.disabled=true;el.dataset.lk='1'}));
 }
+/* ชื่อไฟล์ผลลัพธ์: <ชื่อบัญชี>_ผลการสุ่ม_ปีเดือนวัน_ชั่วโมงนาที (ไม่กรอกชื่อบัญชี = ผลการสุ่ม_...)
+   ตัดอักขระที่ใช้ในชื่อไฟล์ไม่ได้ และจำกัดความยาวชื่อบัญชีไม่เกิน 60 ตัวอักษร */
+function outName(){
+  const d=new Date(),p2=n=>String(n).padStart(2,'0');
+  const acc=$('hAcc').value.replace(/[\\/:*?"<>|\u0000-\u001f]+/g,'-').replace(/\s+/g,' ').replace(/\s*-[\s-]*/g,'-').replace(/^[\s.\-]+|[\s.\-]+$/g,'').slice(0,60).trim();
+  return (acc?acc+'_':'')+`ผลการสุ่ม_${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}_${p2(d.getHours())}${p2(d.getMinutes())}`;
+}
+/* ตอนพิมพ์/บันทึกเป็น PDF เบราว์เซอร์ใช้ชื่อหน้าเว็บเป็นชื่อไฟล์ จึงเปลี่ยนชื่อหน้าชั่วคราวเมื่อมีรายงาน */
+let titleKeep=null;
+window.addEventListener('beforeprint',()=>{if(!$('report').hidden){titleKeep=document.title;document.title=outName()}});
+window.addEventListener('afterprint',()=>{if(titleKeep!==null){document.title=titleKeep;titleKeep=null}});
 function setLock(v){
   if(v!==locked){
     locked=v;document.body.classList.toggle('locked',v);
@@ -1784,8 +1795,7 @@ $('run').addEventListener('click',()=>{
         ws['!cols']=w.map(x=>({wch:x}));
         XLSX.utils.book_append_sheet(wb,ws,pt?nm('สรุป',i):nm(ht,i));
       });
-      const d=new Date(),p2=n=>String(n).padStart(2,'0');
-      XLSX.writeFile(wb,`ผลการสุ่ม_${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}_${p2(d.getHours())}${p2(d.getMinutes())}.xlsx`);
+      XLSX.writeFile(wb,outName()+'.xlsx');
     }catch(e){alert('บันทึก Excel ไม่สำเร็จ: '+e.message)}
   };
 
